@@ -46,7 +46,7 @@ Partial Public Class AddinModule
         '
         'AdxRibbonTab1
         '
-        Me.AdxRibbonTab1.Caption = "Tekhelps"
+        Me.AdxRibbonTab1.Caption = "GKBM"
         Me.AdxRibbonTab1.Controls.Add(Me.AdxRibbonGroup1)
         Me.AdxRibbonTab1.Id = "adxRibbonTab_a5cf84a1ced7485ea57b9386db6cf9ed"
         Me.AdxRibbonTab1.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
@@ -56,7 +56,7 @@ Partial Public Class AddinModule
         '
         'AdxRibbonGroup1
         '
-        Me.AdxRibbonGroup1.Caption = "InstantFile"
+        Me.AdxRibbonGroup1.Caption = "Custom Functions"
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
@@ -73,6 +73,7 @@ Partial Public Class AddinModule
         '
         Me.CopyContact2InstantFile.Caption = "Copy Contact to InstantFile"
         Me.CopyContact2InstantFile.Id = "adxRibbonButton_0e8a15c449ee4798adf475a1587fd047"
+        Me.CopyContact2InstantFile.ImageMso = "CopyToPersonalContacts"
         Me.CopyContact2InstantFile.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.CopyContact2InstantFile.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookContact Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         Me.CopyContact2InstantFile.ScreenTip = "Copy this personal Contact to InstantFile's Contacts"
@@ -82,6 +83,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton2.Caption = "Link Two Contacts"
         Me.AdxRibbonButton2.Id = "adxRibbonButton_4b812ad786fc4beb9f6a39f3bbcb0352"
+        Me.AdxRibbonButton2.ImageMso = "LinkBarCustom"
         Me.AdxRibbonButton2.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton2.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
         Me.AdxRibbonButton2.ScreenTip = "Link two Contacts to each other."
@@ -91,6 +93,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButtonSaveAttachments.Caption = "Save Attachments"
         Me.AdxRibbonButtonSaveAttachments.Id = "adxRibbonButton_4c9aad6ef1324d11bf940cb9a7ca7623"
+        Me.AdxRibbonButtonSaveAttachments.ImageMso = "SaveAttachments"
         Me.AdxRibbonButtonSaveAttachments.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButtonSaveAttachments.Ribbons = CType(((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
@@ -101,6 +104,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton1.Caption = "Copy to Folder"
         Me.AdxRibbonButton1.Id = "adxRibbonButton_de572db5435f4b35bc780bc9d332c327"
+        Me.AdxRibbonButton1.ImageMso = "CopyFolder"
         Me.AdxRibbonButton1.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton1.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookTask Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         Me.AdxRibbonButton1.ScreenTip = "Copy this item to another folder."
