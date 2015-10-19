@@ -76,6 +76,7 @@ Partial Public Class AddinModule
         Me.CopyContact2InstantFile.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.CopyContact2InstantFile.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookContact Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         Me.CopyContact2InstantFile.ScreenTip = "Copy this personal Contact to InstantFile's Contacts"
+        Me.CopyContact2InstantFile.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AdxRibbonButton2
         '
@@ -84,6 +85,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton2.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton2.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
         Me.AdxRibbonButton2.ScreenTip = "Link two Contacts to each other."
+        Me.AdxRibbonButton2.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AdxRibbonButtonSaveAttachments
         '
@@ -93,6 +95,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButtonSaveAttachments.Ribbons = CType(((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
         Me.AdxRibbonButtonSaveAttachments.ScreenTip = "Save Attachments to C:\Scans folder."
+        Me.AdxRibbonButtonSaveAttachments.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AdxRibbonButton1
         '
@@ -101,6 +104,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton1.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton1.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookTask Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         Me.AdxRibbonButton1.ScreenTip = "Copy this item to another folder."
+        Me.AdxRibbonButton1.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AdxRibbonButton4
         '
@@ -114,6 +118,7 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+        Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AddinModule
         '

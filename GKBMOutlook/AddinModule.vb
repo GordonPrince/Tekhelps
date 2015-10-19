@@ -50,7 +50,7 @@ Public Class AddinModule
     End Property
 
     Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
-        MsgBox("Tekhelps Add-in for GKBM Outlook" & vbNewLine & vbNewLine & "Version 2015-Oct-17", vbInformation, "About")
+        MsgBox("Tekhelps Add-in for GKBM Outlook" & vbNewLine & vbNewLine & "Version 2015-Oct-19", vbInformation, "About")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
