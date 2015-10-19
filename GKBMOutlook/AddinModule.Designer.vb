@@ -110,6 +110,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton4.Caption = "About"
         Me.AdxRibbonButton4.Id = "adxRibbonButton_54403c6dbcd54328a298f2556650e611"
+        Me.AdxRibbonButton4.ImageMso = "Help"
         Me.AdxRibbonButton4.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton4.Ribbons = CType((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
