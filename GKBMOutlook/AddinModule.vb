@@ -59,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-21 13:25.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-21 14:34.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -94,9 +94,11 @@ Public Class AddinModule
 
         'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
         For Each objAttachment In colAttachments
-            If objAttachment.Size > 15000 Then
+            ' 10/21/2015 don't know why this was in Outlook VBA code, but it doesn't make sense, so I commented it out
+            ' If objAttachment.Size > 15000 Then
+            If objAttachment.Size > 1023 Then
                 MyFile = objAttachment.FileName
-                DateStamp = Space(1) & Format(mySelectedItem.CreationTime, "yyyymmdd_hhnnss")
+                DateStamp = Space(1) & Format(mySelectedItem.CreationTime, "yyyyMMddhhmmss")
                 intPos = InStrRev(MyFile, ".")
                 If intPos > 0 Then
                     MyFile = Left(MyFile, intPos - 1) & DateStamp & Mid(MyFile, intPos)
@@ -106,7 +108,7 @@ Public Class AddinModule
                 MyFile = "C:\Scans\" & MyFile
                 objAttachment.SaveAsFile(MyFile)
                 intCounter = intCounter + 1
-                If intCounter = 1 Then MsgBox("Saved attachment " & IIf(intCounter > 1, "#" & intCounter & Space(1), vbNullString) & "as" & vbNewLine & MyFile, vbInformation, strTitle)
+                ' If intCounter = 1 Then MsgBox("Saved attachment " & IIf(intCounter > 1, "#" & intCounter & Space(1), vbNullString) & "as" & vbNewLine & MyFile, vbInformation, strTitle)
             End If
         Next
         'Cleanup
@@ -116,9 +118,10 @@ Public Class AddinModule
         myOlSelection = Nothing
         mySelectedItem = Nothing
         If intCounter = 0 Then
-            MsgBox("There are no attachments on this item larger than 15k.", vbInformation, strTitle)
+            MsgBox("There are no attachments on this item larger than 1k.", vbInformation, strTitle)
         ElseIf intCounter > 1 Then
-            MsgBox("Saved " & intCounter - 1 & " additional attachment" & IIf(intCounter = 2, vbNullString, "s") & " to " & vbNewLine & "'C:\Scans\' folder.", vbInformation, strTitle)
+            ' MsgBox("Saved " & intCounter - 1 & " additional attachment" & IIf(intCounter = 2, vbNullString, "s") & " to " & vbNewLine & "'C:\Scans\' folder.", vbInformation, strTitle)
+            MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & "C:\Scans.", vbInformation, strTitle)
         End If
     End Sub
 
@@ -296,5 +299,6 @@ Link2Contacts_Exit:
         myCont2 = Nothing
 
     End Sub
+
 End Class
 

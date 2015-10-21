@@ -135,10 +135,13 @@ Partial Public Class AddinModule
         Me.SaveClose.IdMso = "SaveAndClose"
         Me.SaveClose.ImageMso = "SaveAndClose"
         Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.SaveClose.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+        Me.SaveClose.Ribbons = CType((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
         Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AddinModule
