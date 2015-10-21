@@ -43,6 +43,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButtonSaveAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -57,6 +58,7 @@ Partial Public Class AddinModule
         'AdxRibbonGroup1
         '
         Me.AdxRibbonGroup1.Caption = "Custom Functions"
+        Me.AdxRibbonGroup1.Controls.Add(Me.SaveClose)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
@@ -126,6 +128,19 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
+        'SaveClose
+        '
+        Me.SaveClose.Caption = "Save && Close"
+        Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
+        Me.SaveClose.IdMso = "SaveAndClose"
+        Me.SaveClose.ImageMso = "SaveAndClose"
+        Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.SaveClose.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
+        Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -139,6 +154,7 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonButtonSaveAttachments As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents AdxRibbonButton1 As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents AdxRibbonButton4 As AddinExpress.MSO.ADXRibbonButton
+    Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
 
 End Class
 
