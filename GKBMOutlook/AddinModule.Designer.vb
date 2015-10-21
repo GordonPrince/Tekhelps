@@ -38,12 +38,12 @@ Partial Public Class AddinModule
         Me.components = New System.ComponentModel.Container()
         Me.AdxRibbonTab1 = New AddinExpress.MSO.ADXRibbonTab(Me.components)
         Me.AdxRibbonGroup1 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
+        Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.CopyContact2InstantFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton2 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButtonSaveAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
-        Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -70,6 +70,21 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        '
+        'SaveClose
+        '
+        Me.SaveClose.Caption = "Save && Close"
+        Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
+        Me.SaveClose.IdMso = "SaveAndClose"
+        Me.SaveClose.ImageMso = "SaveAndClose"
+        Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.SaveClose.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+        Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'CopyContact2InstantFile
         '
@@ -127,22 +142,6 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
-        '
-        'SaveClose
-        '
-        Me.SaveClose.Caption = "Save && Close"
-        Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
-        Me.SaveClose.IdMso = "SaveAndClose"
-        Me.SaveClose.ImageMso = "SaveAndClose"
-        Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.SaveClose.Ribbons = CType((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
-        Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AddinModule
         '
