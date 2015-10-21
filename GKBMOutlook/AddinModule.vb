@@ -36,6 +36,8 @@ Public Class AddinModule
     End Sub
  
 #End Region
+
+    Const strPublicFolders As String = "Public Folders"
  
     Public Shared Shadows ReadOnly Property CurrentInstance() As AddinModule
         Get
@@ -50,10 +52,11 @@ Public Class AddinModule
     End Property
 
     Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
-        MsgBox("Add-in for Outlook 2007 for" & vbNewLine & _
-               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & _
-               "Copyright (c) 1998-2015 by Tekhelps, Inc." & vbNewLine & vbNewLine & _
-               "Version dated 2015-Oct-19.", vbInformation, "About this Add-in")
+        MsgBox("Outlook Add-in for" & vbNewLine & _
+               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
+               "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
+               "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
+               "This version dated 2015-Oct-21.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -115,6 +118,100 @@ Public Class AddinModule
         ElseIf intCounter > 1 Then
             MsgBox("Saved " & intCounter - 1 & " additional attachment" & IIf(intCounter = 2, vbNullString, "s") & " to " & vbNewLine & "'C:\Scans\' folder.", vbInformation, strTitle)
         End If
+    End Sub
+
+    Private Sub CopyContact2InstantFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyContact2InstantFile.OnClick
+        ' copy the active contact to InstantFile
+        On Error GoTo CopyContact2InstantFile_Error
+        Const strTitle As String = "Copy Contact to InstantFile Contacts"
+        Dim olContact As Outlook.ContactItem
+        Dim olNameSpace As Outlook.NameSpace
+        Dim olPublicFolder As Outlook.MAPIFolder
+        Dim olFolder As Outlook.MAPIFolder
+        Dim olContactsFolder As Outlook.MAPIFolder
+        Dim olIFContact As Outlook.ContactItem
+
+        ' make sure a Contact is the active item
+        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "ContactItem" Then
+            olContact = OutlookApp.ActiveInspector.CurrentItem
+            If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
+                MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
+                            "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
+                            "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
+                olContact = Nothing
+                Exit Sub
+            End If
+        Else
+            MsgBox("Please display the Contact you wish to copy first," & vbNewLine & "then try this again.", vbExclamation, strTitle)
+            Exit Sub
+        End If
+
+        olNameSpace = OutlookApp.GetNamespace("MAPI")
+        For Each olPublicFolder In olNameSpace.Folders
+            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then GoTo GetContactsFolder
+        Next olPublicFolder
+        olNameSpace = Nothing
+        MsgBox("Could not locate the 'Public Folders' folder.", vbExclamation, strTitle)
+        Exit Sub
+
+GetContactsFolder:
+        For Each olFolder In olPublicFolder.Folders
+            If olFolder.Name = "All Public Folders" Then
+                For Each olContactsFolder In olFolder.Folders
+                    If olContactsFolder.Name = "InstantFile Contacts" Then
+                        olFolder = Nothing
+                        GoTo CopyContact
+                    End If
+                Next olContactsFolder
+            End If
+        Next olFolder
+        MsgBox("Could not locate the InstantFile Contacts folder.", vbExclamation, strTitle)
+
+CopyContact:
+        olContact.Save()  ' otherwise changes won't get written to the new contact
+        olIFContact = olContactsFolder.Items.Add("IPM.Contact.InstantFileContact")
+        With olIFContact
+            .FullName = olContact.FullName
+            .JobTitle = olContact.JobTitle
+            .CompanyName = olContact.CompanyName
+            .FileAs = olContact.FileAs
+            .BusinessAddress = olContact.BusinessAddress
+            .HomeAddress = olContact.HomeAddress
+            .OtherAddress = olContact.OtherAddress
+            .MailingAddress = olContact.MailingAddress
+            .BusinessTelephoneNumber = olContact.BusinessTelephoneNumber
+            .HomeTelephoneNumber = olContact.HomeTelephoneNumber
+            .MobileTelephoneNumber = olContact.MobileTelephoneNumber
+            .BusinessFaxNumber = olContact.BusinessFaxNumber
+            .Email1Address = olContact.Email1Address
+            .Email1AddressType = olContact.Email1AddressType
+            .WebPage = olContact.WebPage
+            ' from second page
+            .Department = olContact.Department
+            .ManagerName = olContact.ManagerName
+            .AssistantName = olContact.AssistantName
+            .NickName = olContact.NickName
+            .Spouse = olContact.Spouse
+        End With
+        If MsgBox("Delete '" & olContact.Subject & "' from your personal Contacts folder?", vbQuestion + vbYesNo + vbDefaultButton2, strTitle) = vbYes Then
+            olContact.Delete()
+        Else
+            olContact.Close(Outlook.OlInspectorClose.olSave)
+        End If
+        olIFContact.Display()
+
+CopyContact2InstantFile_Exit:
+        olIFContact = Nothing
+        olFolder = Nothing
+        olContactsFolder = Nothing
+        olNameSpace = Nothing
+        olContact = Nothing
+        Exit Sub
+
+CopyContact2InstantFile_Error:
+        MsgBox(Err.Description, vbExclamation, strTitle)
+        GoTo CopyContact2InstantFile_Exit
+
     End Sub
 End Class
 

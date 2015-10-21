@@ -75,7 +75,7 @@ Partial Public Class AddinModule
         Me.CopyContact2InstantFile.Id = "adxRibbonButton_0e8a15c449ee4798adf475a1587fd047"
         Me.CopyContact2InstantFile.ImageMso = "CopyToPersonalContacts"
         Me.CopyContact2InstantFile.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.CopyContact2InstantFile.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookContact Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.CopyContact2InstantFile.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
         Me.CopyContact2InstantFile.ScreenTip = "Copy this personal Contact to InstantFile's Contacts"
         Me.CopyContact2InstantFile.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
@@ -106,7 +106,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton1.Id = "adxRibbonButton_de572db5435f4b35bc780bc9d332c327"
         Me.AdxRibbonButton1.ImageMso = "CopyFolder"
         Me.AdxRibbonButton1.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.AdxRibbonButton1.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookTask Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.AdxRibbonButton1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
         Me.AdxRibbonButton1.ScreenTip = "Copy this item to another folder."
         Me.AdxRibbonButton1.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
@@ -123,6 +123,7 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+        Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AddinModule
