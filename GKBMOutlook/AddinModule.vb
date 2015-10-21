@@ -59,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-21 14:34.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-21 15:36.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -300,5 +300,23 @@ Link2Contacts_Exit:
 
     End Sub
 
+    Private Sub AdxRibbonButton1_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
+        Dim olTask As Outlook.TaskItem ' , olNew As Outlook.TaskItem
+        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "TaskItem" Then
+            olTask = OutlookApp.ActiveInspector.CurrentItem
+            ' there must be something different about copying / moving a TaskItem to an E-mail folder (drafts)
+            ' olNew = olTask.Copy()
+            olTask.Copy()
+            olTask.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+
+            ' .Move doesn't delete the new copy from the Tasks folder
+            'olNew.Delete()
+            'olNew = Nothing
+            olTask = Nothing
+            MsgBox("The item was copied to your Drafts folder.", vbInformation, "Copy item")
+        Else
+            MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, "Copy Item")
+        End If
+    End Sub
 End Class
 
