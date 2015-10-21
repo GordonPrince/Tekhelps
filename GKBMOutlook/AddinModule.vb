@@ -9,36 +9,39 @@ Imports Outlook = Microsoft.Office.Interop.Outlook
 Public Class AddinModule
     Inherits AddinExpress.MSO.ADXAddinModule
 
+#Region "Tekhelps definitions"
+    Const strPublicFolders As String = "Public Folders"
+    Dim RetVal As VariantType
+#End Region
+
 #Region " Add-in Express automatic code "
- 
+
     'Required by Add-in Express - do not modify
     'the methods within this region
- 
+
     Public Overrides Function GetContainer() As System.ComponentModel.IContainer
         If components Is Nothing Then
             components = New System.ComponentModel.Container
         End If
         GetContainer = components
     End Function
- 
+
     <ComRegisterFunctionAttribute()> _
     Public Shared Sub AddinRegister(ByVal t As Type)
         AddinExpress.MSO.ADXAddinModule.ADXRegister(t)
     End Sub
- 
+
     <ComUnregisterFunctionAttribute()> _
     Public Shared Sub AddinUnregister(ByVal t As Type)
         AddinExpress.MSO.ADXAddinModule.ADXUnregister(t)
     End Sub
- 
+
     Public Overrides Sub UninstallControls()
         MyBase.UninstallControls()
     End Sub
- 
+
 #End Region
 
-    Const strPublicFolders As String = "Public Folders"
- 
     Public Shared Shadows ReadOnly Property CurrentInstance() As AddinModule
         Get
             Return CType(AddinExpress.MSO.ADXAddinModule.CurrentInstance, AddinModule)
@@ -56,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-21.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-21 13:25.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -67,7 +70,6 @@ Public Class AddinModule
         Dim colAttachments As Outlook.Attachments, objAttachment As Outlook.Attachment
         Dim DateStamp As String, MyFile As String
         Dim intCounter As Integer
-        Dim RetVal As VariantType
 
         'Get all selected items
         myOlNameSpace = OutlookApp.GetNamespace("MAPI")
@@ -211,6 +213,87 @@ CopyContact2InstantFile_Exit:
 CopyContact2InstantFile_Error:
         MsgBox(Err.Description, vbExclamation, strTitle)
         GoTo CopyContact2InstantFile_Exit
+
+    End Sub
+
+    Private Sub AdxRibbonButton2_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
+        ' link two open Contacts to each other
+        Const strTitle As String = "Link Two Contacts to Each Other"
+        Dim myInspector As Outlook.Inspector
+        Dim myCont1 As Outlook.ContactItem, myCont2 As Outlook.ContactItem
+        Dim strCompanyDept As String
+        Dim bHave1 As Boolean
+        ' make sure there are exactly two Contacts open
+        For Each myInspector In OutlookApp.Inspectors
+            If TypeName(myInspector.CurrentItem) = "ContactItem" Then
+                If Not bHave1 Then
+                    myCont1 = myInspector.CurrentItem
+                    bHave1 = True
+                Else
+                    myCont2 = myInspector.CurrentItem
+                    GoTo LinkContacts
+                End If
+            End If
+        Next myInspector
+        MsgBox("Did not find two Contacts open." & vbNewLine & vbNewLine & _
+                "Open the two Contacts you want to link to each other, then try this again.", vbExclamation, strTitle)
+        GoTo Link2Contacts_Exit
+
+LinkContacts:
+        ' if there are individual names in the Contacts, ask whether or not the link should display the individual's name or the company's name
+        With myCont2
+            strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
+            If .FullName = vbNullString And .CompanyName <> vbNullString Then
+                .Subject = strCompanyDept
+            ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
+                .Subject = .FullName
+            Else
+                RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
+                If RetVal = vbNo Then
+                    .Subject = strCompanyDept
+                ElseIf RetVal = vbYes Then
+                    .Subject = .FullName
+                ElseIf RetVal = vbCancel Then
+                    GoTo Link2Contacts_Exit
+                End If
+            End If
+            .Save()
+        End With
+
+        With myCont1
+            strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
+            If .FullName = vbNullString And .CompanyName <> vbNullString Then
+                .Subject = strCompanyDept
+            ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
+                .Subject = .FullName
+            Else
+                RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
+                If RetVal = vbNo Then
+                    .Subject = strCompanyDept
+                ElseIf RetVal = vbYes Then
+                    .Subject = .FullName
+                ElseIf RetVal = vbCancel Then
+                    GoTo Link2Contacts_Exit
+                End If
+            End If
+            .Save()
+        End With
+
+        If MsgBox("LINK:" & vbNewLine & myCont1.Subject & vbNewLine & vbNewLine & _
+                           "AND:" & vbNewLine & myCont2.Subject, vbQuestion + vbYesNo, strTitle) = vbYes Then
+            ' link 1 to 2
+            myCont1.Links.Add(myCont2)
+            myCont1.Save()
+            ' link 2 to 1
+            myCont2.Links.Add(myCont1)
+            myCont2.Save()
+            MsgBox("The two Contacts were successfully linked to each other", vbInformation, strTitle)
+        End If
+
+Link2Contacts_Exit:
+        myInspector = Nothing
+        myCont1 = Nothing
+        myCont2 = Nothing
 
     End Sub
 End Class
