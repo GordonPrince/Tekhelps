@@ -55,11 +55,11 @@ Public Class AddinModule
     End Property
 
     Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
-        MsgBox("Outlook Add-in for" & vbNewLine & _
+        MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-21 15:36.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-22  9:45.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -301,21 +301,20 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub AdxRibbonButton1_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
-        Dim olTask As Outlook.TaskItem ' , olNew As Outlook.TaskItem
+        Const strTitle As String = "Copy Item to Drafts Folder"
+        Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
         If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "TaskItem" Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
             ' there must be something different about copying / moving a TaskItem to an E-mail folder (drafts)
-            ' olNew = olTask.Copy()
-            olTask.Copy()
-            olTask.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-
-            ' .Move doesn't delete the new copy from the Tasks folder
-            'olNew.Delete()
-            'olNew = Nothing
+            olNew = olTask.Copy()
+            olNew.UserProperties("CallDate").Value = olTask.UserProperties("CallDate") ' otherwise olNew uses the current date/time
+            olNew.Save()
+            olNew.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+            olNew = Nothing
             olTask = Nothing
-            MsgBox("The item was copied to your Drafts folder.", vbInformation, "Copy item")
+            MsgBox("The item was copied to your Drafts folder.", vbInformation, strTitle)
         Else
-            MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, "Copy Item")
+            MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
         End If
     End Sub
 End Class
