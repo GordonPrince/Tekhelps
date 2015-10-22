@@ -59,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-22 10:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-22 13:30.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -301,11 +301,16 @@ Link2Contacts_Exit:
         Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
         If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "TaskItem" Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
-            ' there must be something different about copying / moving a TaskItem to an E-mail folder (drafts)
+            ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
             olNew.UserProperties("CallDate").Value = olTask.UserProperties("CallDate") ' otherwise olNew uses the current date/time
-            olNew.Save()
+            ' once the item is saved, most users don't have permissions to MOVE it (deletes from NewCallTracking)
+            ' olNew.Save()
             olNew.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+            ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
+            olNew.UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
+            olNew.UserProperties("CallDate").Value = Now
+            olNew.Save()
             olNew = Nothing
             olTask = Nothing
             MsgBox("The item was copied to your Drafts folder.", vbInformation, strTitle)
