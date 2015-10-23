@@ -8,7 +8,7 @@ Imports System.Runtime.InteropServices
  
 'TODO: Review the values of the assembly attributes
  
-<Assembly: AssemblyTitle("GKBMOutlook")>
+<Assembly: AssemblyTitle("GKBM Outlook Add-in")> 
 <Assembly: AssemblyDescription("Outlook customizations for GKBM")> 
 <Assembly: AssemblyCompany("Gatti Keltner Bienvenu Montesi")> 
 <Assembly: AssemblyProduct("GKBM Outlook Add-in")> 
@@ -26,9 +26,9 @@ Imports System.Runtime.InteropServices
 ' You can specify all the values or you can default the Build and Revision Numbers
 ' by using the '*' as shown below:
  
-<Assembly: AssemblyVersion("2.0.3.*")> 
+<Assembly: AssemblyVersion("2.0.4.*")> 
 <Assembly: ComVisible(True)> 
 
 
 
-<Assembly: AssemblyFileVersionAttribute("2.0.3.1")> 
+<Assembly: AssemblyFileVersionAttribute("2.0.4.3")> 

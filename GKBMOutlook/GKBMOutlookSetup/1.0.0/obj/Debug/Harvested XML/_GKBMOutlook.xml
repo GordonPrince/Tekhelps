@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
         <DirectoryRef Id="GKBMOutlook.Binaries">
-            <Component Id="cmp9251175DD8E52EAB090FD43E2586C587" Guid="{C99B1BB1-5D9B-4330-8B65-EB09D7C37346}">
+            <Component Id="cmp9251175DD8E52EAB090FD43E2586C587" Guid="{7C602FB9-9842-4489-8F74-6158C0D498EC}">
                 <File Id="fil702ED53D1E04D5DA7BB7067B6906E0FE" Source="$(var.GKBMOutlook.TargetDir)\GKBMOutlook.dll" />
             </Component>
         </DirectoryRef>

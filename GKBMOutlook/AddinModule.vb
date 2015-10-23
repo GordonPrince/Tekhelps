@@ -59,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-23 6:00.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-23 7:05.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -156,6 +156,7 @@ Public Class AddinModule
         Exit Sub
 
 GetContactsFolder:
+        olContactsFolder = Nothing
         For Each olFolder In olPublicFolder.Folders
             If olFolder.Name = "All Public Folders" Then
                 For Each olContactsFolder In olFolder.Folders
@@ -167,6 +168,7 @@ GetContactsFolder:
             End If
         Next olFolder
         MsgBox("Could not locate the InstantFile Contacts folder.", vbExclamation, strTitle)
+        If IsNothing(olContactsFolder) Then GoTo CopyContact2InstantFile_Exit
 
 CopyContact:
         olContact.Save()  ' otherwise changes won't get written to the new contact
@@ -212,7 +214,6 @@ CopyContact2InstantFile_Exit:
 CopyContact2InstantFile_Error:
         MsgBox(Err.Description, vbExclamation, strTitle)
         GoTo CopyContact2InstantFile_Exit
-
     End Sub
 
     Private Sub AdxRibbonButton2_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
@@ -223,6 +224,7 @@ CopyContact2InstantFile_Error:
         Dim strCompanyDept As String
         Dim bHave1 As Boolean
         ' make sure there are exactly two Contacts open
+        myCont1 = Nothing
         For Each myInspector In OutlookApp.Inspectors
             If TypeName(myInspector.CurrentItem) = "ContactItem" Then
                 If Not bHave1 Then
