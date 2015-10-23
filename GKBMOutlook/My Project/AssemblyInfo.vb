@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Outlook customizations for GKBM")> 
 <Assembly: AssemblyCompany("Gatti Keltner Bienvenu Montesi")> 
 <Assembly: AssemblyProduct("GKBM Outlook Add-in")> 
-<Assembly: AssemblyCopyright("1997-2015 Tekhelps, Inc.")> 
+<Assembly: AssemblyCopyright("(c) 1997-2015 Tekhelps, Inc.")> 
 <Assembly: AssemblyTrademark("")>
 <Assembly: AssemblyCulture("")>
  

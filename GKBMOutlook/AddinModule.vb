@@ -59,7 +59,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-22 13:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-23 6:00.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -309,6 +309,7 @@ Link2Contacts_Exit:
             olNew.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
             ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
             olNew.UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
+            ' so it shows up at the top of the list, so Chuck can delete it
             olNew.UserProperties("CallDate").Value = Now
             olNew.Save()
             olNew = Nothing
