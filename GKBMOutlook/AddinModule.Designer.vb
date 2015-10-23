@@ -121,7 +121,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton1.Caption = "Copy Item to Drafts Folder"
         Me.AdxRibbonButton1.Id = "adxRibbonButton_de572db5435f4b35bc780bc9d332c327"
-        Me.AdxRibbonButton1.ImageMso = "ForwardTask"
+        Me.AdxRibbonButton1.ImageMso = "SendStatusReport"
         Me.AdxRibbonButton1.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
         Me.AdxRibbonButton1.ScreenTip = "Copy this item to your Drafts folder (so you can E-mail a copy of it to someone)." & _

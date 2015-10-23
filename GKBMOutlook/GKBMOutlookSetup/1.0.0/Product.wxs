@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
-  <Product Id="*" Name="GKBM Outlook Add-in" Language="1033" Version="2.0.6" Manufacturer="Tekhelps, Inc." UpgradeCode="{21518F5D-B14E-4B68-AE6E-7D15E0B93675}" Codepage="1252">
+  <Product Id="*" Name="GKBM Outlook Add-in" Language="1033" Version="2.0.7" Manufacturer="Tekhelps, Inc." UpgradeCode="{21518F5D-B14E-4B68-AE6E-7D15E0B93675}" Codepage="1252">
     <Package AdminImage="no" Comments="GKBMOutlook" Compressed="yes" Description="Add-ins for GKBM Outlook" InstallerVersion="200" InstallScope="perUser" Languages="1033" Manufacturer="Tekhelps, Inc." Platform="x86" ReadOnly="no" ShortNames="no" SummaryCodepage="1252" />
     <Media Id="1" Cabinet="GKBMOutlook.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="GKBMOutlook Installation [1]" />
@@ -56,8 +56,8 @@
       <ComponentGroupRef Id="FileSystemGroup" />
     </Feature>
     <Upgrade Id="{21518F5D-B14E-4B68-AE6E-7D15E0B93675}">
-      <UpgradeVersion Minimum="1.0.0" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
-      <UpgradeVersion Maximum="2.9.9" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
+      <UpgradeVersion Minimum="2.0.6" Property="NEWPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="no" Language="1033" />
+      <UpgradeVersion Maximum="2.0.6" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
     </Upgrade>
     <InstallExecuteSequence>
       <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR=""]]></Custom>
