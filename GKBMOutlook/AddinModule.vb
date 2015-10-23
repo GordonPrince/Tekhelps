@@ -301,12 +301,15 @@ Link2Contacts_Exit:
     Private Sub AdxRibbonButton1_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
         Const strTitle As String = "Copy Item to Drafts Folder"
         Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
+        Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
         If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "TaskItem" Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
             ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
+            strSubject = olNew.Subject
             olNew.UserProperties("CallDate").Value = olTask.UserProperties("CallDate") ' otherwise olNew uses the current date/time
             ' once the item is saved, most users don't have permissions to MOVE it (deletes from NewCallTracking)
+            ' if it's not saved, the MOVE fails, but without an error message
             ' olNew.Save()
             olNew.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
             ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
@@ -317,6 +320,20 @@ Link2Contacts_Exit:
             olNew = Nothing
             olTask = Nothing
             MsgBox("The item was copied to your Drafts folder.", vbInformation, strTitle)
+
+            ' display the item for the user
+            olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            For Each obj In olFolder.Items
+                If TypeName(obj) = "MailItem" Then
+                    olDraft = obj
+                    If olDraft.Subject = strSubject Then
+                        olDraft.Display()
+                        Exit For
+                    End If
+                End If
+            Next
+            olDraft = Nothing
+            obj = Nothing
         Else
             MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
         End If
