@@ -6,7 +6,7 @@
     <ProductVersion>3.5</ProductVersion>
     <ProjectGuid>{833e3c47-a49e-451a-be73-c5e00abdc49c}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>GKBMOutlookSetup%282.0.4%29</OutputName>
+    <OutputName>GKBMOutlookSetup%282.0.5%29</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>

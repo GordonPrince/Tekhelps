@@ -88,9 +88,9 @@ Partial Public Class AddinModule
         '
         'CopyContact2InstantFile
         '
-        Me.CopyContact2InstantFile.Caption = "Copy Contact to InstantFile"
+        Me.CopyContact2InstantFile.Caption = "Add Contact to InstantFile"
         Me.CopyContact2InstantFile.Id = "adxRibbonButton_0e8a15c449ee4798adf475a1587fd047"
-        Me.CopyContact2InstantFile.ImageMso = "CopyToPersonalContacts"
+        Me.CopyContact2InstantFile.ImageMso = "ContactCardInstantMessageAddToOutlookContacts"
         Me.CopyContact2InstantFile.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.CopyContact2InstantFile.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
         Me.CopyContact2InstantFile.ScreenTip = "Copy this personal Contact to InstantFile's Contacts"
@@ -100,7 +100,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton2.Caption = "Link Two Contacts"
         Me.AdxRibbonButton2.Id = "adxRibbonButton_4b812ad786fc4beb9f6a39f3bbcb0352"
-        Me.AdxRibbonButton2.ImageMso = "LinkBarCustom"
+        Me.AdxRibbonButton2.ImageMso = "ContactRoles"
         Me.AdxRibbonButton2.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton2.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
         Me.AdxRibbonButton2.ScreenTip = "Link two Contacts to each other."
@@ -121,7 +121,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonButton1.Caption = "Copy Item to Drafts Folder"
         Me.AdxRibbonButton1.Id = "adxRibbonButton_de572db5435f4b35bc780bc9d332c327"
-        Me.AdxRibbonButton1.ImageMso = "CopyFolder"
+        Me.AdxRibbonButton1.ImageMso = "ForwardTask"
         Me.AdxRibbonButton1.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonButton1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
         Me.AdxRibbonButton1.ScreenTip = "Copy this item to your Drafts folder (so you can E-mail a copy of it to someone)." & _

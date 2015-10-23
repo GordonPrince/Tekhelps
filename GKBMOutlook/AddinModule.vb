@@ -124,7 +124,7 @@ Public Class AddinModule
     Private Sub CopyContact2InstantFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyContact2InstantFile.OnClick
         ' copy the active contact to InstantFile
         On Error GoTo CopyContact2InstantFile_Error
-        Const strTitle As String = "Copy Contact to InstantFile Contacts"
+        Const strTitle As String = "Add Personal Contact to InstantFile"
         Dim olContact As Outlook.ContactItem
         Dim olNameSpace As Outlook.NameSpace
         Dim olPublicFolder As Outlook.MAPIFolder
