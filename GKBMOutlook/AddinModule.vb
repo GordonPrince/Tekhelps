@@ -318,8 +318,11 @@ Link2Contacts_Exit:
             olNew.UserProperties("CallDate").Value = Now
             olNew.Save()
             olNew = Nothing
+            If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
+                      "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
+                olTask.Close(Outlook.OlInspectorClose.olSave)
+            End If
             olTask = Nothing
-            MsgBox("The item was copied to your Drafts folder.", vbInformation, strTitle)
 
             ' display the item for the user
             olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
