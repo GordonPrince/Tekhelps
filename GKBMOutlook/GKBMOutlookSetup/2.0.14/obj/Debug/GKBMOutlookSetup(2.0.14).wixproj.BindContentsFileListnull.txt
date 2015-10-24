@@ -1,8 +1,8 @@
-C:\Program Files (x86)\Add-in Express\Add-in Express for .NET\Bin\AddinExpress.MSO.2005.dll
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\Loader\adxloader.dll
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\Loader\adxloader.dll.manifest
+C:\Program Files (x86)\Add-in Express\Add-in Express for .NET\Bin\AddinExpress.MSO.2005.dll
+C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\Office.dll
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\Microsoft.Office.Interop.Outlook.dll
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\Microsoft.Vbe.Interop.dll
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\Loader\adxloader64.dll
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\Office.dll
+C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\Loader\adxloader.dll.manifest
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\\GKBMOutlook.dll

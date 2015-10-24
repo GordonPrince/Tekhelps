@@ -4,13 +4,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.5</ProductVersion>
-    <ProjectGuid>{833e3c47-a49e-451a-be73-c5e00abdc49c}</ProjectGuid>
+    <ProjectGuid>{4c7b087d-efd5-4cdd-8c05-32365d9066a3}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>GKBMOutlookSetup</OutputName>
+    <OutputName>GKBMOutlookSetup(2.0.14)</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>Setup</Name>
+    <Name>GKBMOutlookSetup(2.0.14)</Name>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -36,6 +36,7 @@
     <Content Include="XSLT\XslProjectOutput.xslt" />
     <Content Include="XSLT\readme.txt" />
     <Content Include="XSLT\_GKBMOutlook.xml" />
+    
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixUIExtension">
@@ -60,6 +61,7 @@
       <RefProjectOutputGroups>Binaries;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
+    
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">
@@ -113,8 +115,8 @@
     <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
       <!-- Add bootstrapper items here -->
     </ItemGroup>
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="GKBMOutlook" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\Bootstrapper\" ApplicationRequiresElevation="False" Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' " />
-    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="GKBMOutlook" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\Bootstrapper\" ApplicationRequiresElevation="False" Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="GKBM Outlook Add-in" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\Bootstrapper\" ApplicationRequiresElevation="False"  Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' " />
+    <GenerateBootstrapper ApplicationFile="$(TargetFileName)" ApplicationName="GKBM Outlook Add-in" BootstrapperItems="@(BootstrapperFile)" ComponentsLocation="HomeSite" CopyComponents="False" OutputPath="$(OutputPath)" Path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\Bootstrapper\" ApplicationRequiresElevation="False"  Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' " />
   </Target>
   <PropertyGroup>
     <PreBuildEvent>

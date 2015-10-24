@@ -1,7 +1,0 @@
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\GKBMOutlookSetup\1.0.0\bin\Debug\GKBMOutlookSetup(1.0.0).msi
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\GKBMOutlookSetup\1.0.0\bin\Debug\GKBMOutlookSetup(1.0.0).wixpdb
-obj\\Debug\Product.wixobj
-obj\\Debug\pthEDC224A9953C6E81F67C8954B7A0793A\_GKBMOutlook.wixobj
-obj\\Debug\GKBMOutlookSetup(1.0.0).wixproj.BindContentsFileListnull.txt
-obj\\Debug\GKBMOutlookSetup(1.0.0).wixproj.BindOutputsFileListnull.txt
-obj\\Debug\GKBMOutlookSetup(1.0.0).wixproj.BindBuiltOutputsFileListnull.txt
