@@ -376,17 +376,16 @@ Link2Contacts_Exit:
             If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
                 MsgBox("The item does not have a DocNo", vbExclamation, "Show Document")
             Else
-                Do Until bHaveActiveAccess
-                    appAccess = GetObject(, "Access.Application")
-                    With appAccess
-                        If .Visible Then
-                            bHaveActiveAccess = True
-                        Else
-                            .Quit()
-                            appAccess = Nothing
-                        End If
-                    End With
-                Loop
+                appAccess = GetObject(, "Access.Application")
+                With appAccess
+                    If .Visible Then
+                        bHaveActiveAccess = True
+                    Else
+                        .Quit()
+                        appAccess = Nothing
+                        Exit Sub
+                    End If
+                End With
                 ' close and delete the Note
                 For Each myInspector In OutlookApp.Inspectors
                     If Left(myInspector.Caption, 18) = strIFdocNo Then
@@ -408,17 +407,15 @@ Link2Contacts_Exit:
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
                 MsgBox("The item does not have a Matter No", vbExclamation, "Show Matter")
             Else
-                Do Until bHaveActiveAccess
-                    appAccess = GetObject(, "Access.Application")
-                    With appAccess
-                        If .Visible Then
-                            bHaveActiveAccess = True
-                        Else
-                            .Quit()
-                            appAccess = Nothing
-                        End If
-                    End With
-                Loop
+                appAccess = GetObject(, "Access.Application")
+                With appAccess
+                    If .Visible Then
+                        bHaveActiveAccess = True
+                    Else
+                        .Quit()
+                        appAccess = Nothing
+                    End If
+                End With
                 appAccess.Run("DisplayMatter", dblMatNo)
                 appAccess = Nothing
             End If
@@ -427,15 +424,11 @@ Link2Contacts_Exit:
             olNameSpace = OutlookApp.GetNamespace("MAPI")
             olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
             olItem.Display()
-            olItem = Nothing
-            olNameSpace = Nothing
         ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
             strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
             olNameSpace = OutlookApp.GetNamespace("MAPI")
             olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
             olItem.Display()
-            olItem = Nothing
-            olNameSpace = Nothing
             ' added 7/23/2008 for reminders to follow up on InstantFile Requests & Tasks
         ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
             strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
@@ -444,11 +437,11 @@ Link2Contacts_Exit:
             olNameSpace = OutlookApp.GetNamespace("MAPI")
             olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
             olItem.Display()
-            olItem = Nothing
-            olNameSpace = Nothing
         End If
 
 DisplayMatOrDoc_Exit:
+        olItem = Nothing
+        olNameSpace = Nothing
         Exit Sub
 
 DisplayMatOrDoc_Error:
