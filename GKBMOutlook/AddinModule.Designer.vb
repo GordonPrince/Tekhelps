@@ -44,6 +44,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButtonSaveAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -144,6 +145,9 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
+        'AdxOutlookAppEvents1
+        '
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -158,6 +162,7 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonButton1 As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents AdxRibbonButton4 As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
+    Private WithEvents AdxOutlookAppEvents1 As AddinExpress.MSO.ADXOutlookAppEvents
 
 End Class
 

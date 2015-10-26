@@ -24,16 +24,6 @@ Public Class AddinModule
     Public WithEvents myMailItem As Outlook.MailItem
 #End Region
 
-    Private Sub myInspectors_NewInspector(ByVal Inspector As Outlook.Inspector)
-        If TypeName(Inspector.CurrentItem) = "MailItem" Then
-            myMailItem = Inspector.CurrentItem
-        ElseIf TypeName(Inspector.CurrentItem) = "NoteItem" Then
-            DisplayMatOrDoc(Inspector.CurrentItem)
-            myInsp = Inspector
-        End If
-        Exit Sub
-    End Sub
-
 #Region " Add-in Express automatic code "
 
     'Required by Add-in Express - do not modify
@@ -365,7 +355,7 @@ Link2Contacts_Exit:
     Private Sub DisplayMatOrDoc(ByRef myNoteItem As Outlook.NoteItem)
         On Error GoTo DisplayMatOrDoc_Error
         Const strTitle As String = "Display InstantFile Matter or Document"
-        Dim appAccess As Access.Application, bHaveActiveAccess As Boolean
+        Dim appAccess As Access.Application
         Dim lngDocNo As Long, dblMatNo As Double, strID As String, intX As Integer
         Dim myInspector As Outlook.Inspector
         Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
@@ -379,7 +369,6 @@ Link2Contacts_Exit:
                 appAccess = GetObject(, "Access.Application")
                 With appAccess
                     If .Visible Then
-                        bHaveActiveAccess = True
                     Else
                         .Quit()
                         appAccess = Nothing
@@ -407,15 +396,21 @@ Link2Contacts_Exit:
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
                 MsgBox("The item does not have a Matter No", vbExclamation, "Show Matter")
             Else
-                appAccess = GetObject(, "Access.Application")
-                With appAccess
-                    If .Visible Then
-                        bHaveActiveAccess = True
-                    Else
-                        .Quit()
-                        appAccess = Nothing
-                    End If
-                End With
+                ' appAccess = GetObject(, "Access.Application")
+                'appAccess = New Access.Application
+                'With appAccess
+                '.Visible = True
+                '.OpenCurrentDatabase("C:\Tekhelps\OutlookStubs.accdb", True)
+                'End With
+                'With appAccess
+                'If .Visible Then
+                'Else
+                '.CloseCurrentDatabase()
+                '.Quit()
+                ' appAccess = Nothing
+                ' End If
+                'End With
+                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 appAccess.Run("DisplayMatter", dblMatNo)
                 appAccess = Nothing
             End If
@@ -452,6 +447,15 @@ DisplayMatOrDoc_Error:
             MsgBox(Err.Description, vbExclamation, strTitle)
         End If
         GoTo DisplayMatOrDoc_Exit
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+        If TypeName(inspector.CurrentItem) = "MailItem" Then
+            myMailItem = inspector.CurrentItem
+        ElseIf TypeName(inspector.CurrentItem) = "NoteItem" Then
+            DisplayMatOrDoc(inspector.CurrentItem)
+            myInsp = inspector
+        End If
     End Sub
 End Class
 
