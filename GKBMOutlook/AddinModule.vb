@@ -69,7 +69,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-27  7:55.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-27  8:55.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -396,22 +396,8 @@ Link2Contacts_Exit:
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
                 MsgBox("The item does not have a Matter No", vbExclamation, "Show Matter")
             Else
-                ' appAccess = GetObject(, "Access.Application")
-                'If Not appAccess.Visible Then appAccess.Visible = True
-                'appAccess = New Access.Application
-                'With appAccess
-                '.Visible = True
-                '.OpenCurrentDatabase("C:\Access\Access2010\GKBM\OutlookStubs.accdb", True)
-                'End With
-                'With appAccess
-                'If .Visible Then
-                'Else
-                '.CloseCurrentDatabase()
-                '.Quit()
-                ' appAccess = Nothing
-                ' End If
-                'End With
-                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+                appAccess = GetObject(, "Access.Application")
+                ' appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 MsgBox("appAccess was set without error")
                 appAccess.Run("DisplayMatter", dblMatNo)
                 appAccess = Nothing
@@ -444,7 +430,7 @@ DisplayMatOrDoc_Exit:
 DisplayMatOrDoc_Error:
         If Err.Number = 429 Then
             MsgBox("Could not find the InstantFile program." & vbNewLine & vbNewLine & _
-                        "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
+                    "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
         Else
             MsgBox(Err.Description, vbExclamation, strTitle)
         End If
@@ -458,10 +444,6 @@ DisplayMatOrDoc_Error:
             DisplayMatOrDoc(inspector.CurrentItem)
             myInsp = inspector
         End If
-    End Sub
-
-    Private Sub AdxAccessAppEvents1_OpenDatabase(sender As Object, e As EventArgs) Handles AdxAccessAppEvents1.OpenDatabase
-        MsgBox("Access database is being opened", vbInformation, "AdxAccessAppEvents1_OpenDatabase")
     End Sub
 End Class
 

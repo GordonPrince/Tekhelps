@@ -36,6 +36,7 @@ Partial Public Class AddinModule
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(AddinModule))
         Me.AdxRibbonTab1 = New AddinExpress.MSO.ADXRibbonTab(Me.components)
         Me.AdxRibbonGroup1 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
         Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
@@ -148,9 +149,7 @@ Partial Public Class AddinModule
         '
         'AdxOutlookAppEvents1
         '
-        '
-        'AdxAccessAppEvents1
-        '
+        Me.AdxOutlookAppEvents1.HandleEvents = CType(resources.GetObject("AdxOutlookAppEvents1.HandleEvents"), AddinExpress.MSO.ADXOutlookAppEvents.HandledOutlookEvents)
         '
         'AddinModule
         '
