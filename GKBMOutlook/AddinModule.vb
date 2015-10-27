@@ -401,9 +401,8 @@ Link2Contacts_Exit:
         ElseIf Left(myNoteItem.Subject, 18) = strIFmatNo Then
             dblMatNo = Mid(myNoteItem.Subject, 19)
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                MsgBox("The item does not have a Matter No", vbExclamation, "Show Matter")
+                MsgBox("The item does not have a Matter No.", vbExclamation, "Show Matter")
             Else
-                ' appAccess = GetObject(, "Access.Application")
                 appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 appAccess.Run("DisplayMatter", dblMatNo)
                 appAccess = Nothing
@@ -448,7 +447,9 @@ DisplayMatOrDoc_Error:
             myMailItem = inspector.CurrentItem
         ElseIf TypeName(inspector.CurrentItem) = "NoteItem" Then
             DisplayMatOrDoc(inspector.CurrentItem)
-            myInsp = inspector
+            ' these caused Outlook to crash
+            ' myInsp = inspector
+            ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
         End If
     End Sub
 End Class

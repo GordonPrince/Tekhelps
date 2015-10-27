@@ -2,6 +2,6 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartProgram>C:\Program Files %28x86%29\Microsoft Office\Office14\OUTLOOK.EXE</StartProgram>
-    <StartAction>Project</StartAction>
+    <StartAction>Program</StartAction>
   </PropertyGroup>
 </Project>
