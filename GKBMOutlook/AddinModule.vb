@@ -352,7 +352,14 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    Private Sub DisplayMatOrDoc(ByRef myNoteItem As Outlook.NoteItem)
+    Private Sub DisplayMatOrDoc(ByVal myNoteItem As Outlook.NoteItem)
+        ' changed this from ByRef to ByVal during conversion from VBA to Add-in
+        ' connecting to Access only works if:
+        ' VS > Debug "Start External Program" is blank. 
+        ' Open Outlook and Access manually, then
+        ' VS > Tools > Attach to Process for both OUTLOOK.EXE and MSACCESS.EXE
+        ' then >Start (VS debugging)
+        ' Breakpoints in the VS code will work
         On Error GoTo DisplayMatOrDoc_Error
         Const strTitle As String = "Display InstantFile Matter or Document"
         Dim appAccess As Access.Application
@@ -396,9 +403,8 @@ Link2Contacts_Exit:
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
                 MsgBox("The item does not have a Matter No", vbExclamation, "Show Matter")
             Else
-                appAccess = GetObject(, "Access.Application")
-                ' appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-                MsgBox("appAccess was set without error")
+                ' appAccess = GetObject(, "Access.Application")
+                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 appAccess.Run("DisplayMatter", dblMatNo)
                 appAccess = Nothing
             End If
