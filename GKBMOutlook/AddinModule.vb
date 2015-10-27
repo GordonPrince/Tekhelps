@@ -118,12 +118,6 @@ Public Class AddinModule
                 intCounter = intCounter + 1
             End If
         Next
-        'Cleanup
-        objAttachment = Nothing
-        colAttachments = Nothing
-        myOlNameSpace = Nothing
-        myOlSelection = Nothing
-        mySelectedItem = Nothing
         If intCounter = 0 Then
             MsgBox("There are no attachments on this item larger than 15k.", vbInformation, strTitle)
         Else
@@ -149,7 +143,6 @@ Public Class AddinModule
                 MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
                             "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
                             "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
-                olContact = Nothing
                 Exit Sub
             End If
         Else
@@ -161,7 +154,6 @@ Public Class AddinModule
         For Each olPublicFolder In olNameSpace.Folders
             If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then GoTo GetContactsFolder
         Next olPublicFolder
-        olNameSpace = Nothing
         MsgBox("Could not locate the 'Public Folders' folder.", vbExclamation, strTitle)
         Exit Sub
 
@@ -171,7 +163,6 @@ GetContactsFolder:
             If olFolder.Name = "All Public Folders" Then
                 For Each olContactsFolder In olFolder.Folders
                     If olContactsFolder.Name = "InstantFile Contacts" Then
-                        olFolder = Nothing
                         GoTo CopyContact
                     End If
                 Next olContactsFolder
@@ -214,11 +205,6 @@ CopyContact:
         olIFContact.Display()
 
 CopyContact2InstantFile_Exit:
-        olIFContact = Nothing
-        olFolder = Nothing
-        olContactsFolder = Nothing
-        olNameSpace = Nothing
-        olContact = Nothing
         Exit Sub
 
 CopyContact2InstantFile_Error:
@@ -302,10 +288,6 @@ LinkContacts:
         End If
 
 Link2Contacts_Exit:
-        myInspector = Nothing
-        myCont1 = Nothing
-        myCont2 = Nothing
-
     End Sub
 
     Private Sub AdxRibbonButton1_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
@@ -327,12 +309,10 @@ Link2Contacts_Exit:
             ' so it shows up at the top of the list, so Chuck can delete it
             olNew.UserProperties("CallDate").Value = Now
             olNew.Save()
-            olNew = Nothing
             If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
                       "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
                 olTask.Close(Outlook.OlInspectorClose.olSave)
             End If
-            olTask = Nothing
 
             ' display the item for the user
             olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
@@ -345,8 +325,6 @@ Link2Contacts_Exit:
                     End If
                 End If
             Next
-            olDraft = Nothing
-            obj = Nothing
         Else
             MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
         End If
@@ -375,17 +353,15 @@ Link2Contacts_Exit:
             Else
                 appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 appAccess.Run("DisplayDocument", lngDocNo)
-                appAccess = Nothing
                 DisplayMatOrDoc = True
             End If
         ElseIf Left(myNoteItem.Subject, 18) = strIFmatNo Then
             dblMatNo = Mid(myNoteItem.Subject, 19)
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                MsgBox("The item does not have a Matter No.", vbExclamation, "Show Matter")
+                MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
             Else
                 appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
                 appAccess.Run("DisplayMatter", dblMatNo)
-                appAccess = Nothing
                 DisplayMatOrDoc = True
             End If
         ElseIf Left(myNoteItem.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
@@ -411,15 +387,12 @@ Link2Contacts_Exit:
         End If
 
 DisplayMatOrDoc_Exit:
-        olItem = Nothing
-        olNameSpace = Nothing
         Exit Function
 
 DisplayMatOrDoc_Error:
         If Err.Number = 429 Then
             MsgBox("Could not find the InstantFile program." & vbNewLine & vbNewLine & _
                     "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
-            appAccess = Nothing
         Else
             MsgBox(Err.Description, vbExclamation, strTitle)
         End If
@@ -431,7 +404,6 @@ DisplayMatOrDoc_Error:
             myMailItem = inspector.CurrentItem
         ElseIf TypeName(inspector.CurrentItem) = "NoteItem" Then
             If DisplayMatOrDoc(inspector.CurrentItem) Then
-                ' MsgBox("Displayed InstantFile item")
                 ' these caused Outlook to crash
                 ' myInsp = inspector
                 ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
