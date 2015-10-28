@@ -485,12 +485,20 @@ HaveNewCallTracking:
         OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
         ' force the form to load in the user's private Tasks folder
         ' to create a new .oft file, open the form in Design mode, then SaveAs
-        ' 5/28/2008 added the olFolderTasks argument, commented out several other lines of code -- only works in Outlook 2007
-        ' objItem = OutlookApp.CreateItemFromTemplate("W:\InstantFileTask.oft")
-        objItem = OutlookApp.CreateItemFromTemplate("D:\W\InstantFileTask.oft")
-        objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
-        objFD = objItem.FormDescription
-        objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
+        strScratch = "W:\InstantFileTask.oft"
+        If My.Computer.FileSystem.FileExists(strScratch) Then
+            GoTo LoadTemplate
+        Else
+            ' this is only used for development -- couldn't get mapping to W:\ to work 10/28/2015
+            strScratch = "D:\W\InstantFileTask.oft"
+            If My.Computer.FileSystem.FileExists(strScratch) Then
+LoadTemplate:
+                objItem = OutlookApp.CreateItemFromTemplate(strScratch)
+                objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
+                objFD = objItem.FormDescription
+                objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
+            End If
+        End If
         Exit Sub
 
 Startup_Error:
