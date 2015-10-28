@@ -397,9 +397,9 @@ DisplayMatOrDoc_Error:
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         ' Dim myNote As Outlook.NoteItem
-        If TypeName(inspector.CurrentItem) = Outlook.OlItemType.olMailItem Then
+        If TypeOf inspector Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
-        ElseIf TypeName(inspector.CurrentItem) = Outlook.OlItemType.olNoteItem Then
+        ElseIf TypeOf inspector Is Outlook.NoteItem Then
             If DisplayMatOrDoc(inspector.CurrentItem) Then
                 ' these caused Outlook to crash
                 'myNote = inspector.CurrentItem
@@ -409,6 +409,18 @@ DisplayMatOrDoc_Error:
                 'myInsp.Close(Outlook.OlInspectorClose.olDiscard)
             Else
                 MsgBox("Did not display InstantFile item.", vbExclamation + vbOKOnly, "AdxOutlookAppEvents1_NewInspector")
+            End If
+        End If
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        Dim myInsp As Outlook.Inspector, myItem As Outlook.NoteItem
+        myInsp = inspector
+        If TypeOf inspector Is Outlook.NoteItem Then
+            myItem = myInsp.CurrentItem
+            RetVal = MsgBox(myItem.Subject, vbQuestion + vbYesNo, "AdxOutlookAppEvents1_InspectorActivate")
+            If RetVal = vbYes Then
+                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
             End If
         End If
     End Sub
