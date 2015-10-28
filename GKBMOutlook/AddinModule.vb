@@ -431,10 +431,10 @@ DisplayMatOrDoc_Error:
         ' this won't work if the user is working offline
         If OutlookApp.Session.Offline Then
             MsgBox("Some InstantFile functionality will not work if you are working Offline." & vbNewLine & vbNewLine & _
-                              "(To bring Outlook back Online, look in the bottom right corner of the Outlook window." & vbNewLine & _
-                              "If the word 'Offline' is displayed, right-click on it, clear the checkbox to the left of 'Work offline'" & vbNewLine & _
-                              "and see if you get a 'Connected' message." & vbNewLine & _
-                              "If so, you've solved the problem.)", vbExclamation, "Working Offline")
+                "(To bring Outlook back Online, look in the bottom right corner of the Outlook window." & vbNewLine & _
+                "If the word 'Offline' is displayed, right-click on it, clear the checkbox to the left of 'Work offline'" & vbNewLine & _
+                "and see if you get a 'Connected' message." & vbNewLine & _
+                "If so, you've solved the problem.)", vbExclamation, "Working Offline")
         Else
             For Each olFolder In OutlookApp.Session.Folders
                 ' Debug.Print olFolder.Name
