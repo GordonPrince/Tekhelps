@@ -69,7 +69,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-28  12:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-28  15:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -137,7 +137,7 @@ Public Class AddinModule
         Dim olIFContact As Outlook.ContactItem
 
         ' make sure a Contact is the active item
-        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = Outlook.OlItemType.olContactItem Then
+        If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.ContactItem Then
             olContact = OutlookApp.ActiveInspector.CurrentItem
             If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
                 MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
@@ -222,7 +222,7 @@ CopyContact2InstantFile_Error:
         ' make sure there are exactly two Contacts open
         myCont1 = Nothing
         For Each myInspector In OutlookApp.Inspectors
-            If TypeName(myInspector.CurrentItem) = Outlook.OlItemType.olContactItem Then
+            If TypeOf myInspector.CurrentItem Is Outlook.ContactItem Then
                 If Not bHave1 Then
                     myCont1 = myInspector.CurrentItem
                     bHave1 = True
@@ -294,7 +294,7 @@ Link2Contacts_Exit:
         Const strTitle As String = "Copy Item to Drafts Folder"
         Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
         Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
-        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = Outlook.OlItemType.olTaskItem Then
+        If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
             ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
@@ -317,7 +317,7 @@ Link2Contacts_Exit:
             ' display the item for the user
             olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             For Each obj In olFolder.Items
-                If TypeName(obj) = Outlook.OlItemType.olMailItem Then
+                If TypeOf obj Is Outlook.MailItem Then
                     olDraft = obj
                     If olDraft.Subject = strSubject Then
                         olDraft.Display()
