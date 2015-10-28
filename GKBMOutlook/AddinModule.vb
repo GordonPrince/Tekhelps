@@ -69,7 +69,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-28  15:40.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-28  16:20.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -104,7 +104,7 @@ Public Class AddinModule
 
         'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
         For Each objAttachment In colAttachments
-            If objAttachment.Size > 15000 Then  ' don't save attached Outlook items -- especially Notes
+            If objAttachment.Size > 7000 Then  ' don't save attached Outlook items -- especially Notes
                 MyFile = objAttachment.FileName
                 DateStamp = Space(1) & Format(mySelectedItem.CreationTime, "yyyyMMddhhmmss")
                 intPos = InStrRev(MyFile, ".")
@@ -119,7 +119,7 @@ Public Class AddinModule
             End If
         Next
         If intCounter = 0 Then
-            MsgBox("There are no attachments on this item larger than 15k.", vbInformation, strTitle)
+            MsgBox("There are no attachments on this item larger than 7k.", vbInformation, strTitle)
         Else
             MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & "C:\Scans.", vbInformation, strTitle)
         End If
