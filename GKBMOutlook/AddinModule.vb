@@ -137,7 +137,7 @@ Public Class AddinModule
         Dim olIFContact As Outlook.ContactItem
 
         ' make sure a Contact is the active item
-        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "ContactItem" Then
+        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = Outlook.OlItemType.olContactItem Then
             olContact = OutlookApp.ActiveInspector.CurrentItem
             If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
                 MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
@@ -222,7 +222,7 @@ CopyContact2InstantFile_Error:
         ' make sure there are exactly two Contacts open
         myCont1 = Nothing
         For Each myInspector In OutlookApp.Inspectors
-            If TypeName(myInspector.CurrentItem) = "ContactItem" Then
+            If TypeName(myInspector.CurrentItem) = Outlook.OlItemType.olContactItem Then
                 If Not bHave1 Then
                     myCont1 = myInspector.CurrentItem
                     bHave1 = True
@@ -294,7 +294,7 @@ Link2Contacts_Exit:
         Const strTitle As String = "Copy Item to Drafts Folder"
         Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
         Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
-        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = "TaskItem" Then
+        If TypeName(OutlookApp.ActiveInspector.CurrentItem) = Outlook.OlItemType.olTaskItem Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
             ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
@@ -317,7 +317,7 @@ Link2Contacts_Exit:
             ' display the item for the user
             olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             For Each obj In olFolder.Items
-                If TypeName(obj) = "MailItem" Then
+                If TypeName(obj) = Outlook.OlItemType.olMailItem Then
                     olDraft = obj
                     If olDraft.Subject = strSubject Then
                         olDraft.Display()
@@ -330,14 +330,10 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    Private Function DisplayMatOrDoc(ByVal myNoteItem As Outlook.NoteItem) As Boolean
-        ' changed this from ByRef to ByVal during conversion from VBA to Add-in
-        ' connecting to Access only works if:
-        ' VS > Debug "Start External Program" is blank. 
-        ' Open Outlook and Access manually, then
-        ' VS > Tools > Attach to Process for both OUTLOOK.EXE and MSACCESS.EXE
-        ' then >Start (VS debugging)
-        ' Breakpoints in the VS code will work
+    Private Function DisplayMatOrDoc(myNoteItem As Outlook.NoteItem) As Boolean
+        ' 10/27/2015 changed this from ByRef to ByVal during conversion from VBA to Add-in
+        ' Note: connecting to Access only works if Access and VS are running as the same user
+        ' Especially, if VS is running as Administrator, Access must also be
         On Error GoTo DisplayMatOrDoc_Error
         Const strTitle As String = "Display InstantFile Matter or Document"
         Dim appAccess As Access.Application
@@ -400,15 +396,19 @@ DisplayMatOrDoc_Error:
     End Function
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        If TypeName(inspector.CurrentItem) = "MailItem" Then
+        ' Dim myNote As Outlook.NoteItem
+        If TypeName(inspector.CurrentItem) = Outlook.OlItemType.olMailItem Then
             myMailItem = inspector.CurrentItem
-        ElseIf TypeName(inspector.CurrentItem) = "NoteItem" Then
+        ElseIf TypeName(inspector.CurrentItem) = Outlook.OlItemType.olNoteItem Then
             If DisplayMatOrDoc(inspector.CurrentItem) Then
                 ' these caused Outlook to crash
-                ' myInsp = inspector
-                ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                'myNote = inspector.CurrentItem
+                'MsgBox(myNote.Subject)
+                'myNote.Close()
+                'myInsp = inspector
+                'myInsp.Close(Outlook.OlInspectorClose.olDiscard)
             Else
-                MsgBox("Did not display InstantFile item.")
+                MsgBox("Did not display InstantFile item.", vbExclamation + vbOKOnly, "AdxOutlookAppEvents1_NewInspector")
             End If
         End If
     End Sub
