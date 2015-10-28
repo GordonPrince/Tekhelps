@@ -397,9 +397,9 @@ DisplayMatOrDoc_Error:
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         ' Dim myNote As Outlook.NoteItem
-        If TypeOf inspector Is Outlook.MailItem Then
+        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
-        ElseIf TypeOf inspector Is Outlook.NoteItem Then
+        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
             If DisplayMatOrDoc(inspector.CurrentItem) Then
                 ' these caused Outlook to crash
                 'myNote = inspector.CurrentItem
@@ -413,10 +413,10 @@ DisplayMatOrDoc_Error:
         End If
     End Sub
 
-    Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+    Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
         Dim myInsp As Outlook.Inspector, myItem As Outlook.NoteItem
         myInsp = inspector
-        If TypeOf inspector Is Outlook.NoteItem Then
+        If TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
             myItem = myInsp.CurrentItem
             RetVal = MsgBox(myItem.Subject, vbQuestion + vbYesNo, "AdxOutlookAppEvents1_InspectorActivate")
             If RetVal = vbYes Then
