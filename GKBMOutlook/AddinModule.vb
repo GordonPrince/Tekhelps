@@ -400,9 +400,15 @@ DisplayMatOrDoc_Error:
         If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
         ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
+            myNote = inspector.CurrentItem
+            ' these put it in the bottom right corner of the monitor
+            ' Doing this before displaying the InstantFile item should leave the focus on InstantFile, not the Note
+            With myNote
+                .Top = 1200
+                .Left = 944
+            End With
             If DisplayMatOrDoc(inspector.CurrentItem) Then
-                myNote = inspector.CurrentItem
-                myNote.Close(Outlook.OlInspectorClose.olDiscard)
+                'myNote.Close(Outlook.OlInspectorClose.olDiscard)
                 ' myNote.Close(Outlook.OlInspectorClose.olSave)
                 ' inspector.CurrentItem.Close(Outlook.OlInspectorClose.olDiscard)
             Else
