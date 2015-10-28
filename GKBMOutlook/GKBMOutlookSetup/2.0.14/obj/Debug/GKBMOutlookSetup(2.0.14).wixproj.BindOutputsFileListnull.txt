@@ -1,2 +1,0 @@
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\GKBMOutlookSetup\2.0.14\bin\Debug\GKBMOutlookSetup(2.0.14).msi
-C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\GKBMOutlookSetup\2.0.14\bin\Debug\GKBMOutlookSetup(2.0.14).wixpdb
