@@ -479,8 +479,6 @@ SetNewCallTracking:
         End If
 
 HaveNewCallTracking:
-        olFolder = Nothing
-        olPublicFolder = Nothing
         olNS = OutlookApp.GetNamespace("MAPI")
         ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
         intExchangeConnectionMode = olNS.ExchangeConnectionMode
@@ -492,10 +490,6 @@ HaveNewCallTracking:
         objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
         objFD = objItem.FormDescription
         objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
-        objFD = Nothing
-        objFolder = Nothing
-        objItem = Nothing
-        olNS = Nothing
 
         ' Debug.Print "intExchangeConnectionMode = " & intExchangeConnectionMode
         Exit Sub
