@@ -17,11 +17,20 @@ Public Class AddinModule
     Const strNewCallTrackingTag As String = "NewCall Tracking Item"
     Const strIFtaskTag As String = "InstantFile_Task"
     Const strNewCallAppointmentTag As String = "NewCall Appointment"
-    Dim RetVal As VariantType
+    Const strConnectionString As String = "App=OutlookVBA;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
+                                                         "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
     Public strPublicStoreID As String
     Public WithEvents myInspectors As Outlook.Inspectors
     Public WithEvents myInsp As Outlook.Inspector
     Public WithEvents myMailItem As Outlook.MailItem
+    Public WithEvents myInboxItems As Outlook.Items
+    Public WithEvents mySentItems As Outlook.Items
+    Public WithEvents myTaskItems As Outlook.Items
+    Public WithEvents olInstantFileInbox As Outlook.Items
+    Public WithEvents olInstantFileTasks As Outlook.Items
+    Dim RetVal As VariantType
+    Dim strScratch As String, lngX As Long
+    Dim intExchangeConnectionMode As Integer
 #End Region
 
 #Region " Add-in Express automatic code "
@@ -392,5 +401,109 @@ DisplayMatOrDoc_Error:
         End If
     End Sub
 
+    Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
+        On Error GoTo Startup_Error
+        Const strTitle As String = "AdxOutlookAppEvents1_Startup()"
+        Dim intX As Integer
+        Dim olPublicFolder As Outlook.MAPIFolder, olFolder As Outlook.MAPIFolder
+        Dim olNS As Outlook.NameSpace, objFolder As Outlook.MAPIFolder, objItem As Outlook.TaskItem
+        Dim objFD As Outlook.FormDescription
+        Dim intHour As Integer
+        Dim intNote As Integer, myNotes As Outlook.Items, myNote As Outlook.NoteItem
+        Dim olRem As Outlook.Reminder
+
+        ' delete any leftover notes from InstantFile attachments
+        myNotes = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes).Items
+        intX = myNotes.Count
+        For intNote = intX To 1 Step -1
+            myNote = myNotes(intNote)
+            If Left(myNote.Body, 18) = strIFmatNo Or _
+                Left(myNote.Body, 18) = strIFdocNo Or _
+                Left(myNote.Body, 8) = "NewCall " Then _
+                myNote.Delete()
+        Next
+
+        ' Set myInspectors = Application.Inspectors
+        myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
+        mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
+        myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
+
+        ' this won't work if the user is working offline
+        If OutlookApp.Session.Offline Then
+            MsgBox("Some InstantFile functionality will not work if you are working Offline." & vbNewLine & vbNewLine & _
+                              "(To bring Outlook back Online, look in the bottom right corner of the Outlook window." & vbNewLine & _
+                              "If the word 'Offline' is displayed, right-click on it, clear the checkbox to the left of 'Work offline'" & vbNewLine & _
+                              "and see if you get a 'Connected' message." & vbNewLine & _
+                              "If so, you've solved the problem.)", vbExclamation, "Working Offline")
+        Else
+            For Each olFolder In OutlookApp.Session.Folders
+                ' Debug.Print olFolder.Name
+                If olFolder.Name = "Mailbox - InstantFile" Or olFolder.Name = "InstantFile" Then
+                    olInstantFileInbox = olFolder.Folders("Inbox").Items
+                    olInstantFileTasks = olFolder.Folders("Tasks").Items
+
+                    ' delete any leftover notes from InstantFile attachments
+                    myNotes = olFolder.Folders("Notes").Items
+                    intX = myNotes.Count
+                    For intNote = intX To 1 Step -1
+                        myNote = myNotes(intNote)
+                        With myNote
+                            If Left(.Body, Len(strIFmatNo)) = strIFmatNo Or Left(.Body, Len(strIFdocNo)) = strIFdocNo Or Left(.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                                ' Debug.Print .CreationTime
+                                ' Stop
+                                If DateDiff("h", .CreationTime, Now) > 1 Then .Delete()
+                            End If
+                        End With
+                    Next
+                    myNote = Nothing
+                    myNotes = Nothing
+                    GoTo SetNewCallTracking
+                End If
+            Next olFolder
+            ' MsgBox "Some InstantFile functions related to Tasks will not work unless you open InstantFile's Mailbox first.", vbExclamation, "InstantFile's Mailbox Not Available"
+
+SetNewCallTracking:
+            For Each olPublicFolder In OutlookApp.Session.Folders
+                If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                    strPublicStoreID = olPublicFolder.StoreID
+                    For Each olFolder In olPublicFolder.Folders
+                        If olFolder.Name = "All Public Folders" Then
+                            For Each myNewCallTracking In olFolder.Folders
+                                If myNewCallTracking.Name = "New Call Tracking" Then GoTo HaveNewCallTracking
+                            Next
+                        End If
+                    Next
+                End If
+            Next
+            MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & "Try to get Outlook working Online if possible.", vbExclamation, "New Call Tracking Not Available")
+        End If
+
+HaveNewCallTracking:
+        olFolder = Nothing
+        olPublicFolder = Nothing
+        olNS = OutlookApp.GetNamespace("MAPI")
+        ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
+        intExchangeConnectionMode = olNS.ExchangeConnectionMode
+        OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
+        ' force the form to load in the user's private Tasks folder
+        ' to create a new .oft file, open the form in Design mode, then SaveAs
+        ' 5/28/2008 added the olFolderTasks argument, commented out several other lines of code -- only works in Outlook 2007
+        objItem = OutlookApp.CreateItemFromTemplate("W:\InstantFileTask.oft")
+        objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
+        objFD = objItem.FormDescription
+        objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
+        objFD = Nothing
+        objFolder = Nothing
+        objItem = Nothing
+        olNS = Nothing
+
+        ' Debug.Print "intExchangeConnectionMode = " & intExchangeConnectionMode
+        Exit Sub
+
+Startup_Error:
+        MsgBox(Err.Description, vbExclamation, strTitle)
+
+
+    End Sub
 End Class
 
