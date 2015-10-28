@@ -396,30 +396,26 @@ DisplayMatOrDoc_Error:
     End Function
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        Dim myInsp As Outlook.Inspector, myNote As Outlook.NoteItem
         If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
         ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
-            If DisplayMatOrDoc(inspector.CurrentItem) Then
-                ' these caused Outlook to crash
-                'myNote = inspector.CurrentItem
-                'MsgBox(myNote.Subject)
-                'myNote.Close()
-                'myInsp = inspector
-                For Each myInsp In OutlookApp.Inspectors
-                    If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                        myNote = myInsp.CurrentItem
-                        RetVal = MsgBox("Close the Note:" & vbNewLine & myNote.Subject, vbQuestion + vbYesNo, "AdxOutlookAppEvents1_NewInspector")
-                        If RetVal = vbYes Then
-                            myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                        End If
-                    End If
-                Next
-            Else
+            If Not DisplayMatOrDoc(inspector.CurrentItem) Then
                 MsgBox("Did not display InstantFile item.", vbExclamation + vbOKOnly, "AdxOutlookAppEvents1_NewInspector")
             End If
         End If
     End Sub
 
+    Private Sub AdxOutlookAppEvents1_InspectorClose(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorClose
+        Dim myInsp As Outlook.Inspector, myNote As Outlook.NoteItem
+        For Each myInsp In OutlookApp.Inspectors
+            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                myNote = myInsp.CurrentItem
+                RetVal = MsgBox("Close the Note:" & vbNewLine & myNote.Subject, vbQuestion + vbYesNo, "AdxOutlookAppEvents1_NewInspector")
+                If RetVal = vbYes Then
+                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                End If
+            End If
+        Next
+    End Sub
 End Class
 
