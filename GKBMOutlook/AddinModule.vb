@@ -330,10 +330,7 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    Private Function DisplayMatOrDoc(myNoteItem As Outlook.NoteItem) As Boolean
-        ' 10/27/2015 changed this from ByRef to ByVal during conversion from VBA to Add-in
-        ' Note: connecting to Access only works if Access and VS are running as the same user
-        ' Especially, if VS is running as Administrator, Access must also be
+    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         On Error GoTo DisplayMatOrDoc_Error
         Const strTitle As String = "Display InstantFile Matter or Document"
         Dim appAccess As Access.Application
@@ -341,49 +338,50 @@ Link2Contacts_Exit:
         Dim myInspector As Outlook.Inspector
         Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
         Dim olNameSpace As Outlook.NameSpace, olItem As Object
-        DisplayMatOrDoc = False
-        If Left(myNoteItem.Subject, 18) = strIFdocNo Then
-            lngDocNo = Mid(myNoteItem.Subject, 19)
-            If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
-            Else
-                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-                appAccess.Run("DisplayDocument", lngDocNo)
-                DisplayMatOrDoc = True
-            End If
-        ElseIf Left(myNoteItem.Subject, 18) = strIFmatNo Then
-            dblMatNo = Mid(myNoteItem.Subject, 19)
-            If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
-            Else
-                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-                appAccess.Run("DisplayMatter", dblMatNo)
-                DisplayMatOrDoc = True
-            End If
-        ElseIf Left(myNoteItem.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
-            olNameSpace = OutlookApp.GetNamespace("MAPI")
-            olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            olItem.Display()
-            DisplayMatOrDoc = True
-        ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-            strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
-            olNameSpace = OutlookApp.GetNamespace("MAPI")
-            olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            olItem.Display()
-            DisplayMatOrDoc = True
-        ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-            strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
-            intX = InStr(1, strID, vbNewLine)
-            strID = Left(strID, intX - 1)
-            olNameSpace = OutlookApp.GetNamespace("MAPI")
-            olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
-            olItem.Display()
-            DisplayMatOrDoc = True
-        End If
 
-DisplayMatOrDoc_Exit:
-        Exit Function
+        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
+            myMailItem = inspector.CurrentItem
+        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
+            myNote = inspector.CurrentItem
+            ' Note: connecting to Access only works if Access and VS are running as the same user
+            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), Access must also be
+
+            If Left(myNote.Subject, 18) = strIFdocNo Then
+                lngDocNo = Mid(myNote.Subject, 19)
+                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
+                    MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
+                Else
+                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+                    appAccess.Run("DisplayDocument", lngDocNo)
+                End If
+            ElseIf Left(myNote.Subject, 18) = strIFmatNo Then
+                dblMatNo = Mid(myNote.Subject, 19)
+                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
+                    MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
+                Else
+                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+                    appAccess.Run("DisplayMatter", dblMatNo)
+                End If
+            ElseIf Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+                olNameSpace = OutlookApp.GetNamespace("MAPI")
+                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                olItem.Display()
+            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+                olNameSpace = OutlookApp.GetNamespace("MAPI")
+                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                olItem.Display()
+            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+                intX = InStr(1, strID, vbNewLine)
+                strID = Left(strID, intX - 1)
+                olNameSpace = OutlookApp.GetNamespace("MAPI")
+                olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+                olItem.Display()
+            End If
+        End If
+        Exit Sub
 
 DisplayMatOrDoc_Error:
         If Err.Number = 429 Then
@@ -391,29 +389,6 @@ DisplayMatOrDoc_Error:
                     "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
         Else
             MsgBox(Err.Description, vbExclamation, strTitle)
-        End If
-        GoTo DisplayMatOrDoc_Exit
-    End Function
-
-    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        Dim myNote As Outlook.NoteItem
-        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
-            myMailItem = inspector.CurrentItem
-        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
-            myNote = inspector.CurrentItem
-            ' these put it in the bottom right corner of the monitor
-            ' Doing this before displaying the InstantFile item should leave the focus on InstantFile, not the Note
-            With myNote
-                .Top = 1200
-                .Left = 944
-            End With
-            If DisplayMatOrDoc(inspector.CurrentItem) Then
-                'myNote.Close(Outlook.OlInspectorClose.olDiscard)
-                ' myNote.Close(Outlook.OlInspectorClose.olSave)
-                ' inspector.CurrentItem.Close(Outlook.OlInspectorClose.olDiscard)
-            Else
-                MsgBox("Did not display InstantFile item.", vbExclamation + vbOKOnly, "AdxOutlookAppEvents1_NewInspector")
-            End If
         End If
     End Sub
 
