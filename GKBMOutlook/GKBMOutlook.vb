@@ -1,0 +1,4 @@
+﻿
+Class GKBMOutlook
+
+End Class

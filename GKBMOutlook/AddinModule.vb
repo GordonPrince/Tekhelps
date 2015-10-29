@@ -2,6 +2,7 @@
 Imports System.ComponentModel
 Imports System.Windows.Forms
 Imports AddinExpress.MSO
+Imports System.Diagnostics
 Imports Outlook = Microsoft.Office.Interop.Outlook
 Imports Access = Microsoft.Office.Interop.Access
 
@@ -60,7 +61,17 @@ Public Class AddinModule
         MyBase.UninstallControls()
     End Sub
 
+    Private itemEvents As OutlookItemEventsClass1 = Nothing
+
+    Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
+        itemEvents = New OutlookItemEventsClass1(Me)
+    End Sub
+
 #End Region
+
+    ' added this to copy 
+    ' Private replyAllChecker As GKBMOutlook ' ReplyAllChecker
+    ' Private gkbmOutlook As GKBMOutlook
 
     Public Shared Shadows ReadOnly Property CurrentInstance() As AddinModule
         Get
@@ -74,12 +85,18 @@ Public Class AddinModule
         End Get
     End Property
 
+    'Private Sub AddinModule_AddinStartupComplete(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.AddinStartupComplete
+
+    '    ' This creates an instance of the class that handles the events of an Outlook item
+    '    gkbmOutlook = New GKBMOutlook(Me)
+    'End Sub
+
     Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
         MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-29  9:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-29  11:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -308,17 +325,23 @@ Link2Contacts_Exit:
             olTask = OutlookApp.ActiveInspector.CurrentItem
             ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
-            strSubject = olNew.Subject
-            olNew.UserProperties("CallDate").Value = olTask.UserProperties("CallDate") ' otherwise olNew uses the current date/time
-            ' once the item is saved, most users don't have permissions to MOVE it (deletes from NewCallTracking)
-            ' if it's not saved, the MOVE fails, but without an error message
-            ' olNew.Save()
-            olNew.Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-            ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
-            olNew.UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
-            ' purge these automatically somehow
-            olNew.UserProperties("CallDate").Value = #8/8/1988#
-            olNew.Save()
+            With olNew
+                strSubject = .Subject
+                ' otherwise olNew uses the current date/time
+                .UserProperties("CallDate").Value = olTask.UserProperties("CallDate")
+                ' so opening the item doesn't prompt with the Locked by user message
+                .UserProperties("Locked").Value = vbNullString
+
+                ' once the item is saved, most users don't have permissions to MOVE it (deletes from NewCallTracking)
+                ' if it's not saved, the MOVE fails, but without an error message
+                .Save()
+                .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+                ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
+                .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
+                ' purge these automatically somehow
+                .UserProperties("CallDate").Value = #8/8/1988#
+                .Save()
+            End With
             If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
                       "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
                 olTask.Close(Outlook.OlInspectorClose.olSave)
@@ -340,68 +363,68 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        On Error GoTo DisplayMatOrDoc_Error
-        Const strTitle As String = "Display InstantFile Matter or Document"
-        Dim appAccess As Access.Application
-        Dim lngDocNo As Long, dblMatNo As Double, strID As String, intX As Integer
-        Dim myInspector As Outlook.Inspector
-        Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
-        Dim olNameSpace As Outlook.NameSpace, olItem As Object
+    '    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+    '        On Error GoTo DisplayMatOrDoc_Error
+    '        Const strTitle As String = "Display InstantFile Matter or Document"
+    '        Dim appAccess As Access.Application
+    '        Dim lngDocNo As Long, dblMatNo As Double, strID As String, intX As Integer
+    '        Dim myInspector As Outlook.Inspector
+    '        Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
+    '        Dim olNameSpace As Outlook.NameSpace, olItem As Object
 
-        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
-            myMailItem = inspector.CurrentItem
-        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
-            myNote = inspector.CurrentItem
-            ' Note: connecting to Access only works if Access and VS are running as the same user
-            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), 
-            ' Access must also be running as Administrator
+    '        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
+    '            myMailItem = inspector.CurrentItem
+    '        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
+    '            myNote = inspector.CurrentItem
+    '            ' Note: connecting to Access only works if Access and VS are running as the same user
+    '            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), 
+    '            ' Access must also be running as Administrator
 
-            If Left(myNote.Subject, 18) = strIFdocNo Then
-                lngDocNo = Mid(myNote.Subject, 19)
-                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                    MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
-                Else
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-                    appAccess.Run("DisplayDocument", lngDocNo)
-                End If
-            ElseIf Left(myNote.Subject, 18) = strIFmatNo Then
-                dblMatNo = Mid(myNote.Subject, 19)
-                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                    MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
-                Else
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-                    appAccess.Run("DisplayMatter", dblMatNo)
-                End If
-            ElseIf Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-                olNameSpace = OutlookApp.GetNamespace("MAPI")
-                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                olItem.Display()
-            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-                olNameSpace = OutlookApp.GetNamespace("MAPI")
-                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                olItem.Display()
-            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-                intX = InStr(1, strID, vbNewLine)
-                strID = Left(strID, intX - 1)
-                olNameSpace = OutlookApp.GetNamespace("MAPI")
-                olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
-                olItem.Display()
-            End If
-        End If
-        Exit Sub
+    '            If Left(myNote.Subject, 18) = strIFdocNo Then
+    '                lngDocNo = Mid(myNote.Subject, 19)
+    '                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
+    '                    MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
+    '                Else
+    '                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+    '                    appAccess.Run("DisplayDocument", lngDocNo)
+    '                End If
+    '            ElseIf Left(myNote.Subject, 18) = strIFmatNo Then
+    '                dblMatNo = Mid(myNote.Subject, 19)
+    '                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
+    '                    MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
+    '                Else
+    '                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+    '                    appAccess.Run("DisplayMatter", dblMatNo)
+    '                End If
+    '            ElseIf Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+    '                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
+    '                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+    '                olItem.Display()
+    '            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+    '                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
+    '                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+    '                olItem.Display()
+    '            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+    '                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+    '                intX = InStr(1, strID, vbNewLine)
+    '                strID = Left(strID, intX - 1)
+    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
+    '                olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+    '                olItem.Display()
+    '            End If
+    '        End If
+    '        Exit Sub
 
-DisplayMatOrDoc_Error:
-        If Err.Number = 429 Then
-            MsgBox("Could not find the InstantFile program." & vbNewLine & vbNewLine & _
-                    "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
-        Else
-            MsgBox(Err.Description, vbExclamation, strTitle)
-        End If
-    End Sub
+    'DisplayMatOrDoc_Error:
+    '        If Err.Number = 429 Then
+    '            MsgBox("Could not find the InstantFile program." & vbNewLine & vbNewLine & _
+    '                    "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
+    '        Else
+    '            MsgBox(Err.Description, vbExclamation, strTitle)
+    '        End If
+    '    End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
         On Error GoTo Startup_Error
@@ -527,11 +550,23 @@ AdxOutlookAppEvents1_Error:
         End If
     End Sub
 
-    Private itemEvents As OutlookItemEventsClass1 = Nothing
-
-    Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
-        itemEvents = New OutlookItemEventsClass1(Me)
+    Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
+        If selection IsNot Nothing Then
+            If selection.Count = 1 Then
+                Dim item As Object = selection.Item(1)
+                If TypeOf item Is Outlook.MailItem Then
+                    If itemEvents.IsConnected Then
+                        itemEvents.RemoveConnection()
+                        Debug.Print("Disconnected from the previously connected item.")
+                    End If
+                    itemEvents.ConnectTo(item, True)
+                    Debug.Print("Connected to this Outlook item.")
+                Else
+                    Marshal.ReleaseComObject(item)
+                    Debug.Print("Do not connect to this Outlook item.")
+                End If
+            End If
+        End If
     End Sub
-
 End Class
 
