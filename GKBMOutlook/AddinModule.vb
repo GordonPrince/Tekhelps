@@ -78,7 +78,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-28  18:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-29  6:30.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -347,6 +347,8 @@ Link2Contacts_Exit:
         Dim myInspector As Outlook.Inspector
         Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
         Dim olNameSpace As Outlook.NameSpace, olItem As Object
+
+        Exit Sub
 
         If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
