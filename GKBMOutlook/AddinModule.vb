@@ -353,7 +353,8 @@ Link2Contacts_Exit:
         ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
             myNote = inspector.CurrentItem
             ' Note: connecting to Access only works if Access and VS are running as the same user
-            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), Access must also be
+            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), 
+            ' Access must also be running as Administrator
 
             If Left(myNote.Subject, 18) = strIFdocNo Then
                 lngDocNo = Mid(myNote.Subject, 19)
@@ -504,5 +505,6 @@ LoadTemplate:
 Startup_Error:
         MsgBox(Err.Description, vbExclamation, strTitle)
     End Sub
+
 End Class
 
