@@ -348,8 +348,6 @@ Link2Contacts_Exit:
         Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
         Dim olNameSpace As Outlook.NameSpace, olItem As Object
 
-        Exit Sub
-
         If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
             myMailItem = inspector.CurrentItem
         ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then

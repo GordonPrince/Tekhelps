@@ -45,7 +45,6 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
-        Me.AdxAccessAppEvents1 = New AddinExpress.MSO.ADXAccessAppEvents(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -164,7 +163,6 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonButton4 As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
     Private WithEvents AdxOutlookAppEvents1 As AddinExpress.MSO.ADXOutlookAppEvents
-    Private WithEvents AdxAccessAppEvents1 As AddinExpress.MSO.ADXAccessAppEvents
 
 End Class
 
