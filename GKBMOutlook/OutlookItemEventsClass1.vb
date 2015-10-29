@@ -45,70 +45,70 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessPropertyChange(ByVal Name As String)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessRead()
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessReply(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessReplyAll(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessWrite(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeDelete(ByVal Item As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessAttachmentRemove(ByVal ByValAttachment As Object)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeAttachmentAdd(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessUnload()
         ' TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ProcessBeforeAutoSave(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
 
     Public Overrides Sub ProcessBeforeRead()
-        ' TODO: Add some code
+        MsgBox("ProcessBeforeRead() fired.")
     End Sub
 
     Public Overrides Sub ProcessAfterWrite()
         ' TODO: Add some code
     End Sub
- 
+
 End Class
 
