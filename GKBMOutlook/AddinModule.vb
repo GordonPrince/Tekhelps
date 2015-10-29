@@ -12,6 +12,7 @@ Public Class AddinModule
 
 #Region "Tekhelps definitions"
     Const strPublicFolders As String = "Public Folders"
+    Const strInstantFile As String = "InstantFile"
     Const strIFmatNo As String = "InstantFile_MatNo_"
     Const strIFdocNo As String = "InstantFile_DocNo_"
     Const strNewCallTrackingTag As String = "NewCall Tracking Item"
@@ -78,7 +79,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-29  6:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-29  9:35.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -439,7 +440,7 @@ DisplayMatOrDoc_Error:
         Else
             For Each olFolder In OutlookApp.Session.Folders
                 ' Debug.Print olFolder.Name
-                If olFolder.Name = "Mailbox - InstantFile" Or olFolder.Name = "InstantFile" Then
+                If olFolder.Name = "Mailbox - InstantFile" Or olFolder.Name = strInstantFile Then
                     olInstantFileInbox = olFolder.Folders("Inbox").Items
                     olInstantFileTasks = olFolder.Folders("Tasks").Items
 
@@ -507,13 +508,22 @@ Startup_Error:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
+        On Error GoTo AdxOutlookAppEvents1_Error
         Dim appAccess As Access.Application
-
         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-        If appAccess.CurrentProject.Name = "InstantFilePDF.mde" Then
+        ' If appAccess.CurrentProject.Name = "OutlookStubs.accdb" Then
+        If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
             MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
                     "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
             appAccess.Quit(Access.AcQuitOption.acQuitSaveNone)
+        End If
+        Exit Sub
+
+AdxOutlookAppEvents1_Error:
+        If Err.Number = 429 Or Err.Number = 2467 Then
+            ' Access not running
+        Else
+            MsgBox(Err.Description, vbExclamation, "AdxOutlookAppEvents1_Quit")
         End If
     End Sub
 End Class
