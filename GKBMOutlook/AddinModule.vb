@@ -526,5 +526,12 @@ AdxOutlookAppEvents1_Error:
             MsgBox(Err.Description, vbExclamation, "AdxOutlookAppEvents1_Quit")
         End If
     End Sub
+
+    Private itemEvents As OutlookItemEventsClass1 = Nothing
+
+    Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
+        itemEvents = New OutlookItemEventsClass1(Me)
+    End Sub
+
 End Class
 
