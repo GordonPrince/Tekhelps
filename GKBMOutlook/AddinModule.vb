@@ -506,5 +506,15 @@ Startup_Error:
         MsgBox(Err.Description, vbExclamation, strTitle)
     End Sub
 
+    Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
+        Dim appAccess As Access.Application
+
+        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+        If appAccess.CurrentProject.Name = "InstantFilePDF.mde" Then
+            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
+                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
+            appAccess.Quit(Access.AcQuitOption.acQuitSaveNone)
+        End If
+    End Sub
 End Class
 
