@@ -561,8 +561,8 @@ AdxOutlookAppEvents1_Error:
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
         ' Private Sub adxOutlookEvents_ExplorerActivate(ByVal sender As System.Object, ByVal explorer As System.Object) Handles adxOutlookEvents.ExplorerActivate
-        Debug.Print("The ExplorerActivate event has occurred.")
-        MsgBox("The ExplorerActivate event has occurred.")
+        ' Debug.Print("The ExplorerActivate event has occurred.")
+        ' MsgBox("The ExplorerActivate event has occurred.")
         Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If theExplorer IsNot Nothing Then
             Dim selection As Outlook.Selection = Nothing
@@ -578,8 +578,22 @@ AdxOutlookAppEvents1_Error:
         End If
     End Sub
 
-    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        MsgBox("The AdxOutlookAppEvents1_NewInspector() event has occured")
+    'Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+    '    MsgBox("The AdxOutlookAppEvents1_NewInspector() event has occurred")
+    'End Sub
+
+    Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        ' Debug.Print("The ExplorerActivate event has occurred.")
+        ' MsgBox("The AdxOutlookAppEvents1_InspectorActivate() event has occured")
+        Dim myInsp As Outlook.Inspector, myMailItem As Outlook.MailItem
+        myInsp = inspector
+        If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
+            myMailItem = myInsp.CurrentItem
+            ' Debug.Print(myMailItem.Sent)
+            If myMailItem.Sent Then
+                MsgBox("myMailItem.Sent = " & myMailItem.Sent)
+            End If
+        End If
     End Sub
 End Class
 
