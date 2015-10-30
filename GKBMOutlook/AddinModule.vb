@@ -583,17 +583,38 @@ AdxOutlookAppEvents1_Error:
     'End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        ' Debug.Print("The ExplorerActivate event has occurred.")
-        ' MsgBox("The AdxOutlookAppEvents1_InspectorActivate() event has occured")
         Dim myInsp As Outlook.Inspector, myMailItem As Outlook.MailItem
         myInsp = inspector
+        Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             myMailItem = myInsp.CurrentItem
-            ' Debug.Print(myMailItem.Sent)
             If myMailItem.Sent Then
-                MsgBox("myMailItem.Sent = " & myMailItem.Sent)
+                Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent & ")")
+                'MsgBox("myMailItem.Sent = " & myMailItem.Sent)
+                'Debug.WriteLine("after MsgBox(myMailItem.Sent = " & myMailItem.Sent & ")")
+                Dim theInspector As Outlook.Inspector = TryCast(inspector, Outlook.Inspector)
+                If theInspector IsNot Nothing Then
+                    Debug.Print("theInspector IsNot Nothing")
+                    Dim selection As Outlook.Selection = Nothing
+                    Try
+                        selection = theInspector.Selection
+                    Catch
+                    End Try
+
+                    If selection IsNot Nothing Then
+                        Debug.Print("selection IsNot Nothing")
+                        ConnectToSelectedItem(selection)
+                        Debug.Print("ConnectToSelectedItem(selection) finished")
+                        Marshal.ReleaseComObject(selection)
+                    Else
+                        Debug.Print("selection is Nothing")
+                    End If
+                Else
+                    Debug.Print("theInspector Is Nothing")
+                End If
             End If
         End If
+        Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
 End Class
 
