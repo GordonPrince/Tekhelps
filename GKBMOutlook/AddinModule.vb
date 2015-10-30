@@ -559,27 +559,27 @@ AdxOutlookAppEvents1_Error:
         End If
     End Sub
 
-    'Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-    '    ' Private Sub adxOutlookEvents_ExplorerActivate(ByVal sender As System.Object, ByVal explorer As System.Object) Handles adxOutlookEvents.ExplorerActivate
-    '    Debug.Print("The ExplorerActivate event has occurred.")
-    '    MsgBox("The ExplorerActivate event has occurred.")
-    '    Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-    '    If theExplorer IsNot Nothing Then
-    '        Dim selection As Outlook.Selection = Nothing
-    '        Try
-    '            selection = theExplorer.Selection
-    '        Catch
-    '        End Try
+    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
+        ' Private Sub adxOutlookEvents_ExplorerActivate(ByVal sender As System.Object, ByVal explorer As System.Object) Handles adxOutlookEvents.ExplorerActivate
+        Debug.Print("The ExplorerActivate event has occurred.")
+        MsgBox("The ExplorerActivate event has occurred.")
+        Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        If theExplorer IsNot Nothing Then
+            Dim selection As Outlook.Selection = Nothing
+            Try
+                selection = theExplorer.Selection
+            Catch
+            End Try
 
-    '        If selection IsNot Nothing Then
-    '            ConnectToSelectedItem(selection)
-    '            Marshal.ReleaseComObject(selection)
-    '        End If
-    '    End If
-    'End Sub
+            If selection IsNot Nothing Then
+                ConnectToSelectedItem(selection)
+                Marshal.ReleaseComObject(selection)
+            End If
+        End If
+    End Sub
 
-    'Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-    '    MsgBox("The AdxOutlookAppEvents1_NewInspector() event has occured")
-    'End Sub
+    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+        MsgBox("The AdxOutlookAppEvents1_NewInspector() event has occured")
+    End Sub
 End Class
 
