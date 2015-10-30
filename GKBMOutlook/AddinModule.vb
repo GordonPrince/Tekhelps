@@ -63,16 +63,6 @@ Public Class AddinModule
 
     Private itemEvents As OutlookItemEventsClass1 = Nothing
 
-    Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
-        itemEvents = New OutlookItemEventsClass1(Me)
-    End Sub
-
-#End Region
-
-    ' added this to copy 
-    ' Private replyAllChecker As GKBMOutlook ' ReplyAllChecker
-    ' Private gkbmOutlook As GKBMOutlook
-
     Public Shared Shadows ReadOnly Property CurrentInstance() As AddinModule
         Get
             Return CType(AddinExpress.MSO.ADXAddinModule.CurrentInstance, AddinModule)
@@ -85,18 +75,18 @@ Public Class AddinModule
         End Get
     End Property
 
-    'Private Sub AddinModule_AddinStartupComplete(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.AddinStartupComplete
+    Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
+        itemEvents = New OutlookItemEventsClass1(Me)
+    End Sub
 
-    '    ' This creates an instance of the class that handles the events of an Outlook item
-    '    gkbmOutlook = New GKBMOutlook(Me)
-    'End Sub
+#End Region
 
     Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
         MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-29  11:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-30  7:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -565,6 +555,25 @@ AdxOutlookAppEvents1_Error:
                     Marshal.ReleaseComObject(item)
                     Debug.Print("Do not connect to this Outlook item.")
                 End If
+            End If
+        End If
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
+        ' Private Sub adxOutlookEvents_ExplorerActivate(ByVal sender As System.Object, ByVal explorer As System.Object) Handles adxOutlookEvents.ExplorerActivate
+        Debug.Print("The ExplorerActivate event has occurred.")
+        MsgBox("The ExplorerActivate event has occurred.")
+        Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        If theExplorer IsNot Nothing Then
+            Dim selection As Outlook.Selection = Nothing
+            Try
+                selection = theExplorer.Selection
+            Catch
+            End Try
+
+            If selection IsNot Nothing Then
+                ConnectToSelectedItem(selection)
+                Marshal.ReleaseComObject(selection)
             End If
         End If
     End Sub
