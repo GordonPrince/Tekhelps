@@ -560,9 +560,6 @@ AdxOutlookAppEvents1_Error:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        ' Private Sub adxOutlookEvents_ExplorerActivate(ByVal sender As System.Object, ByVal explorer As System.Object) Handles adxOutlookEvents.ExplorerActivate
-        ' Debug.Print("The ExplorerActivate event has occurred.")
-        ' MsgBox("The ExplorerActivate event has occurred.")
         Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If theExplorer IsNot Nothing Then
             Dim selection As Outlook.Selection = Nothing
@@ -589,15 +586,16 @@ AdxOutlookAppEvents1_Error:
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             myMailItem = myInsp.CurrentItem
             If myMailItem.Sent Then
-                Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent & ")")
+                Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent)
                 'MsgBox("myMailItem.Sent = " & myMailItem.Sent)
                 'Debug.WriteLine("after MsgBox(myMailItem.Sent = " & myMailItem.Sent & ")")
                 Dim theInspector As Outlook.Inspector = TryCast(inspector, Outlook.Inspector)
+
                 If theInspector IsNot Nothing Then
                     Debug.Print("theInspector IsNot Nothing")
                     Dim selection As Outlook.Selection = Nothing
                     Try
-                        selection = theInspector.Selection
+                        selection = theInspector.Application.ActiveExplorer.Selection
                     Catch
                     End Try
 
