@@ -86,7 +86,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-30  7:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Oct-30  11:55.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -475,7 +475,7 @@ Link2Contacts_Exit:
                     GoTo SetNewCallTracking
                 End If
             Next olFolder
-            ' MsgBox "Some InstantFile functions related to Tasks will not work unless you open InstantFile's Mailbox first.", vbExclamation, "InstantFile's Mailbox Not Available"
+            MsgBox("Some InstantFile functions related to Tasks will not work unless you open InstantFile's Mailbox first.", vbExclamation, "InstantFile's Mailbox Not Available")
 
 SetNewCallTracking:
             For Each olPublicFolder In OutlookApp.Session.Folders
@@ -582,17 +582,17 @@ AdxOutlookAppEvents1_Error:
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
         Dim myInsp As Outlook.Inspector, myMailItem As Outlook.MailItem
         myInsp = inspector
-        Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
+        'Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             myMailItem = myInsp.CurrentItem
             If myMailItem.Sent Then
-                Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent)
+                'Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent)
                 'MsgBox("myMailItem.Sent = " & myMailItem.Sent)
                 'Debug.WriteLine("after MsgBox(myMailItem.Sent = " & myMailItem.Sent & ")")
                 Dim theInspector As Outlook.Inspector = TryCast(inspector, Outlook.Inspector)
 
                 If theInspector IsNot Nothing Then
-                    Debug.Print("theInspector IsNot Nothing")
+                    'Debug.Print("theInspector IsNot Nothing")
                     Dim selection As Outlook.Selection = Nothing
                     Try
                         selection = theInspector.Application.ActiveExplorer.Selection
@@ -600,19 +600,19 @@ AdxOutlookAppEvents1_Error:
                     End Try
 
                     If selection IsNot Nothing Then
-                        Debug.Print("selection IsNot Nothing")
+                        'Debug.Print("selection IsNot Nothing")
                         ConnectToSelectedItem(selection)
-                        Debug.Print("ConnectToSelectedItem(selection) finished")
+                        'Debug.Print("ConnectToSelectedItem(selection) finished")
                         Marshal.ReleaseComObject(selection)
                     Else
-                        Debug.Print("selection is Nothing")
+                        'Debug.Print("selection is Nothing")
                     End If
                 Else
-                    Debug.Print("theInspector Is Nothing")
+                    'Debug.Print("theInspector Is Nothing")
                 End If
             End If
         End If
-        Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+        'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
 End Class
 
