@@ -328,9 +328,10 @@ Link2Contacts_Exit:
                 .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
                 ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
                 .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
-                ' purge these automatically somehow
-                .UserProperties("CallDate").Value = #8/8/1988#
-                .Save()
+                ' purge these nightly when update NewCallTracking program runs for OLAP/Analysis
+                .UserProperties("CallDate").Value = #2/2/2002#
+                ' this causes an error -- can't save item, it has been moved
+                ' .Save()
             End With
             If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
                       "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
@@ -342,10 +343,12 @@ Link2Contacts_Exit:
             For Each obj In olFolder.Items
                 If TypeOf obj Is Outlook.MailItem Then
                     olDraft = obj
-                    If olDraft.Subject = strSubject Then
-                        olDraft.Display()
+                    With olDraft
+                        .Subject = strSubject
+                        .BCC = "NewCallTracking@gkbm.com"
+                        .Display()
                         Exit For
-                    End If
+                    End With
                 End If
             Next
         Else
@@ -547,13 +550,13 @@ AdxOutlookAppEvents1_Error:
                 If TypeOf item Is Outlook.MailItem Then
                     If itemEvents.IsConnected Then
                         itemEvents.RemoveConnection()
-                        Debug.Print("Disconnected from the previously connected item.")
+                        'Debug.Print("Disconnected from the previously connected item.")
                     End If
                     itemEvents.ConnectTo(item, True)
-                    Debug.Print("Connected to this Outlook item.")
+                    'Debug.Print("Connected to this Outlook item.")
                 Else
                     Marshal.ReleaseComObject(item)
-                    Debug.Print("Do not connect to this Outlook item.")
+                    'Debug.Print("Do not connect to this Outlook item.")
                 End If
             End If
         End If
