@@ -81,7 +81,7 @@ Public Class AddinModule
 
 #End Region
 
-    Private Sub AdxRibbonButton4_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
+    Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
         MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
@@ -229,7 +229,7 @@ CopyContact2InstantFile_Error:
         GoTo CopyContact2InstantFile_Exit
     End Sub
 
-    Private Sub AdxRibbonButton2_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
+    Private Sub Link2Contacts2EachOther_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
         ' link two open Contacts to each other
         Const strTitle As String = "Link Two Contacts to Each Other"
         Dim myInspector As Outlook.Inspector
