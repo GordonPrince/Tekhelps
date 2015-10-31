@@ -89,7 +89,7 @@ Public Class AddinModule
                "This version dated 2015-Oct-30  11:55.", vbInformation, "About this Add-in")
     End Sub
 
-    Private Sub AdxRibbonButtonSaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
+    Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
         ' copied from http://www.howto-outlook.com/howto/saveembeddedpictures.htm
         Const strTitle As String = "Save Attachments"
         Dim myOlNameSpace As Outlook.NameSpace, myOlSelection As Outlook.Selection
@@ -307,7 +307,7 @@ LinkContacts:
 Link2Contacts_Exit:
     End Sub
 
-    Private Sub AdxRibbonButton1_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
+    Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
         Const strTitle As String = "Copy Item to Drafts Folder"
         Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
         Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
