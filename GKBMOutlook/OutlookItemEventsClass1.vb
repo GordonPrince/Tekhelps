@@ -58,11 +58,11 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessReply(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        ReplyOrReplyAll(Response, "Reply")
     End Sub
 
     Public Overrides Sub ProcessReplyAll(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        ReplyOrReplyAll(Response, "ReplyAll")
     End Sub
 
     Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -116,6 +116,41 @@ Public Class OutlookItemEventsClass1
 
     Public Overrides Sub ProcessAfterWrite()
         ' TODO: Add some code
+    End Sub
+
+    Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
+        Const strMsg As String = ".msg"
+        Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
+        Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem
+        Dim myAttachment As Outlook.Attachment, strFileName As String
+        Dim myNoteA As Outlook.NoteItem
+        Dim myUserProp As Outlook.UserProperty
+
+        If TypeOf Response Is Outlook.MailItem Then
+            myResponse = Response
+            outlookApp = myResponse.Application
+            For Each myInsp In outlookApp.Inspectors
+                myOriginal = myInsp.CurrentItem
+                If TypeOf myOriginal Is Outlook.MailItem Then
+                    Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+                    If myResponse.Subject = "RE: " & myOriginal.Subject Then
+                        For Each myAttachment In myOriginal.Attachments
+                            If Right(LCase(myAttachment.FileName), 4) = strMsg Then
+                                strFileName = "C:\tmp\" & myAttachment.FileName
+                                myAttachment.SaveAsFile(strFileName)
+                                myNoteA = outlookApp.CreateItemFromTemplate(strFileName)
+                                myNoteA.Save()
+                                myResponse.Attachments.Add(myNoteA, 1, , Replace(myAttachment.FileName, strMsg, vbNullString))
+                                myNoteA.Delete()
+                            End If
+                        Next myAttachment
+                        ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
+                        myUserProp = myResponse.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        myUserProp.Value = strEventName
+                    End If
+                End If
+            Next
+        End If
     End Sub
 
 End Class
