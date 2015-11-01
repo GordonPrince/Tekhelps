@@ -137,6 +137,7 @@ Partial Public Class AddinModule
         '
         Me.CopyAttachments.Caption = "Copy Attachments"
         Me.CopyAttachments.Id = "adxRibbonButton_e906c4b7b7734aa0bcf88b14b7ded48c"
+        Me.CopyAttachments.ImageMso = "AttachItem"
         Me.CopyAttachments.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.CopyAttachments.Ribbons = CType((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
