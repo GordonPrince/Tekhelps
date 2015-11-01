@@ -86,7 +86,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-1  15:15.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-1  17:30.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -582,10 +582,6 @@ AdxOutlookAppEvents1_Error:
         End If
     End Sub
 
-    'Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-    '    MsgBox("The AdxOutlookAppEvents1_NewInspector() event has occurred")
-    'End Sub
-
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
         Dim myInsp As Outlook.Inspector, myMailItem As Outlook.MailItem
         myInsp = inspector
@@ -620,6 +616,27 @@ AdxOutlookAppEvents1_Error:
             End If
         End If
         'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+    End Sub
+
+    Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
+        Const strTitle As String = "Copy Attachments from Another MailItem to This MailItem"
+        Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
+        intX = OutlookApp.Inspectors.Count
+        If intX > 1 Then
+            obj = OutlookApp.Inspectors(intX - 1).CurrentItem
+            If TypeOf obj Is Outlook.MailItem Then
+                myNew = obj
+                If myNew.SentOn > #1/1/2001# Then
+                    MsgBox("The most recently opened item has been sent.", vbExclamation, strTitle)
+                    Exit Sub
+                End If
+            End If
+        Else
+            MsgBox("Display two mail items, then click on this button from the new E-mail.", vbInformation, strTitle)
+            Exit Sub
+        End If
+        myNew = OutlookApp.ActiveInspector.CurrentItem
+
     End Sub
 End Class
 

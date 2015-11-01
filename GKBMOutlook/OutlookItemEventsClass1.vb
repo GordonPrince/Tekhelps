@@ -147,10 +147,15 @@ Public Class OutlookItemEventsClass1
                 Exit Sub
             End If
 HaveItem:
-            ' Debug.Print("myOriginal.Subject = " & myOriginal.Subject & ", myResponse.Subject = " & myResponse.Subject)
-            ' Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+            'Debug.Print("myOriginal.Subject = " & myOriginal.Subject & ", myResponse.Subject = " & myResponse.Subject)
+            'Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+            Dim str1 As String, str2 As String
+            str1 = myOriginal.Subject
+            str2 = myResponse.Subject
+            'Debug.Print("str1 = " & str1)
+            'Debug.Print("str2 = " & str2)
             ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
-            If Left(myResponse.Subject, Len(myOriginal.Subject)) = myOriginal.Subject Then
+            If InStr(str2, str1) Then
                 For Each myAttachment In myOriginal.Attachments
                     If Right(LCase(myAttachment.FileName), 4) = strMsg Then
                         strFileName = "C:\tmp\" & myAttachment.FileName

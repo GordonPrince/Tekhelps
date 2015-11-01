@@ -43,6 +43,8 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton2 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButtonSaveAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.CopyAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxRibbonSeparator1 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
         '
@@ -64,6 +66,8 @@ Partial Public Class AddinModule
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
+        Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator1)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton4)
         Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
         Me.AdxRibbonGroup1.ImageTransparentColor = System.Drawing.Color.Transparent
@@ -129,22 +133,45 @@ Partial Public Class AddinModule
     ""
         Me.AdxRibbonButton1.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
+        'CopyAttachments
+        '
+        Me.CopyAttachments.Caption = "Copy Attachments"
+        Me.CopyAttachments.Id = "adxRibbonButton_e906c4b7b7734aa0bcf88b14b7ded48c"
+        Me.CopyAttachments.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.CopyAttachments.Ribbons = CType((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
+        Me.CopyAttachments.ScreenTip = "Copy the attachments from another E-mail to this E-mail."
+        Me.CopyAttachments.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        '
+        'AdxRibbonSeparator1
+        '
+        Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ba414a646b9741d3a9839deaa0e8fba4"
+        Me.AdxRibbonSeparator1.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        '
         'AdxRibbonButton4
         '
         Me.AdxRibbonButton4.Caption = "About"
         Me.AdxRibbonButton4.Id = "adxRibbonButton_54403c6dbcd54328a298f2556650e611"
         Me.AdxRibbonButton4.ImageMso = "Help"
         Me.AdxRibbonButton4.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.AdxRibbonButton4.Ribbons = CType((((((((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+        Me.AdxRibbonButton4.Ribbons = CType((((((((((((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestSend) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookResponseRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookResponseCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookResponseCounterPropose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookSharingRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookSharingCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
@@ -169,6 +196,8 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonButton4 As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
     Private WithEvents AdxOutlookAppEvents1 As AddinExpress.MSO.ADXOutlookAppEvents
+    Friend WithEvents CopyAttachments As AddinExpress.MSO.ADXRibbonButton
+    Friend WithEvents AdxRibbonSeparator1 As AddinExpress.MSO.ADXRibbonSeparator
 
 End Class
 
