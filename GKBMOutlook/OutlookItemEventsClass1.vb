@@ -155,10 +155,13 @@ HaveItem:
                     If Right(LCase(myAttachment.FileName), 4) = strMsg Then
                         strFileName = "C:\tmp\" & myAttachment.FileName
                         myAttachment.SaveAsFile(strFileName)
-                        myNoteA = outlookApp.CreateItemFromTemplate(strFileName)
-                        myNoteA.Save()
-                        myResponse.Attachments.Add(myNoteA, 1, , Replace(myAttachment.FileName, strMsg, vbNullString))
-                        myNoteA.Delete()
+                        ' myNoteA = outlookApp.CreateItemFromTemplate(strFileName)
+                        ' myNoteA.Save()
+                        ' myResponse.Attachments.Add(myNoteA, 1, , Replace(myAttachment.FileName, strMsg, vbNullString))
+                        ' myNoteA.Delete()
+                        myResponse.Attachments.Add(strFileName)
+                        My.Computer.FileSystem.DeleteFile(strFileName)
+
                     End If
                 Next myAttachment
                 If myOriginal.Attachments.Count = 0 Then Stop
