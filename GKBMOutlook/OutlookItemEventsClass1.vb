@@ -128,13 +128,16 @@ Public Class OutlookItemEventsClass1
         Dim myUserProp As Outlook.UserProperty
 
         If TypeOf Response Is Outlook.MailItem Then
+
             myResponse = Response
             outlookApp = myResponse.Application
             For Each myInsp In outlookApp.Inspectors
                 myOriginal = myInsp.CurrentItem
                 If TypeOf myOriginal Is Outlook.MailItem Then
-                    ' Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
-                    If myResponse.Subject = "RE: " & myOriginal.Subject Then
+                    Debug.Print("myOriginal.Subject = " & myOriginal.Subject & ", myResponse.Subject = " & myResponse.Subject)
+                    Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+                    ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
+                    If Left(myResponse.Subject, Len(myOriginal.Subject)) = myOriginal.Subject Then
                         For Each myAttachment In myOriginal.Attachments
                             If Right(LCase(myAttachment.FileName), 4) = strMsg Then
                                 strFileName = "C:\tmp\" & myAttachment.FileName
