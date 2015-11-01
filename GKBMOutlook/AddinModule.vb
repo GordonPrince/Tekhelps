@@ -86,7 +86,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Oct-30  11:55.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-1  9:45.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -313,7 +313,6 @@ Link2Contacts_Exit:
         Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
         If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
             olTask = OutlookApp.ActiveInspector.CurrentItem
-            ' most users don't have permission to DELETE items from NewCallTracking
             olNew = olTask.Copy()
             With olNew
                 strSubject = .Subject
@@ -321,17 +320,23 @@ Link2Contacts_Exit:
                 .UserProperties("CallDate").Value = olTask.UserProperties("CallDate")
                 ' so opening the item doesn't prompt with the Locked by user message
                 .UserProperties("Locked").Value = vbNullString
+                ' TO-DO -- disable the code in the attached form, so double-clicking on the attachment doesn't try to run the form's code
+                ' The form's code throws error messages at open & close
+                ' because the code is trying to update the History of the item with date opened and closed
+                ' The error messages are confusing to the user.
 
-                ' once the item is saved, most users don't have permissions to MOVE it (deletes from NewCallTracking)
-                ' if it's not saved, the MOVE fails, but without an error message
-                .Save()
-                .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-                ' if it's moved without being saved, it copies to Drafts and leaves the new item in the current folder
-                .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
-                ' purge these nightly when update NewCallTracking program runs for OLAP/Analysis
-                .UserProperties("CallDate").Value = #2/2/2002#
-                ' this causes an error -- can't save item, it has been moved
+                ' if it's saved, and the user has Delete permission, only a Note about the item is attached (rather than a text copy of everything)
+                ' if it's not saved, the .Move command below leaves a copy in NCT
                 ' .Save()
+                Try
+                    ' most users don't have permissions to MOVE it (deletes from NewCallTracking)
+                    .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+                Catch
+                End Try
+                .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
+                ' purge these nightly when update NewCallTracking program runs for OLAP/Analysis (based on CallDate)
+                .UserProperties("CallDate").Value = #8/8/1988#
+                .Save()
             End With
             If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
                       "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then

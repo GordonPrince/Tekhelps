@@ -135,13 +135,19 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4.Id = "adxRibbonButton_54403c6dbcd54328a298f2556650e611"
         Me.AdxRibbonButton4.ImageMso = "Help"
         Me.AdxRibbonButton4.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.AdxRibbonButton4.Ribbons = CType((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+        Me.AdxRibbonButton4.Ribbons = CType((((((((((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestSend) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookResponseCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
