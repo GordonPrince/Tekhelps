@@ -349,10 +349,17 @@ Link2Contacts_Exit:
                 If TypeOf obj Is Outlook.MailItem Then
                     olDraft = obj
                     With olDraft
-                        .Subject = strSubject
-                        .BCC = "NewCallTracking@gkbm.com"
-                        .Display()
-                        Exit For
+                        ' Debug.Print(".Subject = " & .Subject)
+                        If .Subject = strSubject Then
+                            .BCC = "NewCallTracking@gkbm.com"
+                            ' delete the NCT item that's attached (as a result of the Move command)
+                            Dim myAttach As Outlook.Attachment
+                            For Each myAttach In olDraft.Attachments
+                                myAttach.Delete()
+                            Next
+                            .Display()
+                            Exit For
+                        End If
                     End With
                 End If
             Next
