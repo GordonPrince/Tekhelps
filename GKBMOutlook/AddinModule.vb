@@ -620,16 +620,42 @@ AdxOutlookAppEvents1_Error:
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
         Const strTitle As String = "Copy Attachments from Another MailItem to This MailItem"
+        Const strMsg As String = ".msg"
+        Dim myAttachment As Outlook.Attachment, strFileName As String
         Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
+
         intX = OutlookApp.Inspectors.Count
         If intX > 1 Then
-            obj = OutlookApp.Inspectors(intX - 1).CurrentItem
+            obj = OutlookApp.Inspectors(intX).CurrentItem
             If TypeOf obj Is Outlook.MailItem Then
                 myNew = obj
-                If myNew.SentOn > #1/1/2001# Then
+                If myNew.Sent Then
                     MsgBox("The most recently opened item has been sent.", vbExclamation, strTitle)
                     Exit Sub
                 End If
+            Else
+                MsgBox("This only works if the most recently opened item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
+                Exit Sub
+            End If
+            obj = OutlookApp.Inspectors(intX - 1).CurrentItem
+            If TypeOf obj Is Outlook.MailItem Then
+                myOther = obj
+                intX = myOther.Attachments.Count
+                If intX Then
+                    intX = 0
+                    For Each myAttachment In myOther.Attachments
+                        If Right(LCase(myAttachment.FileName), 4) = strMsg Then
+                            strFileName = "C:\tmp\" & myAttachment.FileName
+                            myAttachment.SaveAsFile(strFileName)
+                            myNew.Attachments.Add(strFileName)
+                            My.Computer.FileSystem.DeleteFile(strFileName)
+                            intX = intX + 1
+                        End If
+                    Next myAttachment
+                    MsgBox(IIf(intX = 1, "One attachment", intX & " attachments") & " were added to your new item.", vbInformation, strTitle)
+                End If
+            Else
+                MsgBox("The previously opened item does not have any attachments on it.", vbExclamation, strTitle)
             End If
         Else
             MsgBox("Display two mail items, then click on this button from the new E-mail.", vbInformation, strTitle)
