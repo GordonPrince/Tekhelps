@@ -119,6 +119,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
+        ' adds Outlook attachments from original message to Reply or ReplyApp
         Const strMsg As String = ".msg"
         Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem
@@ -132,7 +133,7 @@ Public Class OutlookItemEventsClass1
             For Each myInsp In outlookApp.Inspectors
                 myOriginal = myInsp.CurrentItem
                 If TypeOf myOriginal Is Outlook.MailItem Then
-                    Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+                    ' Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
                     If myResponse.Subject = "RE: " & myOriginal.Subject Then
                         For Each myAttachment In myOriginal.Attachments
                             If Right(LCase(myAttachment.FileName), 4) = strMsg Then
