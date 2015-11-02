@@ -22,7 +22,7 @@ Public Class OutlookItemsEventsClass1
     Const strPublicFolders As String = "Public Folders"
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
-        MsgBox("ItemAdd fired.")
+        ' MsgBox("ItemAdd fired.")
         Const strTitle As String = "Save Sent E-mail in InstantFile"
         Const strFolderName As String = "All Public Folders"
         Const strCommentID As String = "InstantFile CommentID "
@@ -170,6 +170,7 @@ InstantFileEmail:
 HaveInstantFileMailFolder:
         myCopy = myMailItem.Copy
         myMove = myCopy.Move(mFolder)  ' the myMove object has the new EntryID
+        ' MsgBox("A copy of the item was saved in the InstantFile Mail folder.", vbInformation, strTitle)
 
         ' make a comment in InstantFile about this email
         'With con
@@ -177,32 +178,137 @@ HaveInstantFileMailFolder:
         '    rst = .Execute("select staff_id from staff where staff_name = '" & Replace(Outlook.Session.CurrentUser, "'", "''") & "'") ' in case there's an apostrophe in the staff_name
         'End With
         ' Dim con As New ADODB.Connection, rst As ADODB.Recordset
-        Const strConnectionString As String = _
-            "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-            "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
+
+        '"Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=C:\Access\Access2010\GKBM\OutlookStubs.accdb;" & _
+        '"Mode=Share Deny None;Extended Properties="";" & _
+        '"Jet OLEDB:System database=C:\Users\Gordon\AppData\Roaming\Microsoft\Access\System.mdw;" & _
+        '"Jet OLEDB:Registry Path=Software\Microsoft\Office\14.0\Access\Access Connectivity Engine;" & _
+        '"Jet OLEDB:Database Password="";" & _
+        '"Jet OLEDB:Engine Type=6;" & _
+        '"Jet OLEDB:Database Locking Mode=1;" & _
+        '"Jet OLEDB:Global Partial Bulk Ops=2;Jet OLEDB:Global Bulk Transactions=1;" & _
+        '"Jet OLEDB:New Database Password="";Jet OLEDB:Create System Database=False;Jet OLEDB:Encrypt Database=False;" & _
+        '"Jet OLEDB:Don't Copy Locale on Compact=False;Jet OLEDB:Compact Without Replica Repair=False;" & _
+        '"Jet OLEDB:SFP=False;Jet OLEDB:Support Complex Data=True;Jet OLEDB:Bypass UserInfo Validation=False"
+        ' Const strConnectionString As String = _
+        ' "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
+        ' "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
+        Dim strConnectionString As String = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        '"App=GKBMOutlookAdd-in;Data Source=SQLserver;" & _
+        '"Database Password=""lahave$13"";" & _
+        '"Initial Catalog=InstantFile;"
         Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, myReader As SqlClient.SqlDataReader
-        Dim varInitials As String
+        Dim strInitials As String = Nothing
         con = New SqlClient.SqlConnection(strConnectionString)
         myCmd = con.CreateCommand
-        strScratch = "select staff_id from staff where staff_name = '" & Replace(appOutlook.Session.CurrentUser, "'", "''") & "'"
+        strScratch = "select staff_id from staff where staff_name = '" & Replace(appOutlook.Session.CurrentUser.Name, "'", "''") & "'"
         myCmd.CommandText = strScratch
         con.Open()
         myReader = myCmd.ExecuteReader()
-        varInitials = myReader.GetString(0)
-        If Len(varInitials) > 0 Then
+        Do While myReader.Read
+            strInitials = myReader.GetString(0)
+        Loop
+        myReader.Close()
+        con.Close()
+
+        If Len(strInitials) > 0 Then
         Else
-            MsgBox("Could not find your initals based on your Outlook user name." & vbNewLine & vbNewLine & _
-                        "Please tell Gordon this message appeared and have him make them the same.", vbExclamation, strTitle)
-            varInitials = InputBox("Enter your initials", strTitle, "ABC")
-            If Len(varInitials) > 0 Then
+            MsgBox("Could not find your initials based on your Outlook user name." & vbNewLine & vbNewLine & _
+                    "Please tell Gordon this message appeared and have him make them the same.", vbExclamation, strTitle)
+            strInitials = InputBox("Enter your initials", strTitle, "ABC")
+            If Len(strInitials) > 0 Then
             Else
-                MsgBox("No initials were entered. No comment about this email could be created.", vbExclamation, strTitle)
+                MsgBox("No initials were entered. No comment about this E-mail could be created.", vbExclamation, strTitle)
+                con.Close()
                 GoTo SentItems_Exit
             End If
         End If
-        myReader.Close()
 
-        MsgBox("A copy of the item was saved in the InstantFile Mail folder.", vbInformation, strTitle)
+        Dim lngX As Int16
+        With myMove
+            If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
+                ' update the Comment with the EntryID
+                lngX = InStr(1, .BillingInformation, strCommentID)
+                If lngX > 0 Then
+                    strSQL = Mid(.BillingInformation, Len(strCommentID))
+                    lngX = InStr(1, strSQL, ",")
+                    If lngX > 0 Then strSQL = Left(strSQL, lngX - 1)
+                    strSQL = Trim(strSQL)
+                    strScratch = "update Comment set EntryID = '" & .EntryID & "' where CommentID = " & CLng(strSQL)
+                    ' con.Execute(strScratch, lngX)
+                    myCmd.CommandText = strScratch
+                    con.Open()
+                    con.Close()
+                    If lngX <> 1 Then MsgBox("The InstantFile Comment was not updated properly with the email's EntryID.", vbExclamation, strTitle)
+                End If
+                ' update the Email with the EntryID
+                lngX = InStr(1, .BillingInformation, strDocNo)
+                If lngX > 0 Then
+                    strSQL = Mid(.BillingInformation, lngX + 1)
+                    strSQL = Trim(Mid(strSQL, Len(strDocNo)))
+                    strScratch = "update Email set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
+                    ' con.Execute(strScratch, lngX)
+                    myCmd.CommandText = strScratch
+                    con.Open()
+                    con.Close()
+                    If lngX <> 1 Then MsgBox("The InstantFile Document was not updated properly with the email's EntryID.", vbExclamation, strTitle)
+                End If
+                GoTo SentItems_Exit
+            ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
+                intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
+                If intA > 1 Then
+                    dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
+                Else
+                    GoTo Prompt4Matter
+                End If
+            ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
+                intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
+                If intA > 1 Then
+                    dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
+                Else
+                    GoTo Prompt4Matter
+                End If
+            ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
+            Else
+Prompt4Matter:
+                dblMatNo = InputBox("Enter the Matter # this email should be saved in.", strTitle)
+            End If
+
+            strBody = "email to "
+            For Each myRecipient In .Recipients
+                strBody = strBody & myRecipient.Name & "; "
+            Next myRecipient
+
+            If bScanned Then
+                strBody = strBody & strDocScanned
+                intA = InStr(Len(strDocScanned) + 1, .Body, "Author:")
+                If intA > 0 Then strBody = strBody & Trim(Mid(.Body, intA + 7))
+            Else
+                strBody = strBody & " -- " & myMove.Body
+            End If
+        End With
+
+        strBody = Replace(strBody, "Summary:", vbNullString)
+        Do While InStr(1, strBody, Chr(160))
+            strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
+        Loop
+        Do While InStr(1, strBody, vbNewLine & vbNewLine)
+            strBody = Replace(strBody, vbNewLine & vbNewLine, vbNewLine)
+        Loop
+
+        strSQL = "insert into comment (matter_no, author, summary, EntryID)" & _
+                      " values (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
+        'With con
+        '    If .State = 0 Then .Open(strConnectionString)
+        '    .Execute strSQL
+        '    .Close()
+        'End With
+        myCmd.CommandText = strSQL
+        con.Open()
+        con.Close()
+
+        MsgBox("A comment about the email you sent was created in InstantFile" & vbNewLine & _
+                     "(and a copy of the email was saved with the Comment).", vbInformation, strTitle)
 
 SentItems_Exit:
         Exit Sub
