@@ -193,19 +193,13 @@ HaveInstantFileMailFolder:
         ' Const strConnectionString As String = _
         ' "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
         ' "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
-        Dim strConnectionString As String
-        If My.Computer.Name = "TEKHELPS7X64" Then
-            strConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
-        Else
-            strConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
-        End If
 
         '"App=GKBMOutlookAdd-in;Data Source=SQLserver;" & _
         '"Database Password=""lahave$13"";" & _
         '"Initial Catalog=InstantFile;"
         Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, myReader As SqlClient.SqlDataReader
         Dim strInitials As String = Nothing
-        con = New SqlClient.SqlConnection(strConnectionString)
+        con = New SqlClient.SqlConnection(SQLConnectionString)
         myCmd = con.CreateCommand
         strScratch = "select staff_id from staff where staff_name = '" & Replace(appOutlook.Session.CurrentUser.Name, "'", "''") & "'"
         myCmd.CommandText = strScratch
@@ -242,9 +236,7 @@ HaveInstantFileMailFolder:
                     strSQL = Trim(strSQL)
                     strScratch = "update Comment set EntryID = '" & .EntryID & "' where CommentID = " & CLng(strSQL)
                     ' con.Execute(strScratch, lngX)
-                    myCmd.CommandText = strScratch
-                    con.Open()
-                    con.Close()
+                    RunSQLcommand(strScratch)
                     If lngX <> 1 Then MsgBox("The InstantFile Comment was not updated properly with the email's EntryID.", vbExclamation, strTitle)
                 End If
                 ' update the Email with the EntryID
@@ -254,9 +246,7 @@ HaveInstantFileMailFolder:
                     strSQL = Trim(Mid(strSQL, Len(strDocNo)))
                     strScratch = "update Email set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
                     ' con.Execute(strScratch, lngX)
-                    myCmd.CommandText = strScratch
-                    con.Open()
-                    con.Close()
+                    RunSQLcommand(strScratch)
                     If lngX <> 1 Then MsgBox("The InstantFile Document was not updated properly with the email's EntryID.", vbExclamation, strTitle)
                 End If
                 GoTo SentItems_Exit
@@ -304,10 +294,7 @@ Prompt4Matter:
 
         strSQL = "insert into comment (matter_no, author, summary, EntryID)" & _
                 " values (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
-        myCmd.CommandText = strSQL
-        con.Open()
-        myCmd.ExecuteNonQuery()
-        con.Close()
+        RunSQLcommand(strSQL)
 
         MsgBox("A comment about the email you sent was created in InstantFile" & vbNewLine & _
                 "(and a copy of the email was saved with the Comment).", vbInformation, strTitle)
@@ -322,7 +309,25 @@ SentItems_Error:
         End If
         GoTo SentItems_Exit
     End Sub
- 
+
+    Public Sub RunSQLcommand(ByVal queryString As String)
+        Dim strConnectionString As String = SQLConnectionString()
+        Dim con As New SqlClient.SqlConnection(strConnectionString)
+        Dim cmd As New SqlClient.SqlCommand(queryString, con)
+        ' Using con As New SqlClient.SqlConnection(strConnectionString)
+        cmd.Connection.Open()
+        cmd.ExecuteNonQuery()
+        ' End Using
+        con.Close()
+    End Sub
+
+    Public Function SQLConnectionString() As String
+        If My.Computer.Name = "TEKHELPS7X64" Then
+            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        Else
+            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=SQLserver;Integrated Security=SSPI;")
+        End If
+    End Function
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
         'TODO: Add some code
     End Sub
