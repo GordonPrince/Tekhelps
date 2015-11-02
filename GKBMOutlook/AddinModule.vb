@@ -662,7 +662,7 @@ AdxOutlookAppEvents1_Error:
                                         intZ = intZ + 1
                                     End If
                                 Next myAttachment
-                                MsgBox(IIf(intZ = 1, "One attachment", intZ & " attachments") & " were added to your new item.", vbInformation, strTitle)
+                                MsgBox(IIf(intZ = 1, "One attachment was", intZ & " attachments were") & " added to your new item.", vbInformation, strTitle)
                                 Exit Sub
                             End If
                         End If

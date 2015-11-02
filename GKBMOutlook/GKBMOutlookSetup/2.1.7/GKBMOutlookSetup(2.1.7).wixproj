@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.5</ProductVersion>
-    <ProjectGuid>{56d151fa-8127-4416-b066-97c121704638}</ProjectGuid>
+    <ProjectGuid>{3ec146f1-33de-4a3c-bb14-04ad4d44a878}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>GKBMOutlookSetup(2.1.7)</OutputName>
     <OutputType>Package</OutputType>
