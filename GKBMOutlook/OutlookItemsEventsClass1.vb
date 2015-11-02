@@ -193,7 +193,13 @@ HaveInstantFileMailFolder:
         ' Const strConnectionString As String = _
         ' "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
         ' "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
-        Dim strConnectionString As String = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        Dim strConnectionString As String
+        If My.Computer.Name = "TEKHELPS7X64" Then
+            strConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        Else
+            strConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        End If
+
         '"App=GKBMOutlookAdd-in;Data Source=SQLserver;" & _
         '"Database Password=""lahave$13"";" & _
         '"Initial Catalog=InstantFile;"
@@ -297,18 +303,14 @@ Prompt4Matter:
         Loop
 
         strSQL = "insert into comment (matter_no, author, summary, EntryID)" & _
-                      " values (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
-        'With con
-        '    If .State = 0 Then .Open(strConnectionString)
-        '    .Execute strSQL
-        '    .Close()
-        'End With
+                " values (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
         myCmd.CommandText = strSQL
         con.Open()
+        myCmd.ExecuteNonQuery()
         con.Close()
 
         MsgBox("A comment about the email you sent was created in InstantFile" & vbNewLine & _
-                     "(and a copy of the email was saved with the Comment).", vbInformation, strTitle)
+                "(and a copy of the email was saved with the Comment).", vbInformation, strTitle)
 
 SentItems_Exit:
         Exit Sub
