@@ -58,11 +58,11 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessReply(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        'ReplyOrReplyAll(Response, "Reply")
+        ReplyOrReplyAll(Response, "Reply")
     End Sub
 
     Public Overrides Sub ProcessReplyAll(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        'ReplyOrReplyAll(Response, "ReplyAll")
+        ReplyOrReplyAll(Response, "ReplyAll")
     End Sub
 
     Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -90,12 +90,12 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        'Dim myAttachment As Microsoft.Office.Interop.Outlook.Attachment
-        'myAttachment = attachment
-        'If Left(myAttachment.DisplayName, 12) = "InstantFile_" Then
-        '    MsgBox("This will open " & myAttachment.DisplayName & " instead of displaying the Note.")
-        '    e.Cancel = True
-        'End If
+        Dim myAttachment As Microsoft.Office.Interop.Outlook.Attachment
+        myAttachment = attachment
+        If Left(myAttachment.DisplayName, 12) = "InstantFile_" Then
+            MsgBox("This will open " & myAttachment.DisplayName & " instead of displaying the Note.")
+            e.Cancel = True
+        End If
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)

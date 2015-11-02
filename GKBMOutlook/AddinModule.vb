@@ -311,7 +311,7 @@ LinkContacts:
             ' link 2 to 1
             myCont2.Links.Add(myCont1)
             myCont2.Save()
-            MsgBox("The two Contacts were successfully linked to each other", vbInformation, strTitle)
+            MsgBox("The two Contacts were successfully linked to each other.", vbInformation, strTitle)
         End If
 
 Link2Contacts_Exit:
