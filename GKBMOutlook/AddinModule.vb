@@ -623,46 +623,57 @@ AdxOutlookAppEvents1_Error:
         Const strMsg As String = ".msg"
         Dim myAttachment As Outlook.Attachment, strFileName As String
         Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
+        Dim intY As Int16, intZ As Int16
 
         intX = OutlookApp.Inspectors.Count
         If intX > 1 Then
-            obj = OutlookApp.Inspectors(intX).CurrentItem
+            obj = OutlookApp.ActiveInspector.CurrentItem
             If TypeOf obj Is Outlook.MailItem Then
                 myNew = obj
                 If myNew.Sent Then
-                    MsgBox("The most recently opened item has been sent.", vbExclamation, strTitle)
+                    MsgBox("This item has already been sent." & vbNewLine & vbNewLine & _
+                           "Display the new E-mail and try again when it has the focus.", vbExclamation, strTitle)
                     Exit Sub
                 End If
             Else
-                MsgBox("This only works if the most recently opened item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
+                MsgBox("This only works if the active item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
                 Exit Sub
             End If
-            obj = OutlookApp.Inspectors(intX - 1).CurrentItem
-            If TypeOf obj Is Outlook.MailItem Then
-                myOther = obj
-                intX = myOther.Attachments.Count
-                If intX Then
-                    intX = 0
-                    For Each myAttachment In myOther.Attachments
-                        If Right(LCase(myAttachment.FileName), 4) = strMsg Then
-                            strFileName = "C:\tmp\" & myAttachment.FileName
-                            myAttachment.SaveAsFile(strFileName)
-                            myNew.Attachments.Add(strFileName)
-                            My.Computer.FileSystem.DeleteFile(strFileName)
-                            intX = intX + 1
+            ' step through the other open items, looking for MailItems with Attachments
+            For intY = intX To 1 Step -1
+                obj = OutlookApp.Inspectors(intY).CurrentItem
+                If TypeOf obj Is Outlook.MailItem Then
+                    myOther = obj
+                    If myOther.EntryID = myNew.EntryID Then
+                    Else
+                        intZ = myOther.Attachments.Count
+                        If intZ Then
+                            RetVal = MsgBox("Copy the Attachments from the MailItem" & vbNewLine & _
+                                            "'" & myOther.Subject & "'?", vbQuestion + vbYesNoCancel, strTitle)
+                            If RetVal = vbCancel Then Exit Sub
+                            If RetVal = vbYes Then
+                                intZ = 0
+                                For Each myAttachment In myOther.Attachments
+                                    If Right(LCase(myAttachment.FileName), 4) = strMsg Then
+                                        strFileName = "C:\tmp\" & myAttachment.FileName
+                                        myAttachment.SaveAsFile(strFileName)
+                                        myNew.Attachments.Add(strFileName)
+                                        My.Computer.FileSystem.DeleteFile(strFileName)
+                                        intZ = intZ + 1
+                                    End If
+                                Next myAttachment
+                                MsgBox(IIf(intZ = 1, "One attachment", intZ & " attachments") & " were added to your new item.", vbInformation, strTitle)
+                                Exit Sub
+                            End If
                         End If
-                    Next myAttachment
-                    MsgBox(IIf(intX = 1, "One attachment", intX & " attachments") & " were added to your new item.", vbInformation, strTitle)
+                    End If
                 End If
-            Else
-                MsgBox("The previously opened item does not have any attachments on it.", vbExclamation, strTitle)
-            End If
+            Next
+            MsgBox("No other MailItems with Attachments were found.", vbExclamation, strTitle)
         Else
-            MsgBox("Display two mail items, then click on this button from the new E-mail.", vbInformation, strTitle)
+            MsgBox("Display the MailItem that has the Attachments on it," & vbNewLine & "then click on this button from the new E-mail.", vbInformation, strTitle)
             Exit Sub
         End If
-        myNew = OutlookApp.ActiveInspector.CurrentItem
-
     End Sub
 End Class
 
