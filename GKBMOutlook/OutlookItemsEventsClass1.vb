@@ -28,18 +28,13 @@ Public Class OutlookItemsEventsClass1
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
 
-        Const strConnectionString As String = _
-            "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-            "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
 
         Dim pFolder As Outlook.MAPIFolder, aFolder As Outlook.MAPIFolder, mFolder As Outlook.MAPIFolder
         Dim myMailItem As Outlook.MailItem, myCopy As Outlook.MailItem, myMove As Outlook.MailItem
         Dim myAttachment As Outlook.Attachment
         Dim myRecipient As Outlook.Recipient
         Dim strSQL As String, strBody As String
-        ' Dim con As New ADODB.Connection, rst As ADODB.Recordset
-        Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, rst As SqlClient.SqlDataReader
-        Dim varInitials As Object
+
         Dim dblMatNo As Double, intA As Integer, intB As Integer, lngDocNo As Long
         Dim bScanned As Boolean, myUserProp As Outlook.UserProperty
 
@@ -181,23 +176,32 @@ HaveInstantFileMailFolder:
         '    If .State = 0 Then .Open(strConnectionString)
         '    rst = .Execute("select staff_id from staff where staff_name = '" & Replace(Outlook.Session.CurrentUser, "'", "''") & "'") ' in case there's an apostrophe in the staff_name
         'End With
+        ' Dim con As New ADODB.Connection, rst As ADODB.Recordset
+        Const strConnectionString As String = _
+            "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
+            "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
+        Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, myReader As SqlClient.SqlDataReader
+        Dim varInitials As String
+        con = New SqlClient.SqlConnection(strConnectionString)
+        myCmd = con.CreateCommand
+        strScratch = "select staff_id from staff where staff_name = '" & Replace(appOutlook.Session.CurrentUser, "'", "''") & "'"
+        myCmd.CommandText = strScratch
+        con.Open()
+        myReader = myCmd.ExecuteReader()
+        varInitials = myReader.GetString(0)
+        If Len(varInitials) > 0 Then
+        Else
+            MsgBox("Could not find your initals based on your Outlook user name." & vbNewLine & vbNewLine & _
+                        "Please tell Gordon this message appeared and have him make them the same.", vbExclamation, strTitle)
+            varInitials = InputBox("Enter your initials", strTitle, "ABC")
+            If Len(varInitials) > 0 Then
+            Else
+                MsgBox("No initials were entered. No comment about this email could be created.", vbExclamation, strTitle)
+                GoTo SentItems_Exit
+            End If
+        End If
+        myReader.Close()
 
-        'With rst
-        '    If .EOF Then
-        '        MsgBox("Could not find your initals based on your Outlook user name." & vbNewLine & vbNewLine & _
-        '                    "Please tell Gordon this message appeared and have him make them the same.", vbExclamation, strTitle)
-        '        varInitials = InputBox("Enter your initials", strTitle, "ABC")
-        '        If Len(varInitials) > 0 Then
-        '        Else
-        '            MsgBox("No initials were entered. No comment about this email could be created.", vbExclamation, strTitle)
-        '            GoTo SentItems_Exit
-        '        End If
-        '    Else
-        '        varInitials = .Fields("staff_id")
-        '    End If
-        '    .Close()
-        'End With
-        'rst = Nothing
         MsgBox("A copy of the item was saved in the InstantFile Mail folder.", vbInformation, strTitle)
 
 SentItems_Exit:
