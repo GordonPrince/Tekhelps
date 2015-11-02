@@ -198,6 +198,7 @@ HaveInstantFileMailFolder:
         '    .Close()
         'End With
         'rst = Nothing
+        MsgBox("A copy of the item was saved in the InstantFile Mail folder.", vbInformation, strTitle)
 
 SentItems_Exit:
         Exit Sub
