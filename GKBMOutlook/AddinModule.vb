@@ -629,7 +629,7 @@ AdxOutlookAppEvents1_Error:
     End Sub
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
-        Const strTitle As String = "Copy Attachments from Another MailItem to This MailItem"
+        Const strTitle As String = "Copy Attachments from Another MailItem"
         Const strMsg As String = ".msg"
         Dim myAttachment As Outlook.Attachment, strFileName As String
         Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
