@@ -81,6 +81,7 @@
     <Compile Include="GKBMOutlook.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="OutlookItemEventsClass1.vb" />
+    <Compile Include="OutlookItemsEventsClass1.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AddinModule.resx">

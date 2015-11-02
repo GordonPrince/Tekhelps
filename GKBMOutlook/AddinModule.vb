@@ -77,6 +77,7 @@ Public Class AddinModule
 
     Private Sub AddinModule_AddinStartupComplete(sender As System.Object, e As System.EventArgs) Handles MyBase.AddinStartupComplete
         itemEvents = New OutlookItemEventsClass1(Me)
+        ItemsEvents.ConnectTo(AddinExpress.MSO.ADXOlDefaultFolders.olFolderSentMail, True)
     End Sub
 
 #End Region
@@ -86,7 +87,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-2  5:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-2  6:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -675,5 +676,18 @@ AdxOutlookAppEvents1_Error:
             Exit Sub
         End If
     End Sub
+
+    Dim ItemsEvents As OutlookItemsEventsClass1 = New OutlookItemsEventsClass1(Me)
+
+    Private Sub AddinModule_AddinBeginShutdown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.AddinBeginShutdown
+        If ItemsEvents IsNot Nothing Then
+            ItemsEvents.RemoveConnection()
+            ItemsEvents = Nothing
+        End If
+    End Sub
+    'Private Sub AddinModule_AddinStartupComplete(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.AddinStartupComplete
+    '    ItemsEvents.ConnectTo(AddinExpress.MSO.ADXOlDefaultFolders.olFolderInbox, True)
+    'End Sub
+
 End Class
 
