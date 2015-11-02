@@ -8,11 +8,10 @@ Public Class OutlookItemsEventsClass1
  
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
- 
     End Sub
  
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
-        MsgBox("ItemAdd fired.")
+        ' MsgBox("ItemAdd fired.")
     End Sub
  
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)

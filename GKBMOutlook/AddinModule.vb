@@ -11,31 +11,11 @@ Imports Access = Microsoft.Office.Interop.Access
 Public Class AddinModule
     Inherits AddinExpress.MSO.ADXAddinModule
 
-#Region "Tekhelps definitions"
-    Const strPublicFolders As String = "Public Folders"
-    Const strInstantFile As String = "InstantFile"
-    Const strIFmatNo As String = "InstantFile_MatNo_"
-    Const strIFdocNo As String = "InstantFile_DocNo_"
-    Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-    Const strIFtaskTag As String = "InstantFile_Task"
-    Const strNewCallAppointmentTag As String = "NewCall Appointment"
-    Const strConnectionString As String = "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-                                          "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
-    Public strPublicStoreID As String
-    Public WithEvents myInspectors As Outlook.Inspectors
-    Public WithEvents myInsp As Outlook.Inspector
-    Public WithEvents myMailItem As Outlook.MailItem
-    Public WithEvents myInboxItems As Outlook.Items
-    Public WithEvents mySentItems As Outlook.Items
-    Public WithEvents myTaskItems As Outlook.Items
-    Public WithEvents olInstantFileInbox As Outlook.Items
-    Public WithEvents olInstantFileTasks As Outlook.Items
-    Dim RetVal As VariantType
-    Dim strScratch As String, lngX As Long
-    Dim intExchangeConnectionMode As Integer
-#End Region
 
 #Region " Add-in Express automatic code "
+
+    Dim itemEvents As OutlookItemEventsClass1 = New OutlookItemEventsClass1(Me)
+    Dim ItemsEvents As OutlookItemsEventsClass1 = New OutlookItemsEventsClass1(Me)
 
     'Required by Add-in Express - do not modify
     'the methods within this region
@@ -61,8 +41,6 @@ Public Class AddinModule
         MyBase.UninstallControls()
     End Sub
 
-    Private itemEvents As OutlookItemEventsClass1 = Nothing
-
     Public Shared Shadows ReadOnly Property CurrentInstance() As AddinModule
         Get
             Return CType(AddinExpress.MSO.ADXAddinModule.CurrentInstance, AddinModule)
@@ -80,6 +58,37 @@ Public Class AddinModule
         ItemsEvents.ConnectTo(AddinExpress.MSO.ADXOlDefaultFolders.olFolderSentMail, True)
     End Sub
 
+    Private Sub AddinModule_AddinBeginShutdown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.AddinBeginShutdown
+        If ItemsEvents IsNot Nothing Then
+            ItemsEvents.RemoveConnection()
+            ItemsEvents = Nothing
+        End If
+    End Sub
+
+#End Region
+
+#Region "Tekhelps definitions"
+    Const strPublicFolders As String = "Public Folders"
+    Const strInstantFile As String = "InstantFile"
+    Const strIFmatNo As String = "InstantFile_MatNo_"
+    Const strIFdocNo As String = "InstantFile_DocNo_"
+    Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+    Const strIFtaskTag As String = "InstantFile_Task"
+    Const strNewCallAppointmentTag As String = "NewCall Appointment"
+    Const strConnectionString As String = "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
+                                          "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
+    Public strPublicStoreID As String
+    Public WithEvents myInspectors As Outlook.Inspectors
+    Public WithEvents myInsp As Outlook.Inspector
+    Public WithEvents myMailItem As Outlook.MailItem
+    Public WithEvents myInboxItems As Outlook.Items
+    Public WithEvents mySentItems As Outlook.Items
+    Public WithEvents myTaskItems As Outlook.Items
+    Public WithEvents olInstantFileInbox As Outlook.Items
+    Public WithEvents olInstantFileTasks As Outlook.Items
+    Dim RetVal As VariantType
+    Dim strScratch As String, lngX As Long
+    Dim intExchangeConnectionMode As Integer
 #End Region
 
     Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
@@ -87,7 +96,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-2  6:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-2  7:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -676,18 +685,6 @@ AdxOutlookAppEvents1_Error:
             Exit Sub
         End If
     End Sub
-
-    Dim ItemsEvents As OutlookItemsEventsClass1 = New OutlookItemsEventsClass1(Me)
-
-    Private Sub AddinModule_AddinBeginShutdown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.AddinBeginShutdown
-        If ItemsEvents IsNot Nothing Then
-            ItemsEvents.RemoveConnection()
-            ItemsEvents = Nothing
-        End If
-    End Sub
-    'Private Sub AddinModule_AddinStartupComplete(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.AddinStartupComplete
-    '    ItemsEvents.ConnectTo(AddinExpress.MSO.ADXOlDefaultFolders.olFolderInbox, True)
-    'End Sub
 
 End Class
 
