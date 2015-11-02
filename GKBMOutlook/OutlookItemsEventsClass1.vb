@@ -26,8 +26,9 @@ Public Class OutlookItemsEventsClass1
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
 
-        Const strConnectionString As String = "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-                                            "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
+        Const strConnectionString As String = _
+            "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
+            "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
 
         Dim pFolder As Outlook.MAPIFolder, aFolder As Outlook.MAPIFolder, mFolder As Outlook.MAPIFolder
         Dim myMailItem As Outlook.MailItem, myCopy As Outlook.MailItem, myMove As Outlook.MailItem
@@ -77,10 +78,8 @@ Public Class OutlookItemsEventsClass1
             GoTo InstantFileEmail
         Else
             ' if this is InstantFile related email then add it to InstantFile (unless it originated in InstantFile)
-            'If Environ("username") = "Gordon" Then
-            'Else
             For Each myAttachment In myMailItem.Attachments
-                If myAttachment.Application = "Outlook" And myAttachment.Class = 5 Then
+                If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
                     dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
                     If dblMatNo > 0 Then
 Prompt2Save:
@@ -107,7 +106,8 @@ Prompt2Save:
             'End If
             ' if no Note attachment had the MatterNo on it, try to determine the MatterNo from the DocNo that's attached
             For Each myAttachment In myMailItem.Attachments
-                If myAttachment.Application = "Outlook" And myAttachment.Class = 5 Then
+                ' If myAttachment.Application = "Outlook" And myAttachment.Class = 5 Then
+                If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
                     strScratch = myAttachment.DisplayName
                     ' added 10/25/2010
                     If strScratch = "NewCall Tracking Item" Then
@@ -119,24 +119,26 @@ Prompt2Save:
                             On Error GoTo SentItems_Error
                         End If
                         If lngDocNo > 0 Then
-                            With con
-                                .Open(strConnectionString)
-                                rst = .Execute("sp_MatNo4DocNo " & lngDocNo)
-                            End With
-                            With rst
-                                If .EOF Then
-                                    MsgBox("Could not find MatterNo for DocNo=" & lngDocNo & "." & vbNewLine & vbNewLine & _
-                                            "Please forward the email you just sent to Gordon" & vbNewLine & _
-                                            "and type 'Could not find MatterNo for DocNo' as the message body.", vbExclamation, strTitle)
-                                Else
-                                    dblMatNo = .Fields("matter_no")
-                                End If
-                                .Close()
-                            End With
-                            rst = Nothing
+                            MsgBox("lngDocNo = " & lngDocNo)
+
+                            '    With con
+                            '        .Open(strConnectionString)
+                            '        rst = .Execute("sp_MatNo4DocNo " & lngDocNo)
+                            '    End With
+                            '    With rst
+                            '        If .EOF Then
+                            '            MsgBox("Could not find MatterNo for DocNo=" & lngDocNo & "." & vbNewLine & vbNewLine & _
+                            '                    "Please forward the email you just sent to Gordon" & vbNewLine & _
+                            '                    "and type 'Could not find MatterNo for DocNo' as the message body.", vbExclamation, strTitle)
+                            '        Else
+                            '            dblMatNo = .Fields("matter_no")
+                            '        End If
+                            '        .Close()
+                            '    End With
+                            '    rst = Nothing
                         End If
-                        ' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
-                        GoTo Prompt2Save
+                        '' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
+                        'GoTo Prompt2Save
                     End If
                 End If
             Next
