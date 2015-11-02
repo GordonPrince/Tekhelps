@@ -593,36 +593,16 @@ AdxOutlookAppEvents1_Error:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        Dim myInsp As Outlook.Inspector, myMailItem As Outlook.MailItem
-        myInsp = inspector
-        'Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
+        Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
+        Dim outlookItem As Object = myInsp.CurrentItem
+        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
-            myMailItem = myInsp.CurrentItem
+            Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
             If myMailItem.Sent Then
-                'Debug.WriteLine("myMailItem.Sent = " & myMailItem.Sent)
-                'MsgBox("myMailItem.Sent = " & myMailItem.Sent)
-                'Debug.WriteLine("after MsgBox(myMailItem.Sent = " & myMailItem.Sent & ")")
-                Dim theInspector As Outlook.Inspector = TryCast(inspector, Outlook.Inspector)
-
-                If theInspector IsNot Nothing Then
-                    'Debug.Print("theInspector IsNot Nothing")
-                    Dim selection As Outlook.Selection = Nothing
-                    Try
-                        selection = theInspector.Application.ActiveExplorer.Selection
-                    Catch
-                    End Try
-
-                    If selection IsNot Nothing Then
-                        'Debug.Print("selection IsNot Nothing")
-                        ConnectToSelectedItem(selection)
-                        'Debug.Print("ConnectToSelectedItem(selection) finished")
-                        Marshal.ReleaseComObject(selection)
-                    Else
-                        'Debug.Print("selection is Nothing")
-                    End If
-                Else
-                    'Debug.Print("theInspector Is Nothing")
-                End If
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of myMailItem 
+                itemEvents.ConnectTo(myMailItem, True)
             End If
         End If
         'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
