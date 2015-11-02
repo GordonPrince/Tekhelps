@@ -3,6 +3,7 @@ Imports System.Windows.Forms
 Imports AddinExpress.MSO
 Imports System.Diagnostics
 Imports Microsoft.Office.Interop
+Imports System.Runtime.InteropServices
 Imports System.Data
 
 'Add-in Express Outlook Items Events Class
@@ -18,6 +19,7 @@ Public Class OutlookItemsEventsClass1
     Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
     Const strIFmatNo As String = "InstantFile_MatNo_"
     Const strIFdocNo As String = "InstantFile_DocNo_"
+    Const strPublicFolders As String = "Public Folders"
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
         MsgBox("ItemAdd fired.")
@@ -40,7 +42,14 @@ Public Class OutlookItemsEventsClass1
         Dim varInitials As Object
         Dim dblMatNo As Double, intA As Integer, intB As Integer, lngDocNo As Long
         Dim bScanned As Boolean, myUserProp As Outlook.UserProperty
+
         Static strLastID As String
+
+        Dim appOutlook As Outlook.Application = Nothing
+        If TypeOf Item Is Outlook.MailItem Then
+            myMailItem = Item
+            appOutlook = myMailItem.Application
+        End If
 
         If TypeName(Item) = "MailItem" Then
             If Left(Item.Subject, 13) = "Task Request:" _
@@ -119,8 +128,6 @@ Prompt2Save:
                             On Error GoTo SentItems_Error
                         End If
                         If lngDocNo > 0 Then
-                            MsgBox("lngDocNo = " & lngDocNo)
-
                             '    With con
                             '        .Open(strConnectionString)
                             '        rst = .Execute("sp_MatNo4DocNo " & lngDocNo)
@@ -137,19 +144,60 @@ Prompt2Save:
                             '    End With
                             '    rst = Nothing
                         End If
-                        '' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
-                        'GoTo Prompt2Save
+                        ' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
+                        ' GoTo Prompt2Save
                     End If
                 End If
             Next
         End If
 
 DontAdd2InstantFile:
-        ' if you get here there either aren't any attachments or it's not an Import2InstantFile document that's attached or it's the attachment is a NewCallTracking note
+        ' if you get here there either aren't any attachments 
+        ' or it's not an Import2InstantFile document that's attached 
+        ' or the attachment is a NewCallTracking note
         Exit Sub
 
 InstantFileEmail:
+        For Each pFolder In appOutlook.Session.Folders
+            If Left(pFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                For Each aFolder In pFolder.Folders
+                    If aFolder.Name = "All Public Folders" Then
+                        For Each mFolder In aFolder.Folders
+                            If mFolder.Name = "InstantFile Mail" Then GoTo HaveInstantFileMailFolder
+                        Next
+                    End If
+                Next
+            End If
+        Next
+        MsgBox("Could not find the folder 'InstantFile Mail'", vbExclamation, strTitle)
+        Exit Sub
 
+HaveInstantFileMailFolder:
+        myCopy = myMailItem.Copy
+        myMove = myCopy.Move(mFolder)  ' the myMove object has the new EntryID
+
+        ' make a comment in InstantFile about this email
+        'With con
+        '    If .State = 0 Then .Open(strConnectionString)
+        '    rst = .Execute("select staff_id from staff where staff_name = '" & Replace(Outlook.Session.CurrentUser, "'", "''") & "'") ' in case there's an apostrophe in the staff_name
+        'End With
+
+        'With rst
+        '    If .EOF Then
+        '        MsgBox("Could not find your initals based on your Outlook user name." & vbNewLine & vbNewLine & _
+        '                    "Please tell Gordon this message appeared and have him make them the same.", vbExclamation, strTitle)
+        '        varInitials = InputBox("Enter your initials", strTitle, "ABC")
+        '        If Len(varInitials) > 0 Then
+        '        Else
+        '            MsgBox("No initials were entered. No comment about this email could be created.", vbExclamation, strTitle)
+        '            GoTo SentItems_Exit
+        '        End If
+        '    Else
+        '        varInitials = .Fields("staff_id")
+        '    End If
+        '    .Close()
+        'End With
+        'rst = Nothing
 
 SentItems_Exit:
         Exit Sub
@@ -201,7 +249,7 @@ EmailMatNo_Error:
     Function MatNoFromSubject(ByVal strSubject) As Double
         ' try to parse the MatterNo from the Subject line, not the attachment
         Dim intA As Integer, intB As Integer
-        Dim strSearchFor As String
+        Dim strSearchFor As String = vbNullString
 
         ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
         intA = InStr(1, strSubject, strDocScanned)

@@ -75,8 +75,6 @@ Public Class AddinModule
     Const strNewCallTrackingTag As String = "NewCall Tracking Item"
     Const strIFtaskTag As String = "InstantFile_Task"
     Const strNewCallAppointmentTag As String = "NewCall Appointment"
-    Const strConnectionString As String = "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-                                          "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
     Public strPublicStoreID As String
     Public WithEvents myInspectors As Outlook.Inspectors
     Public WithEvents myInsp As Outlook.Inspector
