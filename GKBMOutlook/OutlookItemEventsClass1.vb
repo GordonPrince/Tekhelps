@@ -88,7 +88,7 @@ Public Class OutlookItemEventsClass1
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
         ' adds Outlook attachments from original message to Reply or ReplyApp
         Const strMsg As String = ".msg"
-        Dim myResponse As Outlook.MailItem
+        Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem = Nothing
         Dim myAttachment As Outlook.Attachment, strFileName As String
         ' Dim myNoteA As Outlook.NoteItem
@@ -96,51 +96,51 @@ Public Class OutlookItemEventsClass1
 
         If TypeOf Response Is Outlook.MailItem Then
             myResponse = Response
-        Else
-            Exit Sub
-        End If
-        ' this seems to be cleared without me having intervened -- maybe Reply is different from Forward
-        ' But it had to be cleared when Forwarding an email
-        If Len(myResponse.BillingInformation) > 0 Then
-            Debug.Print("ReplyOrReplyAll() myResponse.BillingInformation = " & myResponse.BillingInformation)
-            myResponse.BillingInformation = vbNullString
-        End If
-
-        Dim outlookApp As Outlook.Application = myResponse.Application
-        If outlookApp.Inspectors.Count = 0 Then
-            ' the user hit Reply from the Explorer window -- there's not item open in an Inspector window
-            myOriginal = outlookApp.ActiveExplorer.Selection.Item(1)
-            GoTo HaveItem
-        Else
-            For Each myInsp In outlookApp.Inspectors
-                myOriginal = myInsp.CurrentItem
-                If TypeOf myOriginal Is Outlook.MailItem Then
-                    GoTo HaveItem
-                End If
-            Next
-        End If
+            outlookApp = myResponse.Application
+            If outlookApp.Inspectors.Count = 0 Then
+                ' the user hit Reply from the Explorer window -- there's not item open in an Inspector window
+                myOriginal = outlookApp.ActiveExplorer.Selection.Item(1)
+                GoTo HaveItem
+            Else
+                For Each myInsp In outlookApp.Inspectors
+                    myOriginal = myInsp.CurrentItem
+                    If TypeOf myOriginal Is Outlook.MailItem Then
+                        GoTo HaveItem
+                    End If
+                Next
+            End If
+            If myOriginal Is Nothing Then
+                MsgBox("myOriginal is nothing")
+                Exit Sub
+            End If
 HaveItem:
-        'Debug.Print("myOriginal.Subject = " & myOriginal.Subject & ", myResponse.Subject = " & myResponse.Subject)
-        'Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
-        Dim str1 As String, str2 As String
-        str1 = myOriginal.Subject
-        str2 = myResponse.Subject
-        'Debug.Print("str1 = " & str1)
-        'Debug.Print("str2 = " & str2)
-        ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
-        If InStr(str2, str1) Then
-            For Each myAttachment In myOriginal.Attachments
-                If Right(LCase(myAttachment.FileName), 4) = strMsg Then
-                    strFileName = "C:\tmp\" & myAttachment.FileName
-                    myAttachment.SaveAsFile(strFileName)
-                    myResponse.Attachments.Add(strFileName)
-                    My.Computer.FileSystem.DeleteFile(strFileName)
-                End If
-            Next myAttachment
-            If myOriginal.Attachments.Count = 0 Then Stop
-            ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
-            myUserProp = myResponse.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-            myUserProp.Value = strEventName
+            'Debug.Print("myOriginal.Subject = " & myOriginal.Subject & ", myResponse.Subject = " & myResponse.Subject)
+            'Debug.Print(myOriginal.Subject & " has " & myOriginal.Attachments.Count & " attachments.")
+            Dim str1 As String, str2 As String
+            str1 = myOriginal.Subject
+            str2 = myResponse.Subject
+            'Debug.Print("str1 = " & str1)
+            'Debug.Print("str2 = " & str2)
+            ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
+            If InStr(str2, str1) Then
+                For Each myAttachment In myOriginal.Attachments
+                    If Right(LCase(myAttachment.FileName), 4) = strMsg Then
+                        strFileName = "C:\tmp\" & myAttachment.FileName
+                        myAttachment.SaveAsFile(strFileName)
+                        ' 11/1/2015 changed this so the myNoteA is skipped -- don't know why it was in the VBA, but what's there now seems to work ok
+                        ' myNoteA = outlookApp.CreateItemFromTemplate(strFileName)
+                        ' myNoteA.Save()
+                        ' myResponse.Attachments.Add(myNoteA, 1, , Replace(myAttachment.FileName, strMsg, vbNullString))
+                        ' myNoteA.Delete()
+                        myResponse.Attachments.Add(strFileName)
+                        My.Computer.FileSystem.DeleteFile(strFileName)
+                    End If
+                Next myAttachment
+                If myOriginal.Attachments.Count = 0 Then Stop
+                ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
+                myUserProp = myResponse.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                myUserProp.Value = strEventName
+            End If
         End If
     End Sub
 
