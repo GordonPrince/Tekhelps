@@ -49,13 +49,14 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         If TypeOf Forward Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = Forward
+            Debug.Print(myMailItem.BillingInformation)
+            myMailItem.BillingInformation = vbNullString
             Dim myAttachment As Outlook.Attachment
-            Dim myUserProp As Outlook.UserProperty
             For Each myAttachment In myMailItem.Attachments
-                ' If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
+                ' 11/3/2015 changed from VBA: If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                        myUserProp = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        Dim myUserProp As Outlook.UserProperty = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                         myUserProp.Value = "Forward"
                         Exit Sub
                     End If
@@ -63,54 +64,6 @@ Public Class OutlookItemEventsClass1
             Next myAttachment
         End If
     End Sub
-
-    Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
-        On Error GoTo EmailMatNo_Error
-        Dim strDisplayName As String
-        Dim intX As Integer
-        If Left(myAttach.DisplayName, 18) = strIFmatNo Then
-            strDisplayName = Mid(myAttach.DisplayName, 19)
-            intX = InStr(1, strDisplayName, Space(1))
-            If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
-            EmailMatNo = strDisplayName
-        ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
-            EmailMatNo = MatNoFromSubject(strSubject)
-        Else
-            EmailMatNo = False
-        End If
-        Exit Function
-
-EmailMatNo_Error:
-        MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
-    End Function
-
-    Function MatNoFromSubject(ByVal strSubject) As Double
-        ' try to parse the MatterNo from the Subject line, not the attachment
-        Dim intA As Integer, intB As Integer
-        Dim strSearchFor As String = Nothing
-
-        ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
-        intA = InStr(1, strSubject, strDocScanned)
-        If intA > 0 Then
-            strSearchFor = strDocScanned
-        Else
-            intA = InStr(1, strSubject, strLastScanned)
-            If intA > 0 Then strSearchFor = strLastScanned
-        End If
-        If intA > 0 Then
-            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
-            intB = InStr(1, strSubject, Space(1))
-            If intB > 0 Then
-                On Error Resume Next
-                MatNoFromSubject = Left(strSubject, intB)
-                If Err.Number <> 0 Then
-                    Err.Clear()
-                    MatNoFromSubject = 0
-                    On Error GoTo 0
-                End If
-            End If
-        End If
-    End Function
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
@@ -130,59 +83,6 @@ EmailMatNo_Error:
 
     Public Overrides Sub ProcessReplyAll(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ReplyOrReplyAll(Response, "ReplyAll")
-    End Sub
-
-    Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' ItemSend event of the Outlook.Application object
-    End Sub
-
-    Public Overrides Sub ProcessWrite(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeDelete(ByVal Item As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessAttachmentRemove(ByVal ByValAttachment As Object)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeAttachmentAdd(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        Dim myAttachment As Microsoft.Office.Interop.Outlook.Attachment
-        myAttachment = attachment
-        If Left(myAttachment.DisplayName, 12) = "InstantFile_" Then
-            MsgBox("This will open " & myAttachment.DisplayName & " instead of displaying the Note.")
-            e.Cancel = True
-        End If
-    End Sub
-
-    Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessUnload()
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeAutoSave(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessBeforeRead()
-        ' TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ProcessAfterWrite()
-        ' TODO: Add some code
     End Sub
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
@@ -243,6 +143,108 @@ HaveItem:
             End If
         End If
     End Sub
+
+    Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' ItemSend event of the Outlook.Application object
+    End Sub
+
+    Public Overrides Sub ProcessWrite(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeDelete(ByVal Item As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessAttachmentRemove(ByVal ByValAttachment As Object)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeAttachmentAdd(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
+        Dim myAttachment As Microsoft.Office.Interop.Outlook.Attachment
+        myAttachment = attachment
+        If Left(myAttachment.DisplayName, 12) = "InstantFile_" Then
+            MsgBox("This will open " & myAttachment.DisplayName & " instead of displaying the Note.")
+            e.Cancel = True
+        End If
+    End Sub
+
+    Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessUnload()
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeAutoSave(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessBeforeRead()
+        ' TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ProcessAfterWrite()
+        ' TODO: Add some code
+    End Sub
+
+    Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
+        On Error GoTo EmailMatNo_Error
+        Dim strDisplayName As String
+        Dim intX As Integer
+        If Left(myAttach.DisplayName, 18) = strIFmatNo Then
+            strDisplayName = Mid(myAttach.DisplayName, 19)
+            intX = InStr(1, strDisplayName, Space(1))
+            If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
+            EmailMatNo = strDisplayName
+        ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
+            EmailMatNo = MatNoFromSubject(strSubject)
+        Else
+            EmailMatNo = False
+        End If
+        Exit Function
+
+EmailMatNo_Error:
+        MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
+    End Function
+
+    Private Function MatNoFromSubject(ByVal strSubject) As Double
+        ' try to parse the MatterNo from the Subject line, not the attachment
+        Dim intA As Integer, intB As Integer
+        Dim strSearchFor As String = Nothing
+
+        ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
+        intA = InStr(1, strSubject, strDocScanned)
+        If intA > 0 Then
+            strSearchFor = strDocScanned
+        Else
+            intA = InStr(1, strSubject, strLastScanned)
+            If intA > 0 Then strSearchFor = strLastScanned
+        End If
+        If intA > 0 Then
+            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
+            intB = InStr(1, strSubject, Space(1))
+            If intB > 0 Then
+                On Error Resume Next
+                MatNoFromSubject = Left(strSubject, intB)
+                If Err.Number <> 0 Then
+                    Err.Clear()
+                    MatNoFromSubject = 0
+                    On Error GoTo 0
+                End If
+            End If
+        End If
+    End Function
+
 
 End Class
 

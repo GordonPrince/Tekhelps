@@ -81,10 +81,10 @@ Public Class OutlookItemsEventsClass1
                 If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
                     dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
                     If dblMatNo > 0 Then
-Prompt2Save:
                         myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
                         ' it didn't come from Outlook as a Reply, ReplyAll or Forward -- it must have come from InstantFile
-                        If TypeName(myUserProp) = "Nothing" Then GoTo DontAdd2InstantFile
+                        If TypeName(myUserProp) = "Nothing" Then Exit Sub
+Prompt2Save:
                         If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
                             bScanned = False
                             If dblMatNo > 0 Then
@@ -93,11 +93,11 @@ Prompt2Save:
                                 dblMatNo = InputBox("Enter the Matter # to save this comment under", strTitle, "0.00")
                                 If dblMatNo = 0 Then
                                     MsgBox("No comment was added to InstantFile about this E-mail.", vbInformation, strTitle)
-                                    GoTo DontAdd2InstantFile
+                                    Exit Sub
                                 End If
                             End If
                         Else
-                            GoTo DontAdd2InstantFile
+                            Exit Sub
                         End If
                     End If
                 End If
@@ -140,12 +140,6 @@ Prompt2Save:
                 End If
             Next
         End If
-
-DontAdd2InstantFile:
-        ' if you get here there either aren't any attachments 
-        ' or it's not an Import2InstantFile document that's attached 
-        ' or the attachment is a NewCallTracking note
-        Exit Sub
 
 InstantFileEmail:
         For Each pFolder In appOutlook.Session.Folders
@@ -283,46 +277,7 @@ SentItems_Error:
         GoTo SentItems_Exit
     End Sub
 
-    Public Function RunSQLcommand(ByVal queryString As String) As Boolean
-        Dim strConnectionString As String = SQLConnectionString()
-        Dim con As New SqlClient.SqlConnection(strConnectionString)
-        Dim cmd As New SqlClient.SqlCommand(queryString, con)
-        ' Using con As New SqlClient.SqlConnection(strConnectionString)
-        Try
-            cmd.Connection.Open()
-            cmd.ExecuteNonQuery()
-            RunSQLcommand = True
-        Catch ex As Exception
-            RunSQLcommand = False
-        End Try
-        ' End Using
-        con.Close()
-    End Function
-
-    Public Function SQLConnectionString() As String
-        If My.Computer.Name = "TEKHELPS7X64" Then
-            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
-        Else
-            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=SQLserver;Integrated Security=SSPI;")
-        End If
-    End Function
-    Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
-        'TODO: Add some code
-    End Sub
-
-    Public Overrides Sub ItemRemove(ByVal SourceFolder As Object)
-        'TODO: Add some code
-    End Sub
-
-    Public Overrides Sub BeforeFolderMove(ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        'TODO: Add some code
-    End Sub
-
-    Public Overrides Sub BeforeItemMove(ByVal item As Object, ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        'TODO: Add some code
-    End Sub
-
-    Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
+    Function EmailMatNo(myAttach As Outlook.Attachment, strSubject As String) As Double
         On Error GoTo EmailMatNo_Error
         Dim strDisplayName As String
         Dim intX As Integer
@@ -369,6 +324,45 @@ EmailMatNo_Error:
             End If
         End If
     End Function
+
+    Public Function RunSQLcommand(ByVal queryString As String) As Boolean
+        Dim strConnectionString As String = SQLConnectionString()
+        Dim con As New SqlClient.SqlConnection(strConnectionString)
+        Dim cmd As New SqlClient.SqlCommand(queryString, con)
+        ' Using con As New SqlClient.SqlConnection(strConnectionString)
+        Try
+            cmd.Connection.Open()
+            cmd.ExecuteNonQuery()
+            RunSQLcommand = True
+        Catch ex As Exception
+            RunSQLcommand = False
+        End Try
+        ' End Using
+        con.Close()
+    End Function
+
+    Public Function SQLConnectionString() As String
+        If My.Computer.Name = "TEKHELPS7X64" Then
+            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
+        Else
+            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=SQLserver;Integrated Security=SSPI;")
+        End If
+    End Function
+    Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
+        'TODO: Add some code
+    End Sub
+
+    Public Overrides Sub ItemRemove(ByVal SourceFolder As Object)
+        'TODO: Add some code
+    End Sub
+
+    Public Overrides Sub BeforeFolderMove(ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
+        'TODO: Add some code
+    End Sub
+
+    Public Overrides Sub BeforeItemMove(ByVal item As Object, ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
+        'TODO: Add some code
+    End Sub
 
 End Class
 
