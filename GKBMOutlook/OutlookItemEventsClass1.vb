@@ -165,34 +165,51 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
+        MsgBox("ProcessBeforeAttachmentRead fired")
         myAttachment = attachment
-        Const strIF As String = "InstantFile_"
-        If Left(myAttachment.DisplayName, Len(strIF)) = strIF Then
-            If Left(myAttachment.DisplayName, 18) = strIFdocNo Then
-                Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
-                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                    MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
-                Else
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                    If Not appAccess.Visible Then appAccess.Visible = True
-                    appAccess.Run("DisplayDocument", lngDocNo)
-                    e.Cancel = True
-                End If
-            ElseIf Left(myAttachment.DisplayName, 18) = strIFmatNo Then
-                Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
-                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                    MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
-                Else
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                    ' appAccess.OpenCurrentDatabase("C:\Access\Access2010\GKBM\OutlookStubs.accdb")
-                    ' appAccess = GetObject(, "Access.Application")
-                    If Not appAccess.Visible Then appAccess.Visible = True
-                    appAccess.Run("DisplayMatter", dblMatNo)
-                    e.Cancel = True
-                End If
+        'Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+        'Const strIFtaskTag As String = "InstantFile_Task"
+        'Const strNewCallAppointmentTag As String = "NewCall Appointment"
+
+        If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
+            Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
+            If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
+                MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
             Else
-                MsgBox("This should open " & myAttachment.DisplayName & " instead of displaying the Note.")
+                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                If Not appAccess.Visible Then appAccess.Visible = True
+                appAccess.Run("DisplayDocument", lngDocNo)
+                e.Cancel = True
             End If
+        ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
+            Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
+            If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
+                MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
+            Else
+                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                If Not appAccess.Visible Then appAccess.Visible = True
+                appAccess.Run("DisplayMatter", dblMatNo)
+                e.Cancel = True
+            End If
+            ' ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+            '    strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
+            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            '    olItem.Display()
+            'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+            '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
+            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            '    olItem.Display()
+            'ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+            '    strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
+            '    intX = InStr(1, strID, vbNewLine)
+            '    strID = Left(strID, intX - 1)
+            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+            '    olItem.Display()
+        Else
+            MsgBox("This should open " & myAttachment.DisplayName & " instead of displaying the Note.")
         End If
     End Sub
 
