@@ -52,7 +52,6 @@ Public Class OutlookItemEventsClass1
             Dim myAttachment As Outlook.Attachment
             Dim myUserProp As Outlook.UserProperty
             For Each myAttachment In myMailItem.Attachments
-                Debug.Print(myAttachment.DisplayName)
                 ' If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then

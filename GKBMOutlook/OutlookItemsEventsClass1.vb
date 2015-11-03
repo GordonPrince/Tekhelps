@@ -10,16 +10,16 @@ Imports System.Data
 Public Class OutlookItemsEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemsEvents
  
-    Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
-        MyBase.New(ADXModule)
-    End Sub
-
     Dim strScratch As String
     Const strDocScanned As String = "Document scanned + imported:"
     Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
     Const strIFmatNo As String = "InstantFile_MatNo_"
     Const strIFdocNo As String = "InstantFile_DocNo_"
     Const strPublicFolders As String = "Public Folders"
+
+    Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
+        MyBase.New(ADXModule)
+    End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
         ' MsgBox("ItemAdd fired.")
@@ -33,7 +33,7 @@ Public Class OutlookItemsEventsClass1
         Dim myMailItem As Outlook.MailItem, myCopy As Outlook.MailItem, myMove As Outlook.MailItem
         Dim myAttachment As Outlook.Attachment
         Dim myRecipient As Outlook.Recipient
-        Dim strSQL As String, strBody As String
+        Dim strSQL As String, strBody As String = "email to "
 
         Dim dblMatNo As Double, intA As Integer, intB As Integer, lngDocNo As Long
         Dim bScanned As Boolean, myUserProp As Outlook.UserProperty
@@ -81,7 +81,7 @@ Public Class OutlookItemsEventsClass1
             bScanned = True
             GoTo InstantFileEmail
         Else
-            ' if this is InstantFile related email then add it to InstantFile (unless it originated in InstantFile)
+            ' if this is InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
             For Each myAttachment In myMailItem.Attachments
                 If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
                     dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
@@ -90,14 +90,14 @@ Prompt2Save:
                         myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
                         ' it didn't come from Outlook as a Reply, ReplyAll or Forward -- it must have come from InstantFile
                         If TypeName(myUserProp) = "Nothing" Then GoTo DontAdd2InstantFile
-                        If MsgBox("Save the email you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
+                        If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
                             bScanned = False
                             If dblMatNo > 0 Then
                                 GoTo InstantFileEmail
                             Else
                                 dblMatNo = InputBox("Enter the Matter # to save this comment under", strTitle, "0.00")
                                 If dblMatNo = 0 Then
-                                    MsgBox("No comment was added to InstantFile about this email.", vbInformation, strTitle)
+                                    MsgBox("No comment was added to InstantFile about this E-mail.", vbInformation, strTitle)
                                     GoTo DontAdd2InstantFile
                                 End If
                             End If
@@ -130,7 +130,7 @@ Prompt2Save:
                             '    With rst
                             '        If .EOF Then
                             '            MsgBox("Could not find MatterNo for DocNo=" & lngDocNo & "." & vbNewLine & vbNewLine & _
-                            '                    "Please forward the email you just sent to Gordon" & vbNewLine & _
+                            '                    "Please forward the E-mail you just sent to Gordon" & vbNewLine & _
                             '                    "and type 'Could not find MatterNo for DocNo' as the message body.", vbExclamation, strTitle)
                             '        Else
                             '            dblMatNo = .Fields("matter_no")
@@ -170,33 +170,7 @@ InstantFileEmail:
 HaveInstantFileMailFolder:
         myCopy = myMailItem.Copy
         myMove = myCopy.Move(mFolder)  ' the myMove object has the new EntryID
-        ' MsgBox("A copy of the item was saved in the InstantFile Mail folder.", vbInformation, strTitle)
 
-        ' make a comment in InstantFile about this email
-        'With con
-        '    If .State = 0 Then .Open(strConnectionString)
-        '    rst = .Execute("select staff_id from staff where staff_name = '" & Replace(Outlook.Session.CurrentUser, "'", "''") & "'") ' in case there's an apostrophe in the staff_name
-        'End With
-        ' Dim con As New ADODB.Connection, rst As ADODB.Recordset
-
-        '"Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=C:\Access\Access2010\GKBM\OutlookStubs.accdb;" & _
-        '"Mode=Share Deny None;Extended Properties="";" & _
-        '"Jet OLEDB:System database=C:\Users\Gordon\AppData\Roaming\Microsoft\Access\System.mdw;" & _
-        '"Jet OLEDB:Registry Path=Software\Microsoft\Office\14.0\Access\Access Connectivity Engine;" & _
-        '"Jet OLEDB:Database Password="";" & _
-        '"Jet OLEDB:Engine Type=6;" & _
-        '"Jet OLEDB:Database Locking Mode=1;" & _
-        '"Jet OLEDB:Global Partial Bulk Ops=2;Jet OLEDB:Global Bulk Transactions=1;" & _
-        '"Jet OLEDB:New Database Password="";Jet OLEDB:Create System Database=False;Jet OLEDB:Encrypt Database=False;" & _
-        '"Jet OLEDB:Don't Copy Locale on Compact=False;Jet OLEDB:Compact Without Replica Repair=False;" & _
-        '"Jet OLEDB:SFP=False;Jet OLEDB:Support Complex Data=True;Jet OLEDB:Bypass UserInfo Validation=False"
-        ' Const strConnectionString As String = _
-        ' "App=GKBMOutlookAdd-in;Provider=MSDataShape.1;Persist Security Info=False;Data Source=SQLserver;Integrated Security=SSPI;" & _
-        ' "Initial Catalog=InstantFile;Data Provider=SQLOLEDB.1"
-
-        '"App=GKBMOutlookAdd-in;Data Source=SQLserver;" & _
-        '"Database Password=""lahave$13"";" & _
-        '"Initial Catalog=InstantFile;"
         Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, myReader As SqlClient.SqlDataReader
         Dim strInitials As String = Nothing
         con = New SqlClient.SqlConnection(SQLConnectionString)
@@ -226,6 +200,7 @@ HaveInstantFileMailFolder:
 
         Dim lngX As Int16
         With myMove
+            Debug.Print(".BillingInformation = " & .BillingInformation)
             If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                 ' update the Comment with the EntryID
                 lngX = InStr(1, .BillingInformation, strCommentID)
@@ -234,70 +209,73 @@ HaveInstantFileMailFolder:
                     lngX = InStr(1, strSQL, ",")
                     If lngX > 0 Then strSQL = Left(strSQL, lngX - 1)
                     strSQL = Trim(strSQL)
-                    strScratch = "update Comment set EntryID = '" & .EntryID & "' where CommentID = " & CLng(strSQL)
+                    strScratch = "UPDATE COMMENT SET EntryID = '" & .EntryID & "' WHERE CommentID = " & CLng(strSQL)
                     ' con.Execute(strScratch, lngX)
-                    RunSQLcommand(strScratch)
-                    If lngX <> 1 Then MsgBox("The InstantFile Comment was not updated properly with the email's EntryID.", vbExclamation, strTitle)
-                End If
-                ' update the Email with the EntryID
-                lngX = InStr(1, .BillingInformation, strDocNo)
-                If lngX > 0 Then
-                    strSQL = Mid(.BillingInformation, lngX + 1)
-                    strSQL = Trim(Mid(strSQL, Len(strDocNo)))
-                    strScratch = "update Email set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
-                    ' con.Execute(strScratch, lngX)
-                    RunSQLcommand(strScratch)
-                    If lngX <> 1 Then MsgBox("The InstantFile Document was not updated properly with the email's EntryID.", vbExclamation, strTitle)
-                End If
-                GoTo SentItems_Exit
-            ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
-                intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
-                If intA > 1 Then
-                    dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
-                Else
-                    GoTo Prompt4Matter
-                End If
-            ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
-                intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
-                If intA > 1 Then
-                    dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
-                Else
-                    GoTo Prompt4Matter
-                End If
-            ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
-            Else
+                    If Not RunSQLcommand(strScratch) Then
+                        MsgBox("The InstantFile Comment was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
+                    End If
+                    ' update the E-mail with the EntryID
+                    lngX = InStr(1, .BillingInformation, strDocNo)
+                    If lngX > 0 Then
+                        strSQL = Mid(.BillingInformation, lngX + 1)
+                        strSQL = Trim(Mid(strSQL, Len(strDocNo)))
+                        strScratch = "update E-mail set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
+                        ' con.Execute(strScratch, lngX)
+                        If Not RunSQLcommand(strScratch) Then
+                            MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
+                        End If
+                        GoTo SentItems_Exit
+                    ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
+                        intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
+                        If intA > 1 Then
+                            dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
+                        Else
+                            GoTo Prompt4Matter
+                        End If
+                    ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
+                        intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
+                        If intA > 1 Then
+                            dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
+                        Else
+                            GoTo Prompt4Matter
+                        End If
+                    ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
+                    Else
 Prompt4Matter:
-                dblMatNo = InputBox("Enter the Matter # this email should be saved in.", strTitle)
-            End If
+                        dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
+                    End If
 
-            strBody = "email to "
-            For Each myRecipient In .Recipients
-                strBody = strBody & myRecipient.Name & "; "
-            Next myRecipient
+                    For Each myRecipient In .Recipients
+                        strBody = strBody & myRecipient.Name & "; "
+                    Next myRecipient
 
-            If bScanned Then
-                strBody = strBody & strDocScanned
-                intA = InStr(Len(strDocScanned) + 1, .Body, "Author:")
-                If intA > 0 Then strBody = strBody & Trim(Mid(.Body, intA + 7))
-            Else
-                strBody = strBody & " -- " & myMove.Body
+                    If bScanned Then
+                        strBody = strBody & strDocScanned
+                        intA = InStr(Len(strDocScanned) + 1, .Body, "Author:")
+                        If intA > 0 Then strBody = strBody & Trim(Mid(.Body, intA + 7))
+                    Else
+                        strBody = strBody & " -- " & myMove.Body
+                    End If
+                End If
             End If
         End With
 
-        strBody = Replace(strBody, "Summary:", vbNullString)
-        Do While InStr(1, strBody, Chr(160))
-            strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
-        Loop
-        Do While InStr(1, strBody, vbNewLine & vbNewLine)
-            strBody = Replace(strBody, vbNewLine & vbNewLine, vbNewLine)
-        Loop
+        If Len(strBody) > 0 Then
+            strBody = Replace(strBody, "Summary:", vbNullString)
+            Do While InStr(1, strBody, Chr(160))
+                strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
+            Loop
+            Do While InStr(1, strBody, vbNewLine & vbNewLine)
+                strBody = Replace(strBody, vbNewLine & vbNewLine, vbNewLine)
+            Loop
+        End If
 
-        strSQL = "insert into comment (matter_no, author, summary, EntryID)" & _
-                " values (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
-        RunSQLcommand(strSQL)
-
-        MsgBox("A comment about the email you sent was created in InstantFile" & vbNewLine & _
-                "(and a copy of the email was saved with the Comment).", vbInformation, strTitle)
+        strSQL = "INSERT INTO COMMENT (matter_no, author, summary, EntryID)" & _
+                " VALUES (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
+        If RunSQLcommand(strSQL) Then
+            MsgBox("A comment about the E-mail you sent was created in InstantFile" & vbNewLine & _
+                    "(and a copy of the E-mail was saved with the Comment).", vbInformation, strTitle)
+        End If
 
 SentItems_Exit:
         Exit Sub
@@ -310,16 +288,21 @@ SentItems_Error:
         GoTo SentItems_Exit
     End Sub
 
-    Public Sub RunSQLcommand(ByVal queryString As String)
+    Public Function RunSQLcommand(ByVal queryString As String) As Boolean
         Dim strConnectionString As String = SQLConnectionString()
         Dim con As New SqlClient.SqlConnection(strConnectionString)
         Dim cmd As New SqlClient.SqlCommand(queryString, con)
         ' Using con As New SqlClient.SqlConnection(strConnectionString)
-        cmd.Connection.Open()
-        cmd.ExecuteNonQuery()
+        Try
+            cmd.Connection.Open()
+            cmd.ExecuteNonQuery()
+            RunSQLcommand = True
+        Catch ex As Exception
+            RunSQLcommand = False
+        End Try
         ' End Using
         con.Close()
-    End Sub
+    End Function
 
     Public Function SQLConnectionString() As String
         If My.Computer.Name = "TEKHELPS7X64" Then
@@ -331,15 +314,15 @@ SentItems_Error:
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
         'TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub ItemRemove(ByVal SourceFolder As Object)
         'TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub BeforeFolderMove(ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         'TODO: Add some code
     End Sub
- 
+
     Public Overrides Sub BeforeItemMove(ByVal item As Object, ByVal moveTo As Object, ByVal SourceFolder As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         'TODO: Add some code
     End Sub
@@ -391,6 +374,6 @@ EmailMatNo_Error:
             End If
         End If
     End Function
- 
+
 End Class
 
