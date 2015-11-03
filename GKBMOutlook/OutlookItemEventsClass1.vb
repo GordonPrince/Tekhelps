@@ -165,7 +165,7 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
-        MsgBox("ProcessBeforeAttachmentRead fired")
+        ' MsgBox("ProcessBeforeAttachmentRead fired")
         myAttachment = attachment
         'Const strNewCallTrackingTag As String = "NewCall Tracking Item"
         'Const strIFtaskTag As String = "InstantFile_Task"
@@ -191,23 +191,23 @@ HaveItem:
                 appAccess.Run("DisplayMatter", dblMatNo)
                 e.Cancel = True
             End If
-            ' ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            '    strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
-            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            '    olItem.Display()
-            'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-            '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
-            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            '    olItem.Display()
-            'ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-            '    strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
-            '    intX = InStr(1, strID, vbNewLine)
-            '    strID = Left(strID, intX - 1)
-            '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
-            '    olItem.Display()
+            '    ' ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+            '    '    strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
+            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            '    '    olItem.Display()
+            '    'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+            '    '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
+            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            '    '    olItem.Display()
+            '    'ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+            '    '    strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
+            '    '    intX = InStr(1, strID, vbNewLine)
+            '    '    strID = Left(strID, intX - 1)
+            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
+            '    '    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+            '    '    olItem.Display()
         Else
             MsgBox("This should open " & myAttachment.DisplayName & " instead of displaying the Note.")
         End If
@@ -280,8 +280,6 @@ EmailMatNo_Error:
             End If
         End If
     End Function
-
-
 End Class
 
 
