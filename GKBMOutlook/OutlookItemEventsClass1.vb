@@ -9,6 +9,11 @@ Imports Microsoft.Office.Interop
 Public Class OutlookItemEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemEvents
 
+    Const strIFmatNo As String = "InstantFile_MatNo_"
+    Const strIFdocNo As String = "InstantFile_DocNo_"
+    Const strDocScanned As String = "Document scanned + imported:"
+    Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
+
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
     End Sub
@@ -49,16 +54,64 @@ Public Class OutlookItemEventsClass1
             For Each myAttachment In myMailItem.Attachments
                 Debug.Print(myAttachment.DisplayName)
                 ' If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
-                If Left(myAttachment.DisplayName, 17) = "InstantFile_MatNo" Then
-                    ' If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                    myUserProp = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-                    myUserProp.Value = "Forward"
-                    Exit Sub
-                    ' End If
+                If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
+                    If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
+                        myUserProp = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        myUserProp.Value = "Forward"
+                        Exit Sub
+                    End If
                 End If
             Next myAttachment
         End If
     End Sub
+
+    Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
+        On Error GoTo EmailMatNo_Error
+        Dim strDisplayName As String
+        Dim intX As Integer
+        If Left(myAttach.DisplayName, 18) = strIFmatNo Then
+            strDisplayName = Mid(myAttach.DisplayName, 19)
+            intX = InStr(1, strDisplayName, Space(1))
+            If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
+            EmailMatNo = strDisplayName
+        ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
+            EmailMatNo = MatNoFromSubject(strSubject)
+        Else
+            EmailMatNo = False
+        End If
+        Exit Function
+
+EmailMatNo_Error:
+        MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
+    End Function
+
+    Function MatNoFromSubject(ByVal strSubject) As Double
+        ' try to parse the MatterNo from the Subject line, not the attachment
+        Dim intA As Integer, intB As Integer
+        Dim strSearchFor As String = Nothing
+
+        ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
+        intA = InStr(1, strSubject, strDocScanned)
+        If intA > 0 Then
+            strSearchFor = strDocScanned
+        Else
+            intA = InStr(1, strSubject, strLastScanned)
+            If intA > 0 Then strSearchFor = strLastScanned
+        End If
+        If intA > 0 Then
+            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
+            intB = InStr(1, strSubject, Space(1))
+            If intB > 0 Then
+                On Error Resume Next
+                MatNoFromSubject = Left(strSubject, intB)
+                If Err.Number <> 0 Then
+                    Err.Clear()
+                    MatNoFromSubject = 0
+                    On Error GoTo 0
+                End If
+            End If
+        End If
+    End Function
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
