@@ -86,7 +86,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
-        ' adds Outlook attachments from original message to Reply or ReplyApp
+        ' adds Outlook attachments from original message to Reply or ReplyAll
         Const strMsg As String = ".msg"
         Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem = Nothing
@@ -110,7 +110,7 @@ Public Class OutlookItemEventsClass1
                 Next
             End If
             If myOriginal Is Nothing Then
-                MsgBox("myOriginal is nothing")
+                MsgBox("myOriginal is nothing.", vbEmpty, "ReplyOrReplyAll()")
                 Exit Sub
             End If
 HaveItem:
@@ -127,16 +127,10 @@ HaveItem:
                     If Right(LCase(myAttachment.FileName), 4) = strMsg Then
                         strFileName = "C:\tmp\" & myAttachment.FileName
                         myAttachment.SaveAsFile(strFileName)
-                        ' 11/1/2015 changed this so the myNoteA is skipped -- don't know why it was in the VBA, but what's there now seems to work ok
-                        ' myNoteA = outlookApp.CreateItemFromTemplate(strFileName)
-                        ' myNoteA.Save()
-                        ' myResponse.Attachments.Add(myNoteA, 1, , Replace(myAttachment.FileName, strMsg, vbNullString))
-                        ' myNoteA.Delete()
                         myResponse.Attachments.Add(strFileName)
                         My.Computer.FileSystem.DeleteFile(strFileName)
                     End If
                 Next myAttachment
-                If myOriginal.Attachments.Count = 0 Then Stop
                 ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
                 myUserProp = myResponse.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                 myUserProp.Value = strEventName

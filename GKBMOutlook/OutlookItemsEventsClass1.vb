@@ -42,6 +42,8 @@ Public Class OutlookItemsEventsClass1
             myMailItem = Item
             appOutlook = myMailItem.Application
         Else
+            Dim myFolder As Outlook.Folder = SourceFolder
+            Debug.Print(myFolder.FolderPath)
             Exit Sub
         End If
 
@@ -186,7 +188,7 @@ HaveInstantFileMailFolder:
 
         Dim lngX As Int16
         With myMove
-            Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
+            ' Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
             If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                 ' update the Comment with the EntryID
                 lngX = InStr(1, .BillingInformation, strCommentID)
