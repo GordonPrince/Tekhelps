@@ -87,7 +87,6 @@ Public Class OutlookItemEventsClass1
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
         ' adds Outlook attachments from original message to Reply or ReplyApp
-        MsgBox("Fired ReplyOrReplyAll")
         Const strMsg As String = ".msg"
         Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem = Nothing
