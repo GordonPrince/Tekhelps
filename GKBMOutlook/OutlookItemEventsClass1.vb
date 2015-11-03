@@ -133,7 +133,7 @@ EmailMatNo_Error:
     End Sub
 
     Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        ' ItemSend event of the Outlook.Application object
     End Sub
 
     Public Overrides Sub ProcessWrite(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)

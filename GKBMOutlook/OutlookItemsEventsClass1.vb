@@ -22,38 +22,33 @@ Public Class OutlookItemsEventsClass1
     End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
-        ' MsgBox("ItemAdd fired.")
         Const strTitle As String = "Save Sent E-mail in InstantFile"
         Const strFolderName As String = "All Public Folders"
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
-
 
         Dim pFolder As Outlook.MAPIFolder, aFolder As Outlook.MAPIFolder, mFolder As Outlook.MAPIFolder
         Dim myMailItem As Outlook.MailItem, myCopy As Outlook.MailItem, myMove As Outlook.MailItem
         Dim myAttachment As Outlook.Attachment
         Dim myRecipient As Outlook.Recipient
         Dim strSQL As String, strBody As String = "email to "
-
         Dim dblMatNo As Double, intA As Integer, intB As Integer, lngDocNo As Long
         Dim bScanned As Boolean, myUserProp As Outlook.UserProperty
 
         Static strLastID As String
 
-        Dim appOutlook As Outlook.Application = Nothing
+        Dim appOutlook As Outlook.Application
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
             appOutlook = myMailItem.Application
+        Else
+            Exit Sub
         End If
 
-        If TypeName(Item) = "MailItem" Then
-            If Left(Item.Subject, 13) = "Task Request:" _
-            Or Left(Item.Subject, 14) = "Task Accepted:" _
-            Or Left(Item.Subject, 14) = "Task Declined:" Then   ' it was created by InstantFile, therefore it's already been stored in InstantFile
-                Exit Sub
-            End If
-            myMailItem = Item
-        Else
+        If Left(Item.Subject, 13) = "Task Request:" _
+        Or Left(Item.Subject, 14) = "Task Accepted:" _
+        Or Left(Item.Subject, 14) = "Task Declined:" Then
+            ' it was created by InstantFile, therefore it's already been stored in InstantFile
             Exit Sub
         End If
 

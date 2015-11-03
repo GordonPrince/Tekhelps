@@ -666,5 +666,12 @@ AdxOutlookAppEvents1_Error:
         End If
     End Sub
 
+    Private Sub AdxOutlookAppEvents1_ItemSend(sender As Object, e As ADXOlItemSendEventArgs) Handles AdxOutlookAppEvents1.ItemSend
+        MsgBox("AdxOutlookAppEvents1_ItemSend fired")
+        If TypeOf sender Is Outlook.MailItem Then
+            Dim myMailItem As Outlook.MailItem = sender
+            Debug.Print("myMailItem.BillingInformation = " & myMailItem.BillingInformation)
+        End If
+    End Sub
 End Class
 
