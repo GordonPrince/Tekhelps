@@ -42,7 +42,22 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        If TypeOf Forward Is Outlook.MailItem Then
+            Dim myMailItem As Outlook.MailItem = Forward
+            Dim myAttachment As Outlook.Attachment
+            Dim myUserProp As Outlook.UserProperty
+            For Each myAttachment In myMailItem.Attachments
+                Debug.Print(myAttachment.DisplayName)
+                ' If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
+                If Left(myAttachment.DisplayName, 17) = "InstantFile_MatNo" Then
+                    ' If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
+                    myUserProp = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                    myUserProp.Value = "Forward"
+                    Exit Sub
+                    ' End If
+                End If
+            Next myAttachment
+        End If
     End Sub
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
