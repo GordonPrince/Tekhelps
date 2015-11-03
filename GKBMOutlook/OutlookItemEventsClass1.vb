@@ -165,7 +165,8 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Microsoft.Office.Interop.Outlook.Attachment
         myAttachment = attachment
-        If Left(myAttachment.DisplayName, 12) = "InstantFile_" Then
+        Const strIF As String = "InstantFile_"
+        If Left(myAttachment.DisplayName, Len(strIF)) = strIF Then
             MsgBox("This will open " & myAttachment.DisplayName & " instead of displaying the Note.")
             e.Cancel = True
         End If

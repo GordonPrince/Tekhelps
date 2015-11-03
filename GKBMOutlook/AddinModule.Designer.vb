@@ -44,7 +44,6 @@ Partial Public Class AddinModule
         Me.AdxRibbonButtonSaveAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.CopyAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
-        Me.AdxRibbonSeparator1 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
         '
@@ -67,7 +66,6 @@ Partial Public Class AddinModule
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator1)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton4)
         Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
         Me.AdxRibbonGroup1.ImageTransparentColor = System.Drawing.Color.Transparent
@@ -145,14 +143,6 @@ Partial Public Class AddinModule
         Me.CopyAttachments.ScreenTip = "Copy the attachments from another E-mail to this E-mail."
         Me.CopyAttachments.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
-        'AdxRibbonSeparator1
-        '
-        Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ba414a646b9741d3a9839deaa0e8fba4"
-        Me.AdxRibbonSeparator1.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
-        '
         'AdxRibbonButton4
         '
         Me.AdxRibbonButton4.Caption = "About"
@@ -198,7 +188,6 @@ Partial Public Class AddinModule
     Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
     Private WithEvents AdxOutlookAppEvents1 As AddinExpress.MSO.ADXOutlookAppEvents
     Friend WithEvents CopyAttachments As AddinExpress.MSO.ADXRibbonButton
-    Friend WithEvents AdxRibbonSeparator1 As AddinExpress.MSO.ADXRibbonSeparator
 
 End Class
 
