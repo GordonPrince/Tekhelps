@@ -89,6 +89,24 @@ Public Class AddinModule
     Dim intExchangeConnectionMode As Integer
 #End Region
 
+    Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
+        If selection IsNot Nothing Then
+            If selection.Count = 1 Then
+                Dim item As Object = selection.Item(1)
+                If TypeOf item Is Outlook.MailItem Then
+                    If itemEvents.IsConnected Then
+                        itemEvents.RemoveConnection()
+                        'Debug.Print("Disconnected from the previously connected item.")
+                    End If
+                    itemEvents.ConnectTo(item, True)
+                    'Debug.Print("Connected to this Outlook item.")
+                Else
+                    Marshal.ReleaseComObject(item)
+                    'Debug.Print("Do not connect to this Outlook item.")
+                End If
+            End If
+        End If
+    End Sub
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
         Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If theExplorer IsNot Nothing Then
@@ -523,25 +541,6 @@ Link2Contacts_Exit:
             Next
         Else
             MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
-        End If
-    End Sub
-
-    Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
-        If selection IsNot Nothing Then
-            If selection.Count = 1 Then
-                Dim item As Object = selection.Item(1)
-                If TypeOf item Is Outlook.MailItem Then
-                    If itemEvents.IsConnected Then
-                        itemEvents.RemoveConnection()
-                        'Debug.Print("Disconnected from the previously connected item.")
-                    End If
-                    itemEvents.ConnectTo(item, True)
-                    'Debug.Print("Connected to this Outlook item.")
-                Else
-                    Marshal.ReleaseComObject(item)
-                    'Debug.Print("Do not connect to this Outlook item.")
-                End If
-            End If
         End If
     End Sub
 
