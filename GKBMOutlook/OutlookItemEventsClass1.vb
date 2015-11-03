@@ -49,7 +49,7 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         If TypeOf Forward Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = Forward
-            Debug.Print(myMailItem.BillingInformation)
+            Debug.Print("ProcessForward() myMailItem.BillingInformation = " & myMailItem.BillingInformation)
             myMailItem.BillingInformation = vbNullString
             Dim myAttachment As Outlook.Attachment
             For Each myAttachment In myMailItem.Attachments

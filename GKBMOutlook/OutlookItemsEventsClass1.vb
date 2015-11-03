@@ -82,9 +82,6 @@ Public Class OutlookItemsEventsClass1
                     dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
                     If dblMatNo > 0 Then
                         myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
-                        ' it didn't come from Outlook as a Reply, ReplyAll or Forward -- it must have come from InstantFile
-                        If TypeName(myUserProp) = "Nothing" Then Exit Sub
-Prompt2Save:
                         If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
                             bScanned = False
                             If dblMatNo > 0 Then
@@ -189,7 +186,7 @@ HaveInstantFileMailFolder:
 
         Dim lngX As Int16
         With myMove
-            Debug.Print(".BillingInformation = " & .BillingInformation)
+            Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
             If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                 ' update the Comment with the EntryID
                 lngX = InStr(1, .BillingInformation, strCommentID)
