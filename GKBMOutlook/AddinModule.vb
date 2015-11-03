@@ -89,12 +89,170 @@ Public Class AddinModule
     Dim intExchangeConnectionMode As Integer
 #End Region
 
+    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
+        Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        If theExplorer IsNot Nothing Then
+            Dim selection As Outlook.Selection = Nothing
+            Try
+                selection = theExplorer.Selection
+            Catch
+            End Try
+
+            If selection IsNot Nothing Then
+                ConnectToSelectedItem(selection)
+                Marshal.ReleaseComObject(selection)
+            End If
+        End If
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
+        Dim outlookItem As Object = myInsp.CurrentItem
+        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
+        If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
+            Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
+            If myMailItem.Sent Then
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of myMailItem 
+                itemEvents.ConnectTo(myMailItem, True)
+            End If
+        Else
+            Marshal.ReleaseComObject(outlookItem)
+        End If
+        'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
+        On Error GoTo Startup_Error
+        Const strTitle As String = "AdxOutlookAppEvents1_Startup()"
+        Dim intX As Integer
+        Dim olPublicFolder As Outlook.MAPIFolder, olFolder As Outlook.MAPIFolder
+        Dim olNS As Outlook.NameSpace, objFolder As Outlook.MAPIFolder, objItem As Outlook.TaskItem
+        Dim objFD As Outlook.FormDescription
+        Dim intHour As Integer
+        Dim intNote As Integer, myNotes As Outlook.Items, myNote As Outlook.NoteItem
+        Dim olRem As Outlook.Reminder
+
+        ' delete any leftover notes from InstantFile attachments
+        myNotes = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes).Items
+        intX = myNotes.Count
+        For intNote = intX To 1 Step -1
+            myNote = myNotes(intNote)
+            If Left(myNote.Body, 18) = strIFmatNo Or _
+                Left(myNote.Body, 18) = strIFdocNo Or _
+                Left(myNote.Body, 8) = "NewCall " Then _
+                myNote.Delete()
+        Next
+
+        ' Set myInspectors = Application.Inspectors
+        myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
+        mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
+        myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
+
+        ' this won't work if the user is working offline
+        If OutlookApp.Session.Offline Then
+            MsgBox("Some InstantFile functionality will not work if you are working Offline." & vbNewLine & vbNewLine & _
+                "(To bring Outlook back Online, look in the bottom right corner of the Outlook window." & vbNewLine & _
+                "If the word 'Offline' is displayed, right-click on it, clear the checkbox to the left of 'Work offline'" & vbNewLine & _
+                "and see if you get a 'Connected' message." & vbNewLine & _
+                "If so, you've solved the problem.)", vbExclamation, "Working Offline")
+        Else
+            For Each olFolder In OutlookApp.Session.Folders
+                ' Debug.Print olFolder.Name
+                If olFolder.Name = "Mailbox - InstantFile" Or olFolder.Name = strInstantFile Then
+                    olInstantFileInbox = olFolder.Folders("Inbox").Items
+                    olInstantFileTasks = olFolder.Folders("Tasks").Items
+
+                    ' delete any leftover notes from InstantFile attachments
+                    myNotes = olFolder.Folders("Notes").Items
+                    intX = myNotes.Count
+                    For intNote = intX To 1 Step -1
+                        myNote = myNotes(intNote)
+                        With myNote
+                            If Left(.Body, Len(strIFmatNo)) = strIFmatNo Or Left(.Body, Len(strIFdocNo)) = strIFdocNo Or Left(.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                                ' Debug.Print .CreationTime
+                                ' Stop
+                                If DateDiff("h", .CreationTime, Now) > 1 Then .Delete()
+                            End If
+                        End With
+                    Next
+                    myNote = Nothing
+                    myNotes = Nothing
+                    GoTo SetNewCallTracking
+                End If
+            Next olFolder
+            MsgBox("Some InstantFile functions related to Tasks will not work unless you open InstantFile's Mailbox first.", vbExclamation, "InstantFile's Mailbox Not Available")
+
+SetNewCallTracking:
+            For Each olPublicFolder In OutlookApp.Session.Folders
+                If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                    strPublicStoreID = olPublicFolder.StoreID
+                    For Each olFolder In olPublicFolder.Folders
+                        If olFolder.Name = "All Public Folders" Then
+                            For Each myNewCallTracking In olFolder.Folders
+                                If myNewCallTracking.Name = "New Call Tracking" Then GoTo HaveNewCallTracking
+                            Next
+                        End If
+                    Next
+                End If
+            Next
+            MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & "Try to get Outlook working Online if possible.", vbExclamation, "New Call Tracking Not Available")
+        End If
+
+HaveNewCallTracking:
+        olNS = OutlookApp.GetNamespace("MAPI")
+        ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
+        intExchangeConnectionMode = olNS.ExchangeConnectionMode
+        OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
+        ' force the form to load in the user's private Tasks folder
+        ' to create a new .oft file, open the form in Design mode, then SaveAs
+        strScratch = "W:\InstantFileTask.oft"
+        If My.Computer.FileSystem.FileExists(strScratch) Then
+            GoTo LoadTemplate
+        Else
+            ' this is only used for development -- couldn't get mapping to W:\ to work 10/28/2015
+            strScratch = "D:\W\InstantFileTask.oft"
+            If My.Computer.FileSystem.FileExists(strScratch) Then
+LoadTemplate:
+                objItem = OutlookApp.CreateItemFromTemplate(strScratch)
+                objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
+                objFD = objItem.FormDescription
+                objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
+            End If
+        End If
+        Exit Sub
+
+Startup_Error:
+        MsgBox(Err.Description, vbExclamation, strTitle)
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
+        On Error GoTo AdxOutlookAppEvents1_Error
+        Dim appAccess As Access.Application
+        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+        ' If appAccess.CurrentProject.Name = "OutlookStubs.accdb" Then
+        If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
+            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
+                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
+            appAccess.Quit(Access.AcQuitOption.acQuitSaveNone)
+        End If
+        Exit Sub
+
+AdxOutlookAppEvents1_Error:
+        If Err.Number = 429 Or Err.Number = 2467 Then
+            ' Access not running
+        Else
+            MsgBox(Err.Description, vbExclamation, "AdxOutlookAppEvents1_Quit")
+        End If
+    End Sub
+
     Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
         MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-2 14:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-3  11:35.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -368,193 +526,6 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    '    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-    '        On Error GoTo DisplayMatOrDoc_Error
-    '        Const strTitle As String = "Display InstantFile Matter or Document"
-    '        Dim appAccess As Access.Application
-    '        Dim lngDocNo As Long, dblMatNo As Double, strID As String, intX As Integer
-    '        Dim myInspector As Outlook.Inspector
-    '        Dim myNotes As Outlook.Items, myNote As Outlook.NoteItem
-    '        Dim olNameSpace As Outlook.NameSpace, olItem As Object
-
-    '        If TypeOf inspector.CurrentItem Is Outlook.MailItem Then
-    '            myMailItem = inspector.CurrentItem
-    '        ElseIf TypeOf inspector.CurrentItem Is Outlook.NoteItem Then
-    '            myNote = inspector.CurrentItem
-    '            ' Note: connecting to Access only works if Access and VS are running as the same user
-    '            ' Especially, if Visual Studio is running as Administrator (e.g., for creating Add-ins), 
-    '            ' Access must also be running as Administrator
-
-    '            If Left(myNote.Subject, 18) = strIFdocNo Then
-    '                lngDocNo = Mid(myNote.Subject, 19)
-    '                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-    '                    MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
-    '                Else
-    '                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-    '                    appAccess.Run("DisplayDocument", lngDocNo)
-    '                End If
-    '            ElseIf Left(myNote.Subject, 18) = strIFmatNo Then
-    '                dblMatNo = Mid(myNote.Subject, 19)
-    '                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-    '                    MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
-    '                Else
-    '                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-    '                    appAccess.Run("DisplayMatter", dblMatNo)
-    '                End If
-    '            ElseIf Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-    '                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
-    '                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-    '                olItem.Display()
-    '            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-    '                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
-    '                olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-    '                olItem.Display()
-    '            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-    '                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-    '                intX = InStr(1, strID, vbNewLine)
-    '                strID = Left(strID, intX - 1)
-    '                olNameSpace = OutlookApp.GetNamespace("MAPI")
-    '                olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
-    '                olItem.Display()
-    '            End If
-    '        End If
-    '        Exit Sub
-
-    'DisplayMatOrDoc_Error:
-    '        If Err.Number = 429 Then
-    '            MsgBox("Could not find the InstantFile program." & vbNewLine & vbNewLine & _
-    '                    "Start InstantFile, then double click on the attachment again to display the item.", vbExclamation, strTitle)
-    '        Else
-    '            MsgBox(Err.Description, vbExclamation, strTitle)
-    '        End If
-    '    End Sub
-
-    Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
-        On Error GoTo Startup_Error
-        Const strTitle As String = "AdxOutlookAppEvents1_Startup()"
-        Dim intX As Integer
-        Dim olPublicFolder As Outlook.MAPIFolder, olFolder As Outlook.MAPIFolder
-        Dim olNS As Outlook.NameSpace, objFolder As Outlook.MAPIFolder, objItem As Outlook.TaskItem
-        Dim objFD As Outlook.FormDescription
-        Dim intHour As Integer
-        Dim intNote As Integer, myNotes As Outlook.Items, myNote As Outlook.NoteItem
-        Dim olRem As Outlook.Reminder
-
-        ' delete any leftover notes from InstantFile attachments
-        myNotes = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes).Items
-        intX = myNotes.Count
-        For intNote = intX To 1 Step -1
-            myNote = myNotes(intNote)
-            If Left(myNote.Body, 18) = strIFmatNo Or _
-                Left(myNote.Body, 18) = strIFdocNo Or _
-                Left(myNote.Body, 8) = "NewCall " Then _
-                myNote.Delete()
-        Next
-
-        ' Set myInspectors = Application.Inspectors
-        myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
-        mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
-        myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
-
-        ' this won't work if the user is working offline
-        If OutlookApp.Session.Offline Then
-            MsgBox("Some InstantFile functionality will not work if you are working Offline." & vbNewLine & vbNewLine & _
-                "(To bring Outlook back Online, look in the bottom right corner of the Outlook window." & vbNewLine & _
-                "If the word 'Offline' is displayed, right-click on it, clear the checkbox to the left of 'Work offline'" & vbNewLine & _
-                "and see if you get a 'Connected' message." & vbNewLine & _
-                "If so, you've solved the problem.)", vbExclamation, "Working Offline")
-        Else
-            For Each olFolder In OutlookApp.Session.Folders
-                ' Debug.Print olFolder.Name
-                If olFolder.Name = "Mailbox - InstantFile" Or olFolder.Name = strInstantFile Then
-                    olInstantFileInbox = olFolder.Folders("Inbox").Items
-                    olInstantFileTasks = olFolder.Folders("Tasks").Items
-
-                    ' delete any leftover notes from InstantFile attachments
-                    myNotes = olFolder.Folders("Notes").Items
-                    intX = myNotes.Count
-                    For intNote = intX To 1 Step -1
-                        myNote = myNotes(intNote)
-                        With myNote
-                            If Left(.Body, Len(strIFmatNo)) = strIFmatNo Or Left(.Body, Len(strIFdocNo)) = strIFdocNo Or Left(.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-                                ' Debug.Print .CreationTime
-                                ' Stop
-                                If DateDiff("h", .CreationTime, Now) > 1 Then .Delete()
-                            End If
-                        End With
-                    Next
-                    myNote = Nothing
-                    myNotes = Nothing
-                    GoTo SetNewCallTracking
-                End If
-            Next olFolder
-            MsgBox("Some InstantFile functions related to Tasks will not work unless you open InstantFile's Mailbox first.", vbExclamation, "InstantFile's Mailbox Not Available")
-
-SetNewCallTracking:
-            For Each olPublicFolder In OutlookApp.Session.Folders
-                If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                    strPublicStoreID = olPublicFolder.StoreID
-                    For Each olFolder In olPublicFolder.Folders
-                        If olFolder.Name = "All Public Folders" Then
-                            For Each myNewCallTracking In olFolder.Folders
-                                If myNewCallTracking.Name = "New Call Tracking" Then GoTo HaveNewCallTracking
-                            Next
-                        End If
-                    Next
-                End If
-            Next
-            MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & "Try to get Outlook working Online if possible.", vbExclamation, "New Call Tracking Not Available")
-        End If
-
-HaveNewCallTracking:
-        olNS = OutlookApp.GetNamespace("MAPI")
-        ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
-        intExchangeConnectionMode = olNS.ExchangeConnectionMode
-        OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
-        ' force the form to load in the user's private Tasks folder
-        ' to create a new .oft file, open the form in Design mode, then SaveAs
-        strScratch = "W:\InstantFileTask.oft"
-        If My.Computer.FileSystem.FileExists(strScratch) Then
-            GoTo LoadTemplate
-        Else
-            ' this is only used for development -- couldn't get mapping to W:\ to work 10/28/2015
-            strScratch = "D:\W\InstantFileTask.oft"
-            If My.Computer.FileSystem.FileExists(strScratch) Then
-LoadTemplate:
-                objItem = OutlookApp.CreateItemFromTemplate(strScratch)
-                objFolder = olNS.GetSharedDefaultFolder(OutlookApp.Session.CurrentUser, Outlook.OlDefaultFolders.olFolderTasks)
-                objFD = objItem.FormDescription
-                objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
-            End If
-        End If
-        Exit Sub
-
-Startup_Error:
-        MsgBox(Err.Description, vbExclamation, strTitle)
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
-        On Error GoTo AdxOutlookAppEvents1_Error
-        Dim appAccess As Access.Application
-        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-        ' If appAccess.CurrentProject.Name = "OutlookStubs.accdb" Then
-        If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
-                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
-            appAccess.Quit(Access.AcQuitOption.acQuitSaveNone)
-        End If
-        Exit Sub
-
-AdxOutlookAppEvents1_Error:
-        If Err.Number = 429 Or Err.Number = 2467 Then
-            ' Access not running
-        Else
-            MsgBox(Err.Description, vbExclamation, "AdxOutlookAppEvents1_Quit")
-        End If
-    End Sub
-
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
         If selection IsNot Nothing Then
             If selection.Count = 1 Then
@@ -572,40 +543,6 @@ AdxOutlookAppEvents1_Error:
                 End If
             End If
         End If
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-        If theExplorer IsNot Nothing Then
-            Dim selection As Outlook.Selection = Nothing
-            Try
-                selection = theExplorer.Selection
-            Catch
-            End Try
-
-            If selection IsNot Nothing Then
-                ConnectToSelectedItem(selection)
-                Marshal.ReleaseComObject(selection)
-            End If
-        End If
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
-        Dim outlookItem As Object = myInsp.CurrentItem
-        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
-        If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
-            Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
-            If myMailItem.Sent Then
-                ' disconnect from the currently connected item 
-                itemEvents.RemoveConnection()
-                ' connect to events of myMailItem 
-                itemEvents.ConnectTo(myMailItem, True)
-            End If
-        Else
-            Marshal.ReleaseComObject(outlookItem)
-        End If
-        'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
