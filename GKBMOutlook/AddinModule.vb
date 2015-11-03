@@ -94,7 +94,7 @@ Public Class AddinModule
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-2  7:40.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-2 14:35.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -602,6 +602,8 @@ AdxOutlookAppEvents1_Error:
                 ' connect to events of myMailItem 
                 itemEvents.ConnectTo(myMailItem, True)
             End If
+        Else
+            Marshal.ReleaseComObject(outlookItem)
         End If
         'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
