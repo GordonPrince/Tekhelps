@@ -74,7 +74,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessRead()
-        ' TODO: Add some code
+        ' MsgBox("ProcessRead fired")
     End Sub
 
     Public Overrides Sub ProcessReply(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -182,6 +182,8 @@ HaveItem:
         Const strNewCallAppointmentTag As String = "NewCall Appointment"
         Const strIFtaskTag As String = "InstantFile_Task"
 
+        Debug.Print(myAttachment.DisplayName)
+        MsgBox("ProcessBeforeAttachmentRead fired.")
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
             If IsDBNull(lngDocNo) Or lngDocNo = 0 Then

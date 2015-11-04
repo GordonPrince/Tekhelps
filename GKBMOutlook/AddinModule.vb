@@ -638,5 +638,21 @@ Link2Contacts_Exit:
         End If
     End Sub
 
+    Private Sub HowManyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton3.OnClick
+        'Dim myAttachments As Outlook.Attachments = ItemActivation.attachments
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+        ' MsgBox("AdxOutlookAppEvents1_NewInspector fired")
+        'Dim myAttachments As Outlook.Attachments = myInsp.CurrentItem.attachments
+        'MsgBox("This item has " & myAttachments.Count & " attachments.", vbInformation, "AdxOutlookAppEvents1_NewInspector")
+        Dim myInsp As Outlook.Inspector = inspector
+        Dim obj As Object = myInsp.CurrentItem
+        Debug.Print(TypeName(obj))
+        If TypeOf obj Is Outlook.NoteItem Then
+            Dim myNote As Outlook.NoteItem = obj
+            MsgBox(myNote.Body)
+        End If
+    End Sub
 End Class
 
