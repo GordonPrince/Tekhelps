@@ -109,6 +109,15 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
+        ' Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
+        ' In the same fashion you handle the ExplorerActivate event. 
+        'That is, InspectorActivate and ExplorerActivate let you handle this scenario: 
+        'the user presses Alt+Tab to switch between Outlook windows. 
+        'Whenever an Outlook window becomes active, 
+        'your code disconnects from events of the currently connected item 
+        'and connects to events of the item which is opened (InspectorActivate) or selected (ExplorerActivate). 
+        'The ExplorerSelectionChange allows you to follow the user selecting another item. 
+
         Dim myExplorer As Outlook.Explorer = CType(explorer, Outlook.Explorer)
         Dim sel As Outlook.Selection = Nothing
         Try
