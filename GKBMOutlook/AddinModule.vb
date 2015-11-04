@@ -286,7 +286,6 @@ Startup_Error:
         On Error GoTo AdxOutlookAppEvents1_Error
         Dim appAccess As Access.Application
         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-        ' If appAccess.CurrentProject.Name = "OutlookStubs.accdb" Then
         If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
             MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
                     "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")

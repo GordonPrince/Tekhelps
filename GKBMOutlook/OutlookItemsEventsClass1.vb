@@ -71,19 +71,20 @@ Public Class OutlookItemsEventsClass1
         On Error GoTo SentItems_Error
 
         ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
-        ' 2011/11/20 additional logic if not using CDO anymore
         If InStr(1, myMailItem.BillingInformation, strCommentID) Or InStr(1, myMailItem.BillingInformation, strDocNo) Then
             GoTo InstantFileEmail
         ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Or Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
             bScanned = True
             GoTo InstantFileEmail
         Else
-            ' if this is InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
+            ' if this is an InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
+            Stop
             For Each myAttachment In myMailItem.Attachments
                 If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
                     dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
-                    If dblMatNo > 0 Then
+                    If dblMatNo = 0 Then
                         myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
+                        If myUserProp Is Nothing Then Return
                         If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
                             bScanned = False
                             If dblMatNo > 0 Then
@@ -92,11 +93,11 @@ Public Class OutlookItemsEventsClass1
                                 dblMatNo = InputBox("Enter the Matter # to save this comment under", strTitle, "0.00")
                                 If dblMatNo = 0 Then
                                     MsgBox("No comment was added to InstantFile about this E-mail.", vbInformation, strTitle)
-                                    Exit Sub
+                                    Return
                                 End If
                             End If
                         Else
-                            Exit Sub
+                            Return
                         End If
                     End If
                 End If
