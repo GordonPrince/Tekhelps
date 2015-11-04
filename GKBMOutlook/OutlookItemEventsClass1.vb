@@ -170,8 +170,8 @@ HaveItem:
 
         myAttachment = attachment
         Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+        Const strNewCallAppointmentTag As String = "NewCall Appointment"
         'Const strIFtaskTag As String = "InstantFile_Task"
-        'Const strNewCallAppointmentTag As String = "NewCall Appointment"
 
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
@@ -198,11 +198,18 @@ HaveItem:
             myAttachment.SaveAsFile(strFile)
             myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
             strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-            Debug.Print(strID)
+            ' Debug.Print(strID)
             If OpenItemFromID(myAttachment.Application, strID) Then
                 e.Cancel = True
             End If
-
+        ElseIf Left(myAttachment.DisplayName, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            myAttachment.SaveAsFile(strFile)
+            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+            If OpenItemFromID(myAttachment.Application, strID) Then
+                e.Cancel = True
+            End If
             '    'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
             '    '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
             '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
@@ -229,13 +236,14 @@ HaveItem:
                 For Each olFolder In olPublicFolder.Folders
                     If olFolder.Name = "All Public Folders" Then
                         Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-                        Dim obj As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                        obj.Display()
+                        Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                        item.Display()
                         Return True
                     End If
                 Next
             End If
         Next
+        Return False
     End Function
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
