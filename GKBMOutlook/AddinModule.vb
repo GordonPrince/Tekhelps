@@ -645,15 +645,23 @@ Link2Contacts_Exit:
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         Dim myInsp As Outlook.Inspector = inspector
         Dim obj As Object = myInsp.CurrentItem
-        Debug.Print(TypeName(obj))
+        ' Debug.Print(TypeName(obj))
         If TypeOf obj Is Outlook.NoteItem Then
             Dim myNote As Outlook.NoteItem = obj
             ' MsgBox(myNote.Body)
-            Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-            Dim strID As String = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-            ' Debug.Print(strID)
-            If OpenItemFromID(myInsp.Application, strID) Then
-                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+            Dim strID As String = Nothing
+            If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+            End If
+            If Len(strID) > 0 Then
+                ' Debug.Print(strID)
+                If OpenItemFromID(myInsp.Application, strID) Then
+                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                End If
             End If
         End If
     End Sub
