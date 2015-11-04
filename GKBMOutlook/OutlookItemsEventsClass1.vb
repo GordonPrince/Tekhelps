@@ -208,7 +208,7 @@ HaveInstantFileMailFolder:
                 If lngX > 0 Then
                     strSQL = Mid(.BillingInformation, lngX + 1)
                     strSQL = Trim(Mid(strSQL, Len(strDocNo)))
-                    strScratch = "update Email set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
+                    strScratch = "UPDATE Email SET EntryID = '" & .EntryID & "' WHERE DocNo = " & CLng(strSQL)
                     ' con.Execute(strScratch, lngX)
                     If Not RunSQLcommand(strScratch) Then
                         MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
