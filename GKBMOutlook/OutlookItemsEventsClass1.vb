@@ -202,66 +202,57 @@ HaveInstantFileMailFolder:
                     If Not RunSQLcommand(strScratch) Then
                         MsgBox("The InstantFile Comment was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
-                    ' update the E-mail with the EntryID
-                    lngX = InStr(1, .BillingInformation, strDocNo)
-                    If lngX > 0 Then
-                        strSQL = Mid(.BillingInformation, lngX + 1)
-                        strSQL = Trim(Mid(strSQL, Len(strDocNo)))
-                        strScratch = "update E-mail set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
-                        ' con.Execute(strScratch, lngX)
-                        If Not RunSQLcommand(strScratch) Then
-                            MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
-                        End If
-                        GoTo SentItems_Exit
-                    ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
-                        intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
-                        If intA > 1 Then
-                            dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
-                        Else
-                            GoTo Prompt4Matter
-                        End If
-                    ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
-                        intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
-                        If intA > 1 Then
-                            dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
-                        Else
-                            GoTo Prompt4Matter
-                        End If
-                    ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
+                End If
+                ' update the E-mail with the EntryID
+                lngX = InStr(1, .BillingInformation, strDocNo)
+                If lngX > 0 Then
+                    strSQL = Mid(.BillingInformation, lngX + 1)
+                    strSQL = Trim(Mid(strSQL, Len(strDocNo)))
+                    strScratch = "update Email set EntryID = '" & .EntryID & "' where DocNo = " & CLng(strSQL)
+                    ' con.Execute(strScratch, lngX)
+                    If Not RunSQLcommand(strScratch) Then
+                        MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
+                    End If
+                    GoTo SentItems_Exit
+                ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
+                    intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
+                    If intA > 1 Then
+                        dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
                     Else
+                        GoTo Prompt4Matter
+                    End If
+                ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
+                    intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
+                    If intA > 1 Then
+                        dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
+                    Else
+                        GoTo Prompt4Matter
+                    End If
+                ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
+                Else
 Prompt4Matter:
-                        dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
-                    End If
-
-AddRecipientsAndBody:
-                    For Each myRecipient In .Recipients
-                        strBody = strBody & myRecipient.Name & "; "
-                    Next myRecipient
-                    strBody = Left(strBody, Len(strBody) - 2)
-
-                    If bScanned Then
-                        strBody = strBody & strDocScanned
-                        intA = InStr(Len(strDocScanned) + 1, .Body, "Author:")
-                        If intA > 0 Then strBody = strBody & Trim(Mid(.Body, intA + 7))
-                    Else
-                        strBody = strBody & " -- " & myMove.Body
-                    End If
+                    dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
                 End If
             End If
-            ' 11/4/2015 added this to compensate for clearing the BillingInformation prior to getting here
-            Const strEmailto As String = "email to "
-            If Len(strBody) < 10 Then strBody = strEmailto
-            If strBody = strEmailto Then
-                bScanned = False
-                GoTo AddRecipientsAndBody
+
+AddRecipientsAndBody:
+            strBody = "email to "
+            For Each myRecipient In .Recipients
+                strBody = strBody & myRecipient.Name & "; "
+            Next myRecipient
+            strBody = Left(strBody, Len(strBody) - 2)
+
+            If bScanned Then
+                strBody = strBody & strDocScanned
+                intA = InStr(Len(strDocScanned) + 1, .Body, "Author:")
+                If intA > 0 Then strBody = strBody & Trim(Mid(.Body, intA + 7))
+            Else
+                strBody = strBody & " -- " & myMove.Body
             End If
         End With
 
         If Len(strBody) > 0 Then
             strBody = Replace(strBody, "Summary:", vbNullString)
-            'Do While InStr(1, strBody, Chr(160))
-            '    strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
-            'Loop
             strBody = LTrim(strBody)
             Do While InStr(1, strBody, vbNewLine & vbNewLine)
                 strBody = Replace(strBody, vbNewLine & vbNewLine, vbNewLine)

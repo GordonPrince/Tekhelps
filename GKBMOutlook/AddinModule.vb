@@ -656,7 +656,7 @@ Link2Contacts_Exit:
             If Len(strID) > 0 Then
                 ' Debug.Print(strID)
                 If OpenItemFromID(myInsp.Application, strID) Then
-                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                    ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                 End If
             End If
         End If

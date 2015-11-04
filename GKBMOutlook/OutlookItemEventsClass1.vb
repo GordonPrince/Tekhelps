@@ -182,8 +182,8 @@ HaveItem:
         'Const strNewCallAppointmentTag As String = "NewCall Appointment"
         'Const strIFtaskTag As String = "InstantFile_Task"
 
-        Debug.Print(myAttachment.DisplayName)
-        MsgBox("ProcessBeforeAttachmentRead fired.")
+        'Debug.Print(myAttachment.DisplayName)
+        'MsgBox("ProcessBeforeAttachmentRead fired.")
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
             If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
