@@ -165,7 +165,9 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
+        Const strFile As String = "C:\tmp\myAttachment.msg"
         Dim myNote As Outlook.NoteItem, strID As String
+
         myAttachment = attachment
         Const strNewCallTrackingTag As String = "NewCall Tracking Item"
         'Const strIFtaskTag As String = "InstantFile_Task"
@@ -192,19 +194,14 @@ HaveItem:
                 e.Cancel = True
             End If
         ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            'strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
-            'olNameSpace = OutlookApp.GetNamespace("MAPI")
-            'olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            'olItem.Display()
-            ' Debug.Print(TypeName(myAttachment))
-            Const strFile As String = "C:\tmp\myAttachment.msg"
             If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
             myAttachment.SaveAsFile(strFile)
             myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            ' strID = My.Computer.FileSystem.ReadAllText(strFile)
-            strID = myNote.Body
+            strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
             Debug.Print(strID)
-
+            If OpenItemFromID(myAttachment.Application, strID) Then
+                e.Cancel = True
+            End If
 
             '    'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
             '    '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
@@ -222,6 +219,24 @@ HaveItem:
             MsgBox("This should open " & myAttachment.DisplayName & " instead of displaying the Note.")
         End If
     End Sub
+
+    Public Function OpenItemFromID(OutlookApp As Outlook.Application, strID As String) As Boolean
+        Const strPublicFolders As String = "Public Folders"
+        Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
+        For Each olPublicFolder In OutlookApp.Session.Folders
+            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                strPublicStoreID = olPublicFolder.StoreID
+                For Each olFolder In olPublicFolder.Folders
+                    If olFolder.Name = "All Public Folders" Then
+                        Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
+                        Dim obj As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                        obj.Display()
+                        Return True
+                    End If
+                Next
+            End If
+        Next
+    End Function
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
