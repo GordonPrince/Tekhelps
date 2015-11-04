@@ -188,7 +188,7 @@ HaveInstantFileMailFolder:
 
         Dim lngX As Int16
         With myMove
-            ' Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
+            Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
             If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                 ' update the Comment with the EntryID
                 lngX = InStr(1, .BillingInformation, strCommentID)
@@ -233,9 +233,11 @@ Prompt4Matter:
                         dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
                     End If
 
+AddRecipientsAndBody:
                     For Each myRecipient In .Recipients
                         strBody = strBody & myRecipient.Name & "; "
                     Next myRecipient
+                    strBody = Left(strBody, Len(strBody) - 2)
 
                     If bScanned Then
                         strBody = strBody & strDocScanned
@@ -246,13 +248,21 @@ Prompt4Matter:
                     End If
                 End If
             End If
+            ' 11/4/2015 added this to compensate for clearing the BillingInformation prior to getting here
+            Const strEmailto As String = "email to"
+            If Len(strBody) < 10 Then strBody = strEmailto
+            If strBody = strEmailto Then
+                bScanned = False
+                GoTo AddRecipientsAndBody
+            End If
         End With
 
         If Len(strBody) > 0 Then
             strBody = Replace(strBody, "Summary:", vbNullString)
-            Do While InStr(1, strBody, Chr(160))
-                strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
-            Loop
+            'Do While InStr(1, strBody, Chr(160))
+            '    strBody = Replace(strBody, Chr(160), vbNullString)   ' these are spaces
+            'Loop
+            strBody = LTrim(strBody)
             Do While InStr(1, strBody, vbNewLine & vbNewLine)
                 strBody = Replace(strBody, vbNewLine & vbNewLine, vbNewLine)
             Loop
@@ -261,7 +271,7 @@ Prompt4Matter:
         strSQL = "INSERT INTO COMMENT (matter_no, author, summary, EntryID)" & _
                 " VALUES (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
         If RunSQLcommand(strSQL) Then
-            MsgBox("An InstantFile comment was created from the E-mail you sent" & vbNewLine & _
+            MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
                    "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
         End If
 
