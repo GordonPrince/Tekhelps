@@ -249,7 +249,7 @@ AddRecipientsAndBody:
                 End If
             End If
             ' 11/4/2015 added this to compensate for clearing the BillingInformation prior to getting here
-            Const strEmailto As String = "email to"
+            Const strEmailto As String = "email to "
             If Len(strBody) < 10 Then strBody = strEmailto
             If strBody = strEmailto Then
                 bScanned = False
