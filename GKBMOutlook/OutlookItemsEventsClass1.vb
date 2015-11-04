@@ -41,9 +41,9 @@ Public Class OutlookItemsEventsClass1
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
             appOutlook = myMailItem.Application
-        Else
             Dim myFolder As Outlook.Folder = SourceFolder
-            Debug.Print(myFolder.FolderPath)
+            Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
+        Else
             Exit Sub
         End If
 
@@ -80,66 +80,72 @@ Public Class OutlookItemsEventsClass1
             ' if this is an InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
             Stop
             For Each myAttachment In myMailItem.Attachments
-                If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
-                    dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
-                    If dblMatNo = 0 Then
-                        myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
-                        If myUserProp Is Nothing Then Return
-                        If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
-                            bScanned = False
-                            If dblMatNo > 0 Then
-                                GoTo InstantFileEmail
-                            Else
-                                dblMatNo = InputBox("Enter the Matter # to save this comment under", strTitle, "0.00")
-                                If dblMatNo = 0 Then
-                                    MsgBox("No comment was added to InstantFile about this E-mail.", vbInformation, strTitle)
-                                    Return
-                                End If
-                            End If
+                Debug.Print(myAttachment.DisplayName)
+                strScratch = myAttachment.ToString()
+                Debug.Print(strScratch)
+                'If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
+                dblMatNo = EmailMatNo(myAttachment, myMailItem.Subject)
+                If dblMatNo > 0 Then
+                    myUserProp = myMailItem.UserProperties.Find("CameFromOutlook")
+                    If myUserProp Is Nothing Then Return
+                    If MsgBox("Save the E-mail you sent as a Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
+                        bScanned = False
+                        If dblMatNo > 0 Then
+                            GoTo InstantFileEmail
                         Else
-                            Return
+                            dblMatNo = InputBox("Enter the Matter # to save this comment under", strTitle, "0.00")
+                            If dblMatNo = 0 Then
+                                MsgBox("No comment was added to InstantFile about this E-mail.", vbInformation, strTitle)
+                                Return
+                            End If
                         End If
+                    Else
+                        Return
                     End If
                 End If
+                'End If
             Next
             'End If
             ' if no Note attachment had the MatterNo on it, try to determine the MatterNo from the DocNo that's attached
             For Each myAttachment In myMailItem.Attachments
                 ' If myAttachment.Application = "Outlook" And myAttachment.Class = 5 Then
-                If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
-                    strScratch = myAttachment.DisplayName
-                    ' added 10/25/2010
-                    If strScratch = "NewCall Tracking Item" Then
-                    Else
-                        intA = InStr(1, strScratch, strIFdocNo)
-                        If intA Then
-                            On Error Resume Next
-                            lngDocNo = Mid(strScratch, intA + Len(strIFdocNo))
-                            On Error GoTo SentItems_Error
-                        End If
-                        If lngDocNo > 0 Then
-                            '    With con
-                            '        .Open(strConnectionString)
-                            '        rst = .Execute("sp_MatNo4DocNo " & lngDocNo)
-                            '    End With
-                            '    With rst
-                            '        If .EOF Then
-                            '            MsgBox("Could not find MatterNo for DocNo=" & lngDocNo & "." & vbNewLine & vbNewLine & _
-                            '                    "Please forward the E-mail you just sent to Gordon" & vbNewLine & _
-                            '                    "and type 'Could not find MatterNo for DocNo' as the message body.", vbExclamation, strTitle)
-                            '        Else
-                            '            dblMatNo = .Fields("matter_no")
-                            '        End If
-                            '        .Close()
-                            '    End With
-                            '    rst = Nothing
-                        End If
-                        ' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
-                        ' GoTo Prompt2Save
+                'If TypeOf myAttachment.Application Is Outlook.Application And myAttachment.Class = 5 Then
+                strScratch = myAttachment.DisplayName
+                ' added 10/25/2010
+                If strScratch = "NewCall Tracking Item" Then
+                Else
+                    intA = InStr(1, strScratch, strIFdocNo)
+                    If intA Then
+                        On Error Resume Next
+                        lngDocNo = Mid(strScratch, intA + Len(strIFdocNo))
+                        On Error GoTo SentItems_Error
                     End If
+                    If lngDocNo > 0 Then
+                        '    With con
+                        '        .Open(strConnectionString)
+                        '        rst = .Execute("sp_MatNo4DocNo " & lngDocNo)
+                        '    End With
+                        '    With rst
+                        '        If .EOF Then
+                        '            MsgBox("Could not find MatterNo for DocNo=" & lngDocNo & "." & vbNewLine & vbNewLine & _
+                        '                    "Please forward the E-mail you just sent to Gordon" & vbNewLine & _
+                        '                    "and type 'Could not find MatterNo for DocNo' as the message body.", vbExclamation, strTitle)
+                        '        Else
+                        '            dblMatNo = .Fields("matter_no")
+                        '        End If
+                        '        .Close()
+                        '    End With
+                        '    rst = Nothing
+                    End If
+                    ' if dblmatno is not set, prompt for the MatterNo after prompting to save the email
+                    ' GoTo Prompt2Save
                 End If
+                'End If
             Next
         End If
+
+        ' if you get here there either aren't any attachments or it's not an Import2InstantFile document that's attached or it's the attachment is a NewCallTracking note
+        Exit Sub
 
 InstantFileEmail:
         For Each pFolder In appOutlook.Session.Folders
@@ -289,7 +295,7 @@ SentItems_Error:
         ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
             EmailMatNo = MatNoFromSubject(strSubject)
         Else
-            EmailMatNo = False
+            EmailMatNo = 0
         End If
         Exit Function
 
