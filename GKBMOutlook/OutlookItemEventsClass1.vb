@@ -49,7 +49,7 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         If TypeOf Forward Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = Forward
-            Debug.Print("ProcessForward() myMailItem.BillingInformation = " & myMailItem.BillingInformation)
+            ' Debug.Print("ProcessForward() myMailItem.BillingInformation = " & myMailItem.BillingInformation)
             myMailItem.BillingInformation = vbNullString
             Dim myAttachment As Outlook.Attachment
             For Each myAttachment In myMailItem.Attachments
@@ -165,9 +165,9 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
-        ' MsgBox("ProcessBeforeAttachmentRead fired")
+        Dim myNote As Outlook.NoteItem, strID As String
         myAttachment = attachment
-        'Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+        Const strNewCallTrackingTag As String = "NewCall Tracking Item"
         'Const strIFtaskTag As String = "InstantFile_Task"
         'Const strNewCallAppointmentTag As String = "NewCall Appointment"
 
@@ -191,11 +191,21 @@ HaveItem:
                 appAccess.Run("DisplayMatter", dblMatNo)
                 e.Cancel = True
             End If
-            '    ' ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            '    '    strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
-            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            '    '    olItem.Display()
+        ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+            'strID = Mid(myNoteItem.Body, Len(strNewCallTrackingTag) + 3)
+            'olNameSpace = OutlookApp.GetNamespace("MAPI")
+            'olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            'olItem.Display()
+            ' Debug.Print(TypeName(myAttachment))
+            Const strFile As String = "C:\tmp\myAttachment.msg"
+            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            myAttachment.SaveAsFile(strFile)
+            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            ' strID = My.Computer.FileSystem.ReadAllText(strFile)
+            strID = myNote.Body
+            Debug.Print(strID)
+
+
             '    'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
             '    '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
             '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
