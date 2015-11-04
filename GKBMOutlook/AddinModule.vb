@@ -643,9 +643,6 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        ' MsgBox("AdxOutlookAppEvents1_NewInspector fired")
-        'Dim myAttachments As Outlook.Attachments = myInsp.CurrentItem.attachments
-        'MsgBox("This item has " & myAttachments.Count & " attachments.", vbInformation, "AdxOutlookAppEvents1_NewInspector")
         Dim myInsp As Outlook.Inspector = inspector
         Dim obj As Object = myInsp.CurrentItem
         Debug.Print(TypeName(obj))
