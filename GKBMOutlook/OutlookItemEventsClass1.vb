@@ -174,13 +174,13 @@ HaveItem:
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
-        Const strFile As String = "C:\tmp\myAttachment.msg"
-        Dim myNote As Outlook.NoteItem, strID As String
+        'Const strFile As String = "C:\tmp\myAttachment.msg"
+        'Dim myNote As Outlook.NoteItem, strID As String
 
         myAttachment = attachment
-        Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-        Const strNewCallAppointmentTag As String = "NewCall Appointment"
-        Const strIFtaskTag As String = "InstantFile_Task"
+        'Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+        'Const strNewCallAppointmentTag As String = "NewCall Appointment"
+        'Const strIFtaskTag As String = "InstantFile_Task"
 
         Debug.Print(myAttachment.DisplayName)
         MsgBox("ProcessBeforeAttachmentRead fired.")
@@ -204,31 +204,32 @@ HaveItem:
                 appAccess.Run("DisplayMatter", dblMatNo)
                 e.Cancel = True
             End If
-        ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            myAttachment.SaveAsFile(strFile)
-            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-            ' Debug.Print(strID)
-            If OpenItemFromID(myAttachment.Application, strID) Then
-                e.Cancel = True
-            End If
-        ElseIf Left(myAttachment.DisplayName, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            myAttachment.SaveAsFile(strFile)
-            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-            If OpenItemFromID(myAttachment.Application, strID) Then
-                e.Cancel = True
-            End If
-        ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then
-            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            myAttachment.SaveAsFile(strFile)
-            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-            If OpenItemFromID(myAttachment.Application, strID) Then
-                e.Cancel = True
-            End If
+            ' these don't seem to work here -- copied to AdxOutlookAppEvents1_NewInspector
+            'ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            '    myAttachment.SaveAsFile(strFile)
+            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            '    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+            '    ' Debug.Print(strID)
+            '    If OpenItemFromID(myAttachment.Application, strID) Then
+            '        e.Cancel = True
+            '    End If
+            'ElseIf Left(myAttachment.DisplayName, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            '    myAttachment.SaveAsFile(strFile)
+            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            '    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+            '    If OpenItemFromID(myAttachment.Application, strID) Then
+            '        e.Cancel = True
+            '    End If
+            'ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then
+            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            '    myAttachment.SaveAsFile(strFile)
+            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            '    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+            '    If OpenItemFromID(myAttachment.Application, strID) Then
+            '        e.Cancel = True
+            '    End If
         End If
     End Sub
 

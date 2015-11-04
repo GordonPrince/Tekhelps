@@ -648,8 +648,33 @@ Link2Contacts_Exit:
         Debug.Print(TypeName(obj))
         If TypeOf obj Is Outlook.NoteItem Then
             Dim myNote As Outlook.NoteItem = obj
-            MsgBox(myNote.Body)
+            ' MsgBox(myNote.Body)
+            Const strNewCallTrackingTag As String = "NewCall Tracking Item"
+            Dim strID As String = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+            ' Debug.Print(strID)
+            If OpenItemFromID(myInsp.Application, strID) Then
+                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+            End If
         End If
     End Sub
+
+    Public Function OpenItemFromID(OutlookApp As Outlook.Application, strID As String) As Boolean
+        Const strPublicFolders As String = "Public Folders"
+        Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
+        For Each olPublicFolder In OutlookApp.Session.Folders
+            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                strPublicStoreID = olPublicFolder.StoreID
+                For Each olFolder In olPublicFolder.Folders
+                    If olFolder.Name = "All Public Folders" Then
+                        Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
+                        Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                        item.Display()
+                        Return True
+                    End If
+                Next
+            End If
+        Next
+        Return False
+    End Function
 End Class
 
