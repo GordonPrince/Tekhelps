@@ -332,12 +332,12 @@ EmailMatNo_Error:
         Try
             cmd.Connection.Open()
             cmd.ExecuteNonQuery()
-            RunSQLcommand = True
+            con.Close()
+            Return True
         Catch ex As Exception
-            RunSQLcommand = False
+            Return False
         End Try
         ' End Using
-        con.Close()
     End Function
 
     Public Function SQLConnectionString() As String

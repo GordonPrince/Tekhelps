@@ -171,7 +171,7 @@ HaveItem:
         myAttachment = attachment
         Const strNewCallTrackingTag As String = "NewCall Tracking Item"
         Const strNewCallAppointmentTag As String = "NewCall Appointment"
-        'Const strIFtaskTag As String = "InstantFile_Task"
+        Const strIFtaskTag As String = "InstantFile_Task"
 
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
@@ -210,20 +210,14 @@ HaveItem:
             If OpenItemFromID(myAttachment.Application, strID) Then
                 e.Cancel = True
             End If
-            '    'ElseIf Left(myNoteItem.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-            '    '    strID = Mid(myNoteItem.Body, Len(strNewCallAppointmentTag) + 3)
-            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    '    olItem = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            '    '    olItem.Display()
-            '    'ElseIf Left(myNoteItem.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-            '    '    strID = Mid(myNoteItem.Body, Len(strIFtaskTag) + 3)
-            '    '    intX = InStr(1, strID, vbNewLine)
-            '    '    strID = Left(strID, intX - 1)
-            '    '    olNameSpace = OutlookApp.GetNamespace("MAPI")
-            '    '    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
-            '    '    olItem.Display()
-        Else
-            MsgBox("This should open " & myAttachment.DisplayName & " instead of displaying the Note.")
+        ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then
+            If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
+            myAttachment.SaveAsFile(strFile)
+            myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
+            strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+            If OpenItemFromID(myAttachment.Application, strID) Then
+                e.Cancel = True
+            End If
         End If
     End Sub
 
