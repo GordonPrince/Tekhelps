@@ -182,7 +182,7 @@ HaveInstantFileMailFolder:
             Else
                 MsgBox("No initials were entered. No comment about this E-mail could be created.", vbExclamation, strTitle)
                 con.Close()
-                GoTo SentItems_Exit
+                Exit Sub
             End If
         End If
 
@@ -203,7 +203,7 @@ HaveInstantFileMailFolder:
                         MsgBox("The InstantFile Comment was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
                 End If
-                ' update the E-mail with the EntryID
+                ' update the Email row with the EntryID
                 lngX = InStr(1, .BillingInformation, strDocNo)
                 If lngX > 0 Then
                     strSQL = Mid(.BillingInformation, lngX + 1)
@@ -213,26 +213,26 @@ HaveInstantFileMailFolder:
                     If Not RunSQLcommand(strScratch) Then
                         MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
-                    GoTo SentItems_Exit
-                ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
-                    intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
-                    If intA > 1 Then
-                        dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
-                    Else
-                        GoTo Prompt4Matter
-                    End If
-                ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
-                    intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
-                    If intA > 1 Then
-                        dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
-                    Else
-                        GoTo Prompt4Matter
-                    End If
-                ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
-                Else
-Prompt4Matter:
-                    dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
                 End If
+                Exit Sub
+            ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
+                intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
+                If intA > 1 Then
+                    dblMatNo = Mid(.Subject, Len(strDocScanned) + 2, intA)
+                Else
+                    GoTo Prompt4Matter
+                End If
+            ElseIf Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
+                intA = InStr(1, Mid(.Subject, Len(strLastScanned) + 2), Space(1))
+                If intA > 1 Then
+                    dblMatNo = Mid(.Subject, Len(strLastScanned) + 2, intA)
+                Else
+                    GoTo Prompt4Matter
+                End If
+            ElseIf dblMatNo > 0 Then ' don't prompt for the dblMatNo
+            Else
+Prompt4Matter:
+                dblMatNo = InputBox("Enter the Matter # this E-mail should be saved in.", strTitle)
             End If
 
 AddRecipientsAndBody:
@@ -265,8 +265,6 @@ AddRecipientsAndBody:
             MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
                    "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
         End If
-
-SentItems_Exit:
         Exit Sub
 
 SentItems_Error:
@@ -274,7 +272,6 @@ SentItems_Error:
         Else
             MsgBox(Err.Description, vbExclamation, strTitle)
         End If
-        GoTo SentItems_Exit
     End Sub
 
     Function EmailMatNo(myAttach As Outlook.Attachment, strSubject As String) As Double
