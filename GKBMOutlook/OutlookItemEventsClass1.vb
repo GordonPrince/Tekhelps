@@ -188,10 +188,10 @@ HaveItem:
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayDocument", lngDocNo)
-                    e.Cancel = True
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
                 End Try
+                e.Cancel = True
             End If
         ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
             Const strMat As String = "Show Matter in InstantFile"
@@ -203,10 +203,10 @@ HaveItem:
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayMatter", dblMatNo)
-                    e.Cancel = True
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
                 End Try
+                e.Cancel = True
             End If
         End If
     End Sub
