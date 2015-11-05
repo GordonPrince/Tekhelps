@@ -39,10 +39,12 @@ Public Class OutlookItemsEventsClass1
 
         Static strLastID As String
 
+        Dim myFolder As Outlook.Folder = SourceFolder
+        'Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
+
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
-            Dim myFolder As Outlook.Folder = SourceFolder
-            ' Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
+            'Debug.Print("myMailItem.Subject = " & myMailItem.Subject)
         Else
             Exit Sub
         End If
@@ -54,27 +56,33 @@ Public Class OutlookItemsEventsClass1
             Exit Sub
         End If
 
+        ' 11/5/2015 commented all of this out troubleshooting error after running SQL update statement
+        ' with this commented out, the error changed
         ' Outlook 2010 seems to process each item twice. The first time works, subsequent times fail
         ' On Error Resume Next
-        strScratch = myMailItem.EntryID
-        If Err.Number = 0 Then
-            If myMailItem.EntryID = strLastID Then
-                Exit Sub
-            Else
-                strLastID = myMailItem.EntryID
-            End If
-        Else
-            Err.Clear()
-            Exit Sub
-        End If
+        'strScratch = myMailItem.EntryID
+        'If Err.Number = 0 Then
+        '    If myMailItem.EntryID = strLastID Then
+        '        Exit Sub
+        '    Else
+        '        strLastID = myMailItem.EntryID
+        '    End If
+        'Else
+        '    Err.Clear()
+        '    Exit Sub
+        'End If
         ' On Error GoTo SentItems_Error
 
         ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
-        If InStr(1, myMailItem.BillingInformation, strCommentID) Or InStr(1, myMailItem.BillingInformation, strDocNo) Then
-            GoTo InstantFileEmail
-        ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Or Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
-            bScanned = True
-            GoTo InstantFileEmail
+        If Len(myMailItem.BillingInformation) > 0 Then
+            If InStr(1, myMailItem.BillingInformation, strCommentID) Or InStr(1, myMailItem.BillingInformation, strDocNo) Then
+                GoTo InstantFileEmail
+            End If
+        ElseIf Len(myMailItem.Subject) > 0 Then
+            If Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Or Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
+                bScanned = True
+                GoTo InstantFileEmail
+            End If
         Else
             ' if this is an InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
             For Each myAttachment In myMailItem.Attachments
@@ -222,7 +230,7 @@ HaveInstantFileMailFolder:
                 End If
                 ' without the MsgBox here I get an error
                 Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
+                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))

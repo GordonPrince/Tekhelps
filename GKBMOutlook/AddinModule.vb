@@ -163,7 +163,7 @@ Public Class AddinModule
         ' this seems to fire only when the first Inspector window opens, not when a second or third item is opened in another Inspector window
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
         Dim outlookItem As Object = inspector.CurrentItem
-        Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
+        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
             If myMailItem.Sent Then
@@ -182,12 +182,11 @@ Public Class AddinModule
         '' connect to events of myMailItem 
         'itemEvents.ConnectTo(outlookItem, True)
 
-        Debug.Print("inspector.Application.Inspectors.count = " & inspector.Application.Inspectors.count)
-        For Each myInsp In inspector.Application.Inspectors
-            Debug.Print(TypeName(myInsp.CurrentItem))
-        Next
-        Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
-
+        'Debug.Print("inspector.Application.Inspectors.count = " & inspector.Application.Inspectors.count)
+        'For Each myInsp In inspector.Application.Inspectors
+        '    Debug.Print(TypeName(myInsp.CurrentItem))
+        'Next
+        'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
