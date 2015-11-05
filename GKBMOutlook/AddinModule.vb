@@ -305,7 +305,7 @@ AdxOutlookAppEvents1_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-4 18:00.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-5  6:00.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -670,9 +670,14 @@ Link2Contacts_Exit:
                 For Each olFolder In olPublicFolder.Folders
                     If olFolder.Name = "All Public Folders" Then
                         Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-                        Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                        item.Display()
-                        Return True
+                        Try
+                            Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+                            item.Display()
+                            Return True
+                        Catch
+                            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
+                            Return False
+                        End Try
                     End If
                 Next
             End If
