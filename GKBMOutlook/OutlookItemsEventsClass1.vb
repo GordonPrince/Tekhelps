@@ -42,7 +42,7 @@ Public Class OutlookItemsEventsClass1
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
             Dim myFolder As Outlook.Folder = SourceFolder
-            Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
+            ' Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
         Else
             Exit Sub
         End If
@@ -223,7 +223,7 @@ HaveInstantFileMailFolder:
                 End If
                 ' without the MsgBox here I get an error
                 Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
+                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
