@@ -14,6 +14,8 @@ Public Class OutlookItemEventsClass1
     Const strDocScanned As String = "Document scanned + imported:"
     Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
 
+    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
     End Sub
@@ -53,7 +55,6 @@ Public Class OutlookItemEventsClass1
             myMailItem.BillingInformation = vbNullString
             Dim myAttachment As Outlook.Attachment
             For Each myAttachment In myMailItem.Attachments
-                ' 11/3/2015 changed from VBA: If TypeOf myAttachment Is Outlook.Application And myAttachment.Class = 5 Then
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
                         Dim myUserProp As Outlook.UserProperty = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
@@ -88,7 +89,7 @@ Public Class OutlookItemEventsClass1
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
         ' adds Outlook attachments from original message to Reply or ReplyAll
         Const strMsg As String = ".msg"
-        Dim outlookApp As Outlook.Application, myResponse As Outlook.MailItem = Nothing
+        Dim myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem = Nothing
         Dim myAttachment As Outlook.Attachment, strFileName As String
         ' Dim myNoteA As Outlook.NoteItem
@@ -96,7 +97,7 @@ Public Class OutlookItemEventsClass1
 
         If TypeOf Response Is Outlook.MailItem Then
             myResponse = Response
-            outlookApp = myResponse.Application
+            ' outlookApp = myResponse.Application
             If outlookApp.Inspectors.Count = 0 Then
                 ' the user hit Reply from the Explorer window -- there's not item open in an Inspector window
                 myOriginal = outlookApp.ActiveExplorer.Selection.Item(1)
@@ -148,7 +149,7 @@ HaveItem:
     End Function
 
     Public Overrides Sub ProcessSend(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' ItemSend event of the Outlook.Application object
+        ' ItemSend event of the object
     End Sub
 
     Public Overrides Sub ProcessWrite(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -211,7 +212,7 @@ HaveItem:
         End If
     End Sub
 
-    Public Function OpenItemFromID(OutlookApp As Outlook.Application, strID As String) As Boolean
+    Public Function OpenItemFromID(strID As String) As Boolean
         Const strPublicFolders As String = "Public Folders"
         Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
         For Each olPublicFolder In OutlookApp.Session.Folders

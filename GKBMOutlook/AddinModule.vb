@@ -318,7 +318,7 @@ AdxOutlookAppEvents1_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-5  12:05.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-5  17:15.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -541,16 +541,19 @@ Link2Contacts_Exit:
 
     Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
         Const strTitle As String = "Copy Item to Drafts Folder"
-        Dim olTask As Outlook.TaskItem, olNew As Outlook.TaskItem
+
         Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
         If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
-            olTask = OutlookApp.ActiveInspector.CurrentItem
-            olNew = olTask.Copy()
+            Dim olTask As Outlook.TaskItem = OutlookApp.ActiveInspector.CurrentItem
+            Dim olNew As Outlook.TaskItem
+            With olTask
+                .Save()
+                olNew = .Copy()
+            End With
             With olNew
                 strSubject = .Subject
                 ' otherwise olNew uses the current date/time
                 .UserProperties("CallDate").Value = olTask.UserProperties("CallDate")
-
                 Try
                     ' most users don't have permissions to MOVE it (deletes from NewCallTracking)
                     .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
@@ -562,10 +565,13 @@ Link2Contacts_Exit:
                 .UserProperties("CallDate").Value = #8/8/1988#
                 .Save()
             End With
-            If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
-                      "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
-                olTask.Close(Outlook.OlInspectorClose.olSave)
-            End If
+            ' 11/5/2015 put this here to minimize chance of editing conflicts
+            olTask.Close(Outlook.OlInspectorClose.olSave)
+            olTask = Nothing
+            'If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
+            '          "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
+            '    olTask.Close(Outlook.OlInspectorClose.olSave)
+            'End If
 
             ' display the new item for the user
             olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
@@ -667,7 +673,7 @@ Link2Contacts_Exit:
             End If
             If Len(strID) > 0 Then
                 ' Debug.Print(strID)
-                If OpenItemFromID(myInsp.Application, strID) Then
+                If OpenItemFromID(strID) Then
                     ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                 End If
             End If
@@ -677,7 +683,7 @@ Link2Contacts_Exit:
         End If
     End Sub
 
-    Public Function OpenItemFromID(OutlookApp As Outlook.Application, strID As String) As Boolean
+    Public Function OpenItemFromID(strID As String) As Boolean
         Const strPublicFolders As String = "Public Folders"
         Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
         For Each olPublicFolder In OutlookApp.Session.Folders
