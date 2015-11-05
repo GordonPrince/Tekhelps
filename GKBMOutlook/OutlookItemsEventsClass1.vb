@@ -65,7 +65,6 @@ Public Class OutlookItemsEventsClass1
             End If
         Else
             Err.Clear()
-            myMailItem = Nothing
             Exit Sub
         End If
         ' On Error GoTo SentItems_Error
@@ -223,7 +222,7 @@ HaveInstantFileMailFolder:
                 End If
                 ' without the MsgBox here I get an error
                 Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
+                ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
