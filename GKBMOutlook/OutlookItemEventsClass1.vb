@@ -172,64 +172,42 @@ HaveItem:
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
+        Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
+                                 "Open InstantFile, then try this again."
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
-        'Const strFile As String = "C:\tmp\myAttachment.msg"
-        'Dim myNote As Outlook.NoteItem, strID As String
-
         myAttachment = attachment
-        'Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-        'Const strNewCallAppointmentTag As String = "NewCall Appointment"
-        'Const strIFtaskTag As String = "InstantFile_Task"
-
-        'Debug.Print(myAttachment.DisplayName)
-        'MsgBox("ProcessBeforeAttachmentRead fired.")
+        ' Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
+            Const strDoc As String = "Open InstantFile Document"
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
             If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                MsgBox("The item does not have a DocNo.", vbExclamation, "Show Document")
+                MsgBox("The item does not have a DocNo.", vbExclamation, strDoc)
             Else
-                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                If Not appAccess.Visible Then appAccess.Visible = True
-                appAccess.Run("DisplayDocument", lngDocNo)
-                e.Cancel = True
+                Try
+                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                    If Not appAccess.Visible Then appAccess.Visible = True
+                    appAccess.Run("DisplayDocument", lngDocNo)
+                    e.Cancel = True
+                Catch
+                    MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
+                End Try
             End If
         ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
+            Const strMat As String = "Show Matter in InstantFile"
             Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
             If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                MsgBox("The item does not have a MatterNo.", vbExclamation, "Show Matter")
+                MsgBox("The item does not have a MatterNo.", vbExclamation, strMat)
             Else
-                appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                If Not appAccess.Visible Then appAccess.Visible = True
-                appAccess.Run("DisplayMatter", dblMatNo)
-                e.Cancel = True
+                Try
+                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                    If Not appAccess.Visible Then appAccess.Visible = True
+                    appAccess.Run("DisplayMatter", dblMatNo)
+                    e.Cancel = True
+                Catch
+                    MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
+                End Try
             End If
-            ' these don't seem to work here -- copied to AdxOutlookAppEvents1_NewInspector
-            'ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            '    myAttachment.SaveAsFile(strFile)
-            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            '    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-            '    ' Debug.Print(strID)
-            '    If OpenItemFromID(myAttachment.Application, strID) Then
-            '        e.Cancel = True
-            '    End If
-            'ElseIf Left(myAttachment.DisplayName, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            '    myAttachment.SaveAsFile(strFile)
-            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            '    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-            '    If OpenItemFromID(myAttachment.Application, strID) Then
-            '        e.Cancel = True
-            '    End If
-            'ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then
-            '    If My.Computer.FileSystem.FileExists(strFile) Then My.Computer.FileSystem.DeleteFile(strFile)
-            '    myAttachment.SaveAsFile(strFile)
-            '    myNote = myAttachment.Application.CreateItemFromTemplate(strFile)
-            '    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-            '    If OpenItemFromID(myAttachment.Application, strID) Then
-            '        e.Cancel = True
-            '    End If
         End If
     End Sub
 

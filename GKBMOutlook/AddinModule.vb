@@ -160,9 +160,10 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        ' this seems to fire only when the first Inspector window opens, not when a second or third item is opened in another Inspector window
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
-        Dim outlookItem As Object = myInsp.CurrentItem
-        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now)
+        Dim outlookItem As Object = inspector.CurrentItem
+        'Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
             If myMailItem.Sent Then
@@ -174,7 +175,18 @@ Public Class AddinModule
         Else
             Marshal.ReleaseComObject(outlookItem)
         End If
+
+        ' 11/5/2015 tried this instead of what's above, threw error when opening attached Note
+        '' disconnect from the currently connected item 
+        'itemEvents.RemoveConnection()
+        '' connect to events of myMailItem 
+        'itemEvents.ConnectTo(outlookItem, True)
+
+        'For Each myInsp In inspector.Application.Inspectors
+        '    Debug.Print(TypeName(myInsp.CurrentItem))
+        'Next
         'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
@@ -640,7 +652,7 @@ Link2Contacts_Exit:
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         Dim myInsp As Outlook.Inspector = inspector
         Dim obj As Object = myInsp.CurrentItem
-        ' Debug.Print(TypeName(obj))
+        'Debug.Print("AdxOutlookAppEvents1_NewInspector fired " & Now & ":  TypeName(obj) = " & TypeName(obj))
         If TypeOf obj Is Outlook.NoteItem Then
             Dim myNote As Outlook.NoteItem = obj
             ' MsgBox(myNote.Body)
@@ -658,6 +670,9 @@ Link2Contacts_Exit:
                     ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                 End If
             End If
+            'ElseIf TypeOf obj Is Outlook.AppointmentItem Then
+            '    ' loop through the displayed items and close the Note that this item was opened from
+            '    MsgBox("AdxOutlookAppEvents1_NewInspector fired with an Outlook.AppointmentItem")
         End If
     End Sub
 
