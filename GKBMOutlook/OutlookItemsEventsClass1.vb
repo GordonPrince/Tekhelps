@@ -17,6 +17,8 @@ Public Class OutlookItemsEventsClass1
     Const strIFdocNo As String = "InstantFile_DocNo_"
     Const strPublicFolders As String = "Public Folders"
 
+    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
     End Sub
@@ -37,10 +39,8 @@ Public Class OutlookItemsEventsClass1
 
         Static strLastID As String
 
-        Dim appOutlook As Outlook.Application
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
-            appOutlook = myMailItem.Application
             Dim myFolder As Outlook.Folder = SourceFolder
             Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
         Else
@@ -55,7 +55,7 @@ Public Class OutlookItemsEventsClass1
         End If
 
         ' Outlook 2010 seems to process each item twice. The first time works, subsequent times fail
-        On Error Resume Next
+        ' On Error Resume Next
         strScratch = myMailItem.EntryID
         If Err.Number = 0 Then
             If myMailItem.EntryID = strLastID Then
@@ -68,7 +68,7 @@ Public Class OutlookItemsEventsClass1
             myMailItem = Nothing
             Exit Sub
         End If
-        On Error GoTo SentItems_Error
+        ' On Error GoTo SentItems_Error
 
         ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
         If InStr(1, myMailItem.BillingInformation, strCommentID) Or InStr(1, myMailItem.BillingInformation, strDocNo) Then
@@ -141,19 +141,25 @@ Public Class OutlookItemsEventsClass1
         Exit Sub
 
 InstantFileEmail:
-        For Each pFolder In appOutlook.Session.Folders
-            If Left(pFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                For Each aFolder In pFolder.Folders
-                    If aFolder.Name = "All Public Folders" Then
-                        For Each mFolder In aFolder.Folders
-                            If mFolder.Name = "InstantFile Mail" Then GoTo HaveInstantFileMailFolder
-                        Next
-                    End If
-                Next
-            End If
-        Next
+        ' don't know why this wouldn't work
+        ' For Each pFolder In OutlookApp.Session.Folders        
+        Dim mySession As Outlook.NameSpace = myMailItem.Application.Session
+        If mySession.Folders.Count > 0 Then
+            For Each pFolder In mySession.Folders
+                If Left(pFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                    For Each aFolder In pFolder.Folders
+                        If aFolder.Name = "All Public Folders" Then
+                            For Each mFolder In aFolder.Folders
+                                If mFolder.Name = "InstantFile Mail" Then GoTo HaveInstantFileMailFolder
+                            Next
+                        End If
+                    Next
+                End If
+            Next
+        End If
         MsgBox("Could not find the folder 'InstantFile Mail'", vbExclamation, strTitle)
         Exit Sub
+
 
 HaveInstantFileMailFolder:
         myCopy = myMailItem.Copy
@@ -163,7 +169,7 @@ HaveInstantFileMailFolder:
         Dim strInitials As String = Nothing
         con = New SqlClient.SqlConnection(SQLConnectionString)
         myCmd = con.CreateCommand
-        strScratch = "select staff_id from staff where staff_name = '" & Replace(appOutlook.Session.CurrentUser.Name, "'", "''") & "'"
+        strScratch = "select staff_id from staff where staff_name = '" & Replace(mySession.CurrentUser.Name, "'", "''") & "'"
         myCmd.CommandText = strScratch
         con.Open()
         myReader = myCmd.ExecuteReader()
@@ -217,7 +223,7 @@ HaveInstantFileMailFolder:
                 End If
                 ' without the MsgBox here I get an error
                 Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
+                ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
