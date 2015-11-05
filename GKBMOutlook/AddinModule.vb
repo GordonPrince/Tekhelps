@@ -143,7 +143,6 @@ Public Class AddinModule
         Marshal.ReleaseComObject(sel)
     End Sub
 
-
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
         Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If theExplorer IsNot Nothing Then

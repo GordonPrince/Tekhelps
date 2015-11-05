@@ -188,7 +188,10 @@ HaveInstantFileMailFolder:
 
         Dim lngX As Int16
         With myMove
-            Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
+            ' This updates the database with the EntryID of the mail item, which can only be done after it was sent
+            ' InstantFile puts the Comment or Email.DocNo in the BillingInformation field when it creates the email
+            ' So this code just needs to parse the ID from there and then update the database with the EntryID
+            ' Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
             If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                 ' update the Comment with the EntryID
                 lngX = InStr(1, .BillingInformation, strCommentID)
@@ -198,7 +201,6 @@ HaveInstantFileMailFolder:
                     If lngX > 0 Then strSQL = Left(strSQL, lngX - 1)
                     strSQL = Trim(strSQL)
                     strScratch = "UPDATE COMMENT SET EntryID = '" & .EntryID & "' WHERE CommentID = " & CLng(strSQL)
-                    ' con.Execute(strScratch, lngX)
                     If Not RunSQLcommand(strScratch) Then
                         MsgBox("The InstantFile Comment was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
@@ -209,11 +211,12 @@ HaveInstantFileMailFolder:
                     strSQL = Mid(.BillingInformation, lngX + 1)
                     strSQL = Trim(Mid(strSQL, Len(strDocNo)))
                     strScratch = "UPDATE Email SET EntryID = '" & .EntryID & "' WHERE DocNo = " & CLng(strSQL)
-                    ' con.Execute(strScratch, lngX)
                     If Not RunSQLcommand(strScratch) Then
                         MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
                 End If
+                ' without the MsgBox here I get an error
+                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
@@ -265,6 +268,8 @@ AddRecipientsAndBody:
             MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
                    "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
         End If
+
+SendItems_Exit:
         Exit Sub
 
 SentItems_Error:
