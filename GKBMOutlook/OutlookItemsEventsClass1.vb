@@ -41,29 +41,27 @@ Public Class OutlookItemsEventsClass1
             Exit Sub
         End If
 
-        If Left(Item.Subject, 13) = "Task Request:" _
-        Or Left(Item.Subject, 14) = "Task Accepted:" _
-        Or Left(Item.Subject, 14) = "Task Declined:" Then
+        If Left(myMailItem.Subject, 13) = "Task Request:" _
+        Or Left(myMailItem.Subject, 14) = "Task Accepted:" _
+        Or Left(myMailItem.Subject, 14) = "Task Declined:" Then
             ' it was created by InstantFile, therefore it's already been stored in InstantFile
             Exit Sub
         End If
 
-        ' 11/5/2015 commented all of this out troubleshooting error after running SQL update statement
-        ' with this commented out, the error changed
-        ' Outlook 2010 seems to process each item twice. The first time works, subsequent times fail
-        ' On Error Resume Next
-        'strScratch = myMailItem.EntryID
-        'If Err.Number = 0 Then
-        '    If myMailItem.EntryID = strLastID Then
-        '        Exit Sub
-        '    Else
-        '        strLastID = myMailItem.EntryID
-        '    End If
-        'Else
-        '    Err.Clear()
-        '    Exit Sub
-        'End If
-        ' On Error GoTo SentItems_Error
+        ' Outlook seems to process each item twice. The first time works, subsequent times fail
+        On Error Resume Next
+        strScratch = myMailItem.EntryID
+        If Err.Number = 0 Then
+            If myMailItem.EntryID = strLastID Then
+                Exit Sub
+            Else
+                strLastID = myMailItem.EntryID
+            End If
+        Else
+            Err.Clear()
+            Exit Sub
+        End If
+        On Error GoTo SentItems_Error
 
         ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
         If Len(myMailItem.BillingInformation) > 0 Then
@@ -221,8 +219,8 @@ HaveInstantFileMailFolder:
                     End If
                 End If
                 ' without the MsgBox here I get an error
-                ' Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
+                Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
+                ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                 intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))

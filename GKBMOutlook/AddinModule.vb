@@ -380,8 +380,8 @@ AdxOutlookAppEvents1_Error:
             olContact = OutlookApp.ActiveInspector.CurrentItem
             If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
                 MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
-                            "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
-                            "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
+                        "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
+                        "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
                 Exit Sub
             End If
         Else
