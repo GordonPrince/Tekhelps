@@ -246,7 +246,7 @@ SetNewCallTracking:
                 If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                     strPublicStoreID = olPublicFolder.StoreID
                     For Each olFolder In olPublicFolder.Folders
-                        If olFolder.Name = "All Public Folders" Then
+                        If olFolder.Name = strAllPublicFolders Then
                             For Each myNewCallTracking In olFolder.Folders
                                 If myNewCallTracking.Name = "New Call Tracking" Then GoTo HaveNewCallTracking
                             Next
@@ -399,7 +399,7 @@ AdxOutlookAppEvents1_Error:
 GetContactsFolder:
         olContactsFolder = Nothing
         For Each olFolder In olPublicFolder.Folders
-            If olFolder.Name = "All Public Folders" Then
+            If olFolder.Name = strAllPublicFolders Then
                 For Each olContactsFolder In olFolder.Folders
                     If olContactsFolder.Name = "InstantFile Contacts" Then
                         GoTo CopyContact
@@ -674,13 +674,12 @@ Link2Contacts_Exit:
     End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
-        Const strPublicFolders As String = "Public Folders"
         Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
         For Each olPublicFolder In OutlookApp.Session.Folders
             If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                 strPublicStoreID = olPublicFolder.StoreID
                 For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = "All Public Folders" Then
+                    If olFolder.Name = strAllPublicFolders Then
                         Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
                         Try
                             Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)

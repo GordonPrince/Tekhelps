@@ -18,7 +18,6 @@ Public Class OutlookItemsEventsClass1
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
         Const strTitle As String = "Save Sent E-mail in InstantFile"
-        Const strFolderName As String = "All Public Folders"
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
 
@@ -148,7 +147,7 @@ InstantFileEmail:
             For Each pFolder In mySession.Folders
                 If Left(pFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                     For Each aFolder In pFolder.Folders
-                        If aFolder.Name = "All Public Folders" Then
+                        If aFolder.Name = strAllPublicFolders Then
                             For Each mFolder In aFolder.Folders
                                 If mFolder.Name = "InstantFile Mail" Then GoTo HaveInstantFileMailFolder
                             Next
@@ -331,30 +330,6 @@ EmailMatNo_Error:
                     On Error GoTo 0
                 End If
             End If
-        End If
-    End Function
-
-    Public Function RunSQLcommand(ByVal queryString As String) As Boolean
-        Dim strConnectionString As String = SQLConnectionString()
-        Dim con As New SqlClient.SqlConnection(strConnectionString)
-        Dim cmd As New SqlClient.SqlCommand(queryString, con)
-        ' Using con As New SqlClient.SqlConnection(strConnectionString)
-        Try
-            cmd.Connection.Open()
-            cmd.ExecuteNonQuery()
-            con.Close()
-            Return True
-        Catch ex As Exception
-            Return False
-        End Try
-        ' End Using
-    End Function
-
-    Public Function SQLConnectionString() As String
-        If My.Computer.Name = "TEKHELPS7X64" Then
-            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=TEKHELPS7X64\SQL2005X64;Integrated Security=SSPI;")
-        Else
-            SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=SQLserver;Integrated Security=SSPI;")
         End If
     End Function
 

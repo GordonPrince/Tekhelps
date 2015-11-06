@@ -208,13 +208,12 @@ HaveItem:
     End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
-        Const strPublicFolders As String = "Public Folders"
         Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
         For Each olPublicFolder In OutlookApp.Session.Folders
             If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                 strPublicStoreID = olPublicFolder.StoreID
                 For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = "All Public Folders" Then
+                    If olFolder.Name = strAllPublicFolders Then
                         Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
                         Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
                         item.Display()
