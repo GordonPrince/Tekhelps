@@ -207,24 +207,6 @@ HaveItem:
         End If
     End Sub
 
-    Public Function OpenItemFromID(strID As String) As Boolean
-        Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
-        For Each olPublicFolder In OutlookApp.Session.Folders
-            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                strPublicStoreID = olPublicFolder.StoreID
-                For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = strAllPublicFolders Then
-                        Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-                        Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                        item.Display()
-                        Return True
-                    End If
-                Next
-            End If
-        Next
-        Return False
-    End Function
-
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         ' TODO: Add some code
     End Sub
