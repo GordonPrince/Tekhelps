@@ -657,6 +657,16 @@ Link2Contacts_Exit:
                 If OpenItemFromID(strID) Then
                     ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                     ' myNote.Close(Outlook.OlInspectorClose.olDiscard)
+                    ' close the original item -- 
+                    ' myInsp is the Note, not the Task or Appointment that had the note on it
+                    Debug.Print("OutlookApp.ActiveInspector.CurrentItem = " & TypeName(OutlookApp.ActiveInspector.CurrentItem))
+                    For Each myInsp In OutlookApp.Inspectors
+                        Debug.Print(TypeName(myInsp.CurrentItem))
+                        If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
+                        Else
+                            myInsp.Close(Outlook.OlInspectorClose.olSave)
+                        End If
+                    Next
                 End If
             End If
         End If
@@ -688,17 +698,20 @@ Link2Contacts_Exit:
     Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
         ' Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired " & Now)
         ' opening a NewCallTracking or Appointment attached note triggers this event
-        Dim myInsp As Outlook.Inspector
-        For Each myInsp In OutlookApp.Inspectors
-            'Debug.Print("Subject = " & myInsp.CurrentItem.subject)
-            'Debug.Print("Body    = " & myInsp.CurrentItem.body)
-            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                Dim myNote As Outlook.NoteItem = myInsp.CurrentItem
-                If myNote.Subject = strNewCallTrackingTag Or myNote.Subject = strNewCallAppointmentTag Then
-                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                End If
-            End If
-        Next
+        'Dim myInsp As Outlook.Inspector
+        'For Each myInsp In OutlookApp.Inspectors
+        '    'Debug.Print("Subject = " & myInsp.CurrentItem.subject)
+        '    'Debug.Print("Body    = " & myInsp.CurrentItem.body)
+        '    If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+        '        Dim myNote As Outlook.NoteItem = myInsp.CurrentItem
+        '        If myNote.Subject = strNewCallTrackingTag Or myNote.Subject = strNewCallAppointmentTag Then
+        '            Try
+        '                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+        '            Catch
+        '            End Try
+        '        End If
+        '    End If
+        'Next
     End Sub
 End Class
 
