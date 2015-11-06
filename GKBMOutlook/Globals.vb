@@ -1,4 +1,4 @@
-﻿Imports System.Data
+﻿Imports System.Data  ' includes SqlClient
 
 Module Globals
     Public Const strDocScanned As String = "Document scanned + imported:"
@@ -9,8 +9,8 @@ Module Globals
     Public Const strAllPublicFolders As String = "All Public Folders"
     Public Const strInstantFile As String = "InstantFile"
     Public Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-    Public Const strIFtaskTag As String = "InstantFile_Task"
     Public Const strNewCallAppointmentTag As String = "NewCall Appointment"
+    Public Const strIFtaskTag As String = "InstantFile_Task"
     Public Const strSend2Gordon As String = vbNewLine & vbNewLine & "Please use the Snipping Tool to capture this message" & vbNewLine & _
                                                 "and E-mail it to Gordon."
 

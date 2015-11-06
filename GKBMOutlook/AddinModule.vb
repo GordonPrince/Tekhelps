@@ -151,7 +151,9 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        ' this seems to fire only when the first Inspector window opens, not when a second or third item is opened in another Inspector window
+        ' this seems to fire only when the first Inspector window is activated, 
+        ' not when a second or third item is opened in another Inspector window
+        ' so it doesn't work for closing Notes from NewCallTracking
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
         Dim outlookItem As Object = inspector.CurrentItem
         ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
@@ -166,18 +168,7 @@ Public Class AddinModule
         Else
             Marshal.ReleaseComObject(outlookItem)
         End If
-
-        ' 11/5/2015 tried this instead of what's above, threw error when opening attached Note
-        '' disconnect from the currently connected item 
-        'itemEvents.RemoveConnection()
-        '' connect to events of myMailItem 
-        'itemEvents.ConnectTo(outlookItem, True)
-
-        'Debug.Print("inspector.Application.Inspectors.count = " & inspector.Application.Inspectors.count)
-        'For Each myInsp In inspector.Application.Inspectors
-        '    Debug.Print(TypeName(myInsp.CurrentItem))
-        'Next
-        'Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+        ' Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
@@ -665,11 +656,9 @@ Link2Contacts_Exit:
                 ' Debug.Print(strID)
                 If OpenItemFromID(strID) Then
                     ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                    ' myNote.Close(Outlook.OlInspectorClose.olDiscard)
                 End If
             End If
-            'ElseIf TypeOf obj Is Outlook.AppointmentItem Then
-            '    ' loop through the displayed items and close the Note that this item was opened from
-            '    MsgBox("AdxOutlookAppEvents1_NewInspector fired with an Outlook.AppointmentItem")
         End If
     End Sub
 
@@ -695,5 +684,21 @@ Link2Contacts_Exit:
         Next
         Return False
     End Function
+
+    Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
+        ' Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired " & Now)
+        ' opening a NewCallTracking or Appointment attached note triggers this event
+        Dim myInsp As Outlook.Inspector
+        For Each myInsp In OutlookApp.Inspectors
+            'Debug.Print("Subject = " & myInsp.CurrentItem.subject)
+            'Debug.Print("Body    = " & myInsp.CurrentItem.body)
+            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                Dim myNote As Outlook.NoteItem = myInsp.CurrentItem
+                If myNote.Subject = strNewCallTrackingTag Or myNote.Subject = strNewCallAppointmentTag Then
+                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                End If
+            End If
+        Next
+    End Sub
 End Class
 

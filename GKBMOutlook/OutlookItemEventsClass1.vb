@@ -173,7 +173,11 @@ HaveItem:
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
         myAttachment = attachment
-        ' Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
+        Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
+        Debug.Print("myAttachment.Type = " & myAttachment.Type)
+        If myAttachment.Type = Outlook.OlAttachmentType.olEmbeddeditem Then
+            Dim obj As Object = myAttachment
+        End If
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Const strDoc As String = "Open InstantFile Document"
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
