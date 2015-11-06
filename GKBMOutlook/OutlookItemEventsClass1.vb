@@ -9,11 +9,6 @@ Imports Microsoft.Office.Interop
 Public Class OutlookItemEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemEvents
 
-    Const strIFmatNo As String = "InstantFile_MatNo_"
-    Const strIFdocNo As String = "InstantFile_DocNo_"
-    Const strDocScanned As String = "Document scanned + imported:"
-    Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
-
     Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)

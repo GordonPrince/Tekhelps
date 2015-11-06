@@ -10,13 +10,6 @@ Imports System.Data
 Public Class OutlookItemsEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemsEvents
  
-    Dim strScratch As String
-    Const strDocScanned As String = "Document scanned + imported:"
-    Const strLastScanned As String = "LAST REQUESTED DOCUMENT scanned + imported:"
-    Const strIFmatNo As String = "InstantFile_MatNo_"
-    Const strIFdocNo As String = "InstantFile_DocNo_"
-    Const strPublicFolders As String = "Public Folders"
-
     Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
@@ -229,7 +222,7 @@ HaveInstantFileMailFolder:
                     End If
                 End If
                 ' without the MsgBox here I get an error
-                Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
+                ' Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
                 MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then

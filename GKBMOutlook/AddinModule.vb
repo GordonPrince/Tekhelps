@@ -68,14 +68,7 @@ Public Class AddinModule
 #End Region
 
 #Region "Tekhelps definitions"
-    Const strPublicFolders As String = "Public Folders"
-    Const strInstantFile As String = "InstantFile"
-    Const strIFmatNo As String = "InstantFile_MatNo_"
-    Const strIFdocNo As String = "InstantFile_DocNo_"
-    Const strNewCallTrackingTag As String = "NewCall Tracking Item"
-    Const strIFtaskTag As String = "InstantFile_Task"
-    Const strNewCallAppointmentTag As String = "NewCall Appointment"
-    Public strPublicStoreID As String
+
     Public WithEvents myInspectors As Outlook.Inspectors
     Public WithEvents myInsp As Outlook.Inspector
     Public WithEvents myMailItem As Outlook.MailItem
@@ -84,9 +77,7 @@ Public Class AddinModule
     Public WithEvents myTaskItems As Outlook.Items
     Public WithEvents olInstantFileInbox As Outlook.Items
     Public WithEvents olInstantFileTasks As Outlook.Items
-    Dim RetVal As VariantType
-    Dim strScratch As String, lngX As Long
-    Dim intExchangeConnectionMode As Integer
+
 #End Region
 
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
@@ -269,7 +260,7 @@ SetNewCallTracking:
 HaveNewCallTracking:
         olNS = OutlookApp.GetNamespace("MAPI")
         ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
-        intExchangeConnectionMode = olNS.ExchangeConnectionMode
+        ' Dim intExchangeConnectionMode As Integer = olNS.ExchangeConnectionMode
         OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
         ' force the form to load in the user's private Tasks folder
         ' to create a new .oft file, open the form in Design mode, then SaveAs
@@ -317,7 +308,7 @@ AdxOutlookAppEvents1_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-5  17:15.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-6  5:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick

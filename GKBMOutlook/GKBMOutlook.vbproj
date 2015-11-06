@@ -79,6 +79,7 @@
       <DependentUpon>AddinModule.vb</DependentUpon>
     </Compile>
     <Compile Include="GKBMOutlook.vb" />
+    <Compile Include="Globals.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="OutlookItemEventsClass1.vb" />
     <Compile Include="OutlookItemsEventsClass1.vb" />
