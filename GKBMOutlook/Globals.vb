@@ -11,6 +11,8 @@ Module Globals
     Public Const strNewCallTrackingTag As String = "NewCall Tracking Item"
     Public Const strIFtaskTag As String = "InstantFile_Task"
     Public Const strNewCallAppointmentTag As String = "NewCall Appointment"
+    Public Const strSend2Gordon As String = vbNewLine & vbNewLine & "Please use the Snipping Tool to capture this message" & vbNewLine & _
+                                                "and E-mail it to Gordon."
 
     Public strScratch As String
     Public strPublicStoreID As String

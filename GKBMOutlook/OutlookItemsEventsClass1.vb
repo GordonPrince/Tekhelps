@@ -26,7 +26,7 @@ Public Class OutlookItemsEventsClass1
         Dim myAttachment As Outlook.Attachment
         Dim myRecipient As Outlook.Recipient
         Dim strSQL As String, strBody As String = "email to "
-        Dim dblMatNo As Double, intA As Integer, intB As Integer, lngDocNo As Long
+        Dim dblMatNo As Double, intA As Integer, lngDocNo As Long
         Dim bScanned As Boolean, myUserProp As Outlook.UserProperty
 
         Static strLastID As String
@@ -49,19 +49,28 @@ Public Class OutlookItemsEventsClass1
         End If
 
         ' Outlook seems to process each item twice. The first time works, subsequent times fail
-        On Error Resume Next
-        strScratch = myMailItem.EntryID
-        If Err.Number = 0 Then
+        'On Error Resume Next
+        'strScratch = myMailItem.EntryID
+        'If Err.Number = 0 Then
+        '    If myMailItem.EntryID = strLastID Then
+        '        Exit Sub
+        '    Else
+        '        strLastID = myMailItem.EntryID
+        '    End If
+        'Else
+        '    Err.Clear()
+        '    Exit Sub
+        'End If
+        'On Error GoTo SentItems_Error
+        Try
             If myMailItem.EntryID = strLastID Then
                 Exit Sub
             Else
                 strLastID = myMailItem.EntryID
             End If
-        Else
-            Err.Clear()
+        Catch ex As Exception
             Exit Sub
-        End If
-        On Error GoTo SentItems_Error
+        End Try
 
         ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
         If Len(myMailItem.BillingInformation) > 0 Then
@@ -105,9 +114,13 @@ Public Class OutlookItemsEventsClass1
                 Else
                     intA = InStr(1, strScratch, strIFdocNo)
                     If intA Then
-                        On Error Resume Next
-                        lngDocNo = Mid(strScratch, intA + Len(strIFdocNo))
-                        On Error GoTo SentItems_Error
+                        Try
+                            lngDocNo = Mid(strScratch, intA + Len(strIFdocNo))
+                        Catch
+                            MsgBox("Could not set lngDocNo from Mid(strScratch, intA + Len(strIFdocNo))" & vbNewLine & _
+                                    strScratch & strSend2Gordon, vbInformation, strTitle)
+                            Exit Sub
+                        End Try
                     End If
                     If lngDocNo > 0 Then
                         '    With con
@@ -219,7 +232,7 @@ HaveInstantFileMailFolder:
                     End If
                 End If
                 ' without the MsgBox here I get an error
-                Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
+                ' Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
                 ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
@@ -273,7 +286,7 @@ AddRecipientsAndBody:
                    "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
         End If
 
-SendItems_Exit:
+SentItems_Exit:
         Exit Sub
 
 SentItems_Error:
