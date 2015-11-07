@@ -522,15 +522,13 @@ Link2Contacts_Exit:
 
     Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
         Const strTitle As String = "Copy Item to Drafts Folder"
-        Cursor.Current = Cursors.WaitCursor
-        Dim strSubject As String, olFolder As Outlook.Folder, obj As Object, olDraft As Outlook.MailItem
         If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
+            Cursor.Current = Cursors.WaitCursor
             Dim olTask As Outlook.TaskItem = OutlookApp.ActiveInspector.CurrentItem
-            Dim olNew As Outlook.TaskItem
             olTask.Save()
-            olNew = olTask.Copy()
+            Dim olNew As Outlook.TaskItem = olTask.Copy()
+            Dim strSubject As String = olTask.Subject
             With olNew
-                strSubject = .Subject
                 ' otherwise olNew uses the current date/time
                 ' .UserProperties("CallDate").Value = olTask.UserProperties("CallDate")
                 'Debug.Print("the .UserProperties aren't set in the copy")
@@ -565,17 +563,17 @@ Link2Contacts_Exit:
 
             ' 11/5/2015 put this here to minimize chance of editing conflicts
             olTask.Close(Outlook.OlInspectorClose.olSave)
-            olTask = Nothing
             'If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
             '          "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
             '    olTask.Close(Outlook.OlInspectorClose.olSave)
             'End If
 
             ' display the new item for the user
-            olFolder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            Dim olFolder As Outlook.Folder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            Dim obj As Object
             For Each obj In olFolder.Items
                 If TypeOf obj Is Outlook.MailItem Then
-                    olDraft = obj
+                    Dim olDraft As Outlook.MailItem = obj
                     With olDraft
                         ' Debug.Print(".Subject = " & .Subject)
                         If .Subject = strSubject Then
