@@ -78,6 +78,9 @@ Public Class AddinModule
     Public WithEvents olInstantFileInbox As Outlook.Items
     Public WithEvents olInstantFileTasks As Outlook.Items
 
+    Private Shared WithEvents myTimer As New System.Windows.Forms.Timer()
+    Private Shared alarmCounter As Integer = 1
+    Private Shared exitFlag As Boolean = False
 #End Region
 
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
@@ -156,7 +159,7 @@ Public Class AddinModule
         ' so it doesn't work for closing Notes from NewCallTracking
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
         Dim outlookItem As Object = inspector.CurrentItem
-        ' Debug.Print("Entered AdxOutlookAppEvents1_InspectorActivate() at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
+        Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
             If myMailItem.Sent Then
@@ -168,7 +171,7 @@ Public Class AddinModule
         Else
             Marshal.ReleaseComObject(outlookItem)
         End If
-        ' Debug.Print("Exiting AdxOutlookAppEvents1_InspectorActivate()")
+        Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
@@ -654,9 +657,8 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        Dim myInsp As Outlook.Inspector = inspector
-        Dim obj As Object = myInsp.CurrentItem
-        'Debug.Print("AdxOutlookAppEvents1_NewInspector fired " & Now & ":  TypeName(obj) = " & TypeName(obj))
+        Dim obj As Object = inspector.CurrentItem
+        Debug.Print("AdxOutlookAppEvents1_NewInspector fired " & Now & ":  TypeName(obj) = " & TypeName(obj))
         If TypeOf obj Is Outlook.NoteItem Then
             Dim myNote As Outlook.NoteItem = obj
             ' MsgBox(myNote.Body)
@@ -669,30 +671,72 @@ Link2Contacts_Exit:
                 strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
             End If
             If Len(strID) > 0 Then
-                ' Debug.Print(strID)
+                ' 11/8/2015 tried this but it makes the Note uncloseable either in code or by user interaction
+                'With myNote
+                '    ' this makes the Note less obvious to the user -- it will go in the bottom right of the screen
+                '    .Top = 1999
+                '    .Left = 1999
+                '    .Save()
+                'End With
                 If OpenItemFromID(strID) Then
-                    ' myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                    ' myNote.Close(Outlook.OlInspectorClose.olDiscard)
-                    ' close the original item -- 
-                    ' myInsp is the Note, not the Task or Appointment that had the note on it
-                    Debug.Print("OutlookApp.ActiveInspector.CurrentItem = " & TypeName(OutlookApp.ActiveInspector.CurrentItem))
+                    Dim myInsp As Outlook.Inspector
+                    ' inspector is the Note, not the Task or Appointment that had the note on it
+                    'Debug.Print("OutlookApp.ActiveInspector.CurrentItem = " & TypeName(OutlookApp.ActiveInspector.CurrentItem))
+                    'Debug.Print("OutlookApp.Inspectors.Count = " & OutlookApp.Inspectors.Count)
+                    'Dim intX As Int16
+                    'For intX = 1 To OutlookApp.Inspectors.Count
+                    '    myInsp = OutlookApp.Inspectors(intX)
+                    '    Debug.Print("Activate OutlookApp.Inspectors(" & intX & ") " & TypeName(myInsp.CurrentItem))
+                    '    ' deactivate it so the new Appointment or Task gets the focus
+                    '    myInsp.Activate()
+                    'Next
+
+                    ' OutlookApp.Inspectors.Count = 3 but the For Each loop only steps through two of the items
+                    ' I think it's because the Note hasn't been displayed yet
                     For Each myInsp In OutlookApp.Inspectors
-                        Debug.Print(TypeName(myInsp.CurrentItem))
+                        Debug.Print("TypeName(myInsp.CurrentItem) = " & TypeName(myInsp.CurrentItem))
                         If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
+                            ' myInsp.Activate()
                         Else
+                            ' 11/8/2015 this wouldn't close any of the note items if .Top or .Left had been changed (even if the Note was saved)
+                            'If TypeOf myInsp Is Outlook.NoteItem Then
+                            '    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                            'Else
                             myInsp.Close(Outlook.OlInspectorClose.olSave)
+                            ' End If
                         End If
                     Next
                 End If
+                ' launch the timer to close the Note after is displayed -- couldn't find an event to do this
+                'myTimer.Interval = 3000
+                'myTimer.Start()
+                'While exitFlag = False
+                '    Application.DoEvents()
+                'End While
             End If
+        End If
+        Debug.Print("AdxOutlookAppEvents1_NewInspector exit")
+    End Sub
+
+    Private Shared Sub TimerEventProcessor(myObject As Object,    ByVal myEventArgs As EventArgs)   Handles myTimer.Tick
+        myTimer.Stop()
+
+        ' Displays a message box asking whether to continue running the timer. 
+        If MessageBox.Show("Continue running?", "Count is: " & alarmCounter,  MessageBoxButtons.YesNo) = DialogResult.Yes Then
+            ' Restarts the timer and increments the counter.
+            alarmCounter += 1
+            myTimer.Enabled = True
+        Else
+            ' Stops the timer.
+            exitFlag = True
         End If
     End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
-        Dim olPublicFolder As Outlook.Folder, strPublicStoreID As String
+        Dim olPublicFolder As Outlook.Folder
         For Each olPublicFolder In OutlookApp.Session.Folders
             If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                strPublicStoreID = olPublicFolder.StoreID
+                Dim strPublicStoreID As String = olPublicFolder.StoreID
                 For Each olFolder In olPublicFolder.Folders
                     If olFolder.Name = strAllPublicFolders Then
                         Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
@@ -712,7 +756,7 @@ Link2Contacts_Exit:
     End Function
 
     Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
-        ' Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired " & Now)
+        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired " & Now)
         ' opening a NewCallTracking or Appointment attached note triggers this event
         'Dim myInsp As Outlook.Inspector
         'For Each myInsp In OutlookApp.Inspectors
@@ -728,6 +772,11 @@ Link2Contacts_Exit:
         '        End If
         '    End If
         'Next
+        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate exit")
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_InspectorClose(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorClose
+        Debug.Print("AdxOutlookAppEvents1_InspectorClose fired")
     End Sub
 End Class
 

@@ -70,7 +70,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessRead()
-        ' MsgBox("ProcessRead fired")
+        Debug.Print("ProcessRead fired")
     End Sub
 
     Public Overrides Sub ProcessReply(ByVal Response As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -175,9 +175,6 @@ HaveItem:
         myAttachment = attachment
         Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
         Debug.Print("myAttachment.Type = " & myAttachment.Type)
-        If myAttachment.Type = Outlook.OlAttachmentType.olEmbeddeditem Then
-            Dim obj As Object = myAttachment
-        End If
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Const strDoc As String = "Open InstantFile Document"
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
@@ -224,7 +221,7 @@ HaveItem:
     End Sub
 
     Public Overrides Sub ProcessBeforeRead()
-        ' TODO: Add some code
+        Debug.Print("ProcessBeforeRead fired")
     End Sub
 
     Public Overrides Sub ProcessAfterWrite()

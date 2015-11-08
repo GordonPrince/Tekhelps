@@ -231,8 +231,8 @@ HaveInstantFileMailFolder:
                         MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                     End If
                 End If
-                ' without the MsgBox here I get an error
                 ' Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
+                ' without the MsgBox here I get an error
                 ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                 Exit Sub
             ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
