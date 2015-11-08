@@ -20,11 +20,11 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessAttachmentRead(ByVal Attachment As Object)
-        ' MsgBox("ProcessAttachmentRead fired.")
+        Debug.Print("ProcessAttachmentRead fired")
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentSave(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        Debug.Print("ProcessBeforeAttachmentSave fired")
     End Sub
 
     Public Overrides Sub ProcessBeforeCheckNames(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -62,7 +62,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        Debug.Print("ProcessOpen fired")
     End Sub
 
     Public Overrides Sub ProcessPropertyChange(ByVal Name As String)
@@ -164,7 +164,7 @@ HaveItem:
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        Debug.Print("ProcessBeforeAttachmentPreview")
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
@@ -209,7 +209,7 @@ HaveItem:
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' TODO: Add some code
+        Debug.Print("ProcessBeforeAttachmentPreview fired.")
     End Sub
 
     Public Overrides Sub ProcessUnload()

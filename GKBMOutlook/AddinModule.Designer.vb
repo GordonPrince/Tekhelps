@@ -45,6 +45,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.CopyAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
         '
         'AdxRibbonTab1
@@ -66,6 +67,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
+        Me.AdxRibbonGroup1.Controls.Add(Me.OpenApptFromFile)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton4)
         Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
         Me.AdxRibbonGroup1.ImageTransparentColor = System.Drawing.Color.Transparent
@@ -169,6 +171,19 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
+        'OpenApptFromFile
+        '
+        Me.OpenApptFromFile.Caption = "Open Test Appointment"
+        Me.OpenApptFromFile.Id = "adxRibbonButton_fd25b74e412c4e36a85c28c29d6c6e1a"
+        Me.OpenApptFromFile.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.OpenApptFromFile.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.OpenApptFromFile.ScreenTip = "Open the test Appointment."
+        Me.OpenApptFromFile.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        Me.OpenApptFromFile.SuperTip = "Opens the test Appointment from ""C:\tmp\NewCall Appointment.msg"""
+        '
         'AdxOutlookAppEvents1
         '
         '
@@ -188,6 +203,7 @@ Partial Public Class AddinModule
     Friend WithEvents SaveClose As AddinExpress.MSO.ADXRibbonButton
     Private WithEvents AdxOutlookAppEvents1 As AddinExpress.MSO.ADXOutlookAppEvents
     Friend WithEvents CopyAttachments As AddinExpress.MSO.ADXRibbonButton
+    Friend WithEvents OpenApptFromFile As AddinExpress.MSO.ADXRibbonButton
 
 End Class
 

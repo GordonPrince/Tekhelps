@@ -171,7 +171,7 @@ Public Class AddinModule
         Else
             Marshal.ReleaseComObject(outlookItem)
         End If
-        Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
+        'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
@@ -679,8 +679,32 @@ Link2Contacts_Exit:
                 '    .Save()
                 'End With
                 If OpenItemFromID(strID) Then
-                    Dim myInsp As Outlook.Inspector
+                    Dim myInsp As Outlook.Inspector = inspector
                     ' inspector is the Note, not the Task or Appointment that had the note on it
+                    For Each myInsp In OutlookApp.Inspectors
+                        Debug.Print("AdxOutlookAppEvents1_NewInspector.TypeName(myInsp.CurrentItem) = " & TypeName(myInsp.CurrentItem))
+                        If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
+                            ' myInsp.Activate()
+                        Else
+                            ' 11/8/2015 this wouldn't close any of the note items if .Top or .Left had been changed (even if the Note was saved)
+                            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                                ' this is not the original Note that the user double-clicked on to open a NCT or Appointment item
+                                ' that doesn't get retrieved by the For Each loop, maybe because it hasn't finished displaying yet
+                                ' 11/8/2015 this crashed after double-clicking on the same pair of attached Notes 3-5 times one after the other
+                                'Try
+                                '    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                                '    Debug.Print("Closed Note item with myInsp.Close(Outlook.OlInspectorClose.olDiscard)")
+                                'Catch
+                                '    Debug.Print("Error on myInsp.Close(Outlook.OlInspectorClose.olDiscard)")
+                                'End Try
+                            Else
+                                myInsp.Close(Outlook.OlInspectorClose.olSave)
+                            End If
+                        End If
+                    Next
+
+                    ' OutlookApp.Inspectors.Count = 3 but the For Each loop only steps through two of the items
+                    ' I think it's because the Note hasn't been displayed yet
                     'Debug.Print("OutlookApp.ActiveInspector.CurrentItem = " & TypeName(OutlookApp.ActiveInspector.CurrentItem))
                     'Debug.Print("OutlookApp.Inspectors.Count = " & OutlookApp.Inspectors.Count)
                     'Dim intX As Int16
@@ -689,48 +713,34 @@ Link2Contacts_Exit:
                     '    Debug.Print("Activate OutlookApp.Inspectors(" & intX & ") " & TypeName(myInsp.CurrentItem))
                     '    ' deactivate it so the new Appointment or Task gets the focus
                     '    myInsp.Activate()
+                    '    myInsp.WindowState = Outlook.OlWindowState.olMinimized
                     'Next
 
-                    ' OutlookApp.Inspectors.Count = 3 but the For Each loop only steps through two of the items
-                    ' I think it's because the Note hasn't been displayed yet
-                    For Each myInsp In OutlookApp.Inspectors
-                        Debug.Print("TypeName(myInsp.CurrentItem) = " & TypeName(myInsp.CurrentItem))
-                        If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
-                            ' myInsp.Activate()
-                        Else
-                            ' 11/8/2015 this wouldn't close any of the note items if .Top or .Left had been changed (even if the Note was saved)
-                            'If TypeOf myInsp Is Outlook.NoteItem Then
-                            '    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                            'Else
-                            myInsp.Close(Outlook.OlInspectorClose.olSave)
-                            ' End If
-                        End If
-                    Next
+                    ' launch the timer to close the Note after is displayed -- couldn't find an event to do this
+                    'myTimer.Interval = 3000
+                    'myTimer.Start()
+                    'While exitFlag = False
+                    '    Application.DoEvents()
+                    'End While                
                 End If
-                ' launch the timer to close the Note after is displayed -- couldn't find an event to do this
-                'myTimer.Interval = 3000
-                'myTimer.Start()
-                'While exitFlag = False
-                '    Application.DoEvents()
-                'End While
             End If
         End If
-        Debug.Print("AdxOutlookAppEvents1_NewInspector exit")
+        'Debug.Print("AdxOutlookAppEvents1_NewInspector exit")
     End Sub
 
-    Private Shared Sub TimerEventProcessor(myObject As Object,    ByVal myEventArgs As EventArgs)   Handles myTimer.Tick
-        myTimer.Stop()
+    'Private Shared Sub TimerEventProcessor(myObject As Object,    ByVal myEventArgs As EventArgs)   Handles myTimer.Tick
+    '    myTimer.Stop()
 
-        ' Displays a message box asking whether to continue running the timer. 
-        If MessageBox.Show("Continue running?", "Count is: " & alarmCounter,  MessageBoxButtons.YesNo) = DialogResult.Yes Then
-            ' Restarts the timer and increments the counter.
-            alarmCounter += 1
-            myTimer.Enabled = True
-        Else
-            ' Stops the timer.
-            exitFlag = True
-        End If
-    End Sub
+    '    ' Displays a message box asking whether to continue running the timer. 
+    '    If MessageBox.Show("Continue running?", "Count is: " & alarmCounter,  MessageBoxButtons.YesNo) = DialogResult.Yes Then
+    '        ' Restarts the timer and increments the counter.
+    '        alarmCounter += 1
+    '        myTimer.Enabled = True
+    '    Else
+    '        ' Stops the timer.
+    '        exitFlag = True
+    '    End If
+    'End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
         Dim olPublicFolder As Outlook.Folder
@@ -756,7 +766,8 @@ Link2Contacts_Exit:
     End Function
 
     Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
-        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired " & Now)
+        Dim myInsp As Outlook.Inspector = inspector
+        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired for Object " & TypeName(myInsp.CurrentItem) & " " & Now)
         ' opening a NewCallTracking or Appointment attached note triggers this event
         'Dim myInsp As Outlook.Inspector
         'For Each myInsp In OutlookApp.Inspectors
@@ -772,11 +783,36 @@ Link2Contacts_Exit:
         '        End If
         '    End If
         'Next
-        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate exit")
+        'Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate exit")
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorClose(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorClose
-        Debug.Print("AdxOutlookAppEvents1_InspectorClose fired")
+        Dim myInsp As Outlook.Inspector = inspector
+        Debug.Print("AdxOutlookAppEvents1_InspectorClose fired for Object " & TypeName(myInsp.CurrentItem))
+    End Sub
+
+    Private Sub AdxRibbonButton3_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenApptFromFile.OnClick
+        ' 11/8/2015 see if opening the Note this way triggers any other events that double-clicking the attachment doesn't
+        Dim myNote As Outlook.NoteItem
+        myNote = OutlookApp.CreateItemFromTemplate("C:\tmp\NewCall Appointment.msg")
+        Try
+            Debug.Print("AdxRibbonButton3_OnClick myNote.Display()")
+            myNote.Display()
+        Catch
+            Debug.Print("error at myNote.Display()")
+        End Try
+
+        Dim myInsp As Outlook.Inspector
+        For Each myInsp In OutlookApp.Inspectors
+            Debug.Print("AdxRibbonButton3_OnClick.TypeName(myInsp.CurrentItem) = " & TypeName(myInsp.CurrentItem))
+            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                Try
+                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                Catch
+                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
+                End Try
+            End If
+        Next
     End Sub
 End Class
 
