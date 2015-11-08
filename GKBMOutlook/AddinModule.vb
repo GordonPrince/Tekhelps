@@ -302,7 +302,7 @@ AdxOutlookAppEvents1_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-7  6:15.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-8  14:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
