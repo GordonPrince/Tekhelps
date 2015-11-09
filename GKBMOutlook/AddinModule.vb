@@ -159,7 +159,7 @@ Public Class AddinModule
         ' so it doesn't work for closing Notes from NewCallTracking
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
         Dim outlookItem As Object = inspector.CurrentItem
-        Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
+        'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
             If myMailItem.Sent Then
@@ -302,7 +302,7 @@ AdxOutlookAppEvents1_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-8  14:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-9  14:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -670,16 +670,16 @@ Link2Contacts_Exit:
             End If
             If Len(strID) > 0 Then
                 If OpenItemFromID(strID) Then
-                    Dim myInsp As Outlook.Inspector = inspector
-                    ' inspector is the Note, not the Task or Appointment that had the note on it
-                    For Each myInsp In OutlookApp.Inspectors
-                        If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
-                        Else
-                            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                                myInsp.Close(Outlook.OlInspectorClose.olSave)
-                            End If
-                        End If
-                    Next
+                    'Dim myInsp As Outlook.Inspector = inspector
+                    '' inspector is the Note, not the Task or Appointment that had the note on it
+                    'For Each myInsp In OutlookApp.Inspectors
+                    '    If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
+                    '    Else
+                    '        If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                    '            myInsp.Close(Outlook.OlInspectorClose.olSave)
+                    '        End If
+                    '    End If
+                    'Next
                 End If
             End If
         End If
@@ -723,8 +723,8 @@ Link2Contacts_Exit:
     End Function
 
     Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
-        Dim myInsp As Outlook.Inspector = inspector
-        Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired for Object " & TypeName(myInsp.CurrentItem) & " " & Now)
+        'Dim myInsp As Outlook.Inspector = inspector
+        'Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired for Object " & TypeName(myInsp.CurrentItem) & " " & Now)
         ' opening a NewCallTracking or Appointment attached note triggers this event
         'Dim myInsp As Outlook.Inspector
         'For Each myInsp In OutlookApp.Inspectors
@@ -744,8 +744,8 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorClose(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorClose
-        Dim myInsp As Outlook.Inspector = inspector
-        Debug.Print("AdxOutlookAppEvents1_InspectorClose fired for Object " & TypeName(myInsp.CurrentItem))
+        'Dim myInsp As Outlook.Inspector = inspector
+        'Debug.Print("AdxOutlookAppEvents1_InspectorClose fired for Object " & TypeName(myInsp.CurrentItem))
     End Sub
 
     Private Sub OpenNoteFromFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenApptFromFile.OnClick
@@ -763,101 +763,154 @@ Link2Contacts_Exit:
         Next
     End Sub
 
-    Private Sub OpenNoteFromAttachment_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenNoteFromAttachment.OnClick
-        MsgBox("OpenNoteFromAttachment_OnClick")
+    Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
+        ' look for Note attachments with the right Display property 
+        ' read the EntryID from the Note
+        ' open the item using the EntryID
+        Dim strTitle As String = "Open Item from Attached Note"
+        Dim myAttachments As Outlook.Attachments
+        Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
+        If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+            Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+            myAttachments = myTask.Attachments
+        ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
+            Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
+            myAttachments = myAppt.Attachments
+        Else
+            MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
+            Exit Sub
+        End If
+
+        If myAttachments.Count = 0 Then
+            MsgBox("There are no Notes attached to this item.", vbInformation + vbOKOnly, strTitle)
+            Exit Sub
+        End If
+        Dim myAttach As Outlook.Attachment
+        For Each myAttach In myAttachments
+            With myAttach
+                If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
+                    Dim strFileName As String = "C:\tmp\" & .FileName
+                    .SaveAsFile(strFileName)
+                    Dim myNote As Outlook.NoteItem = OutlookApp.CreateItemFromTemplate(strFileName)
+                    myNote.Display()
+                    For Each myInsp In OutlookApp.Inspectors
+                        If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                            Try
+                                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                            Catch
+                                myInsp.WindowState = Outlook.OlWindowState.olMinimized
+                            End Try
+                        End If
+                    Next
+                    Exit Sub
+                End If
+            End With
+        Next
+        MsgBox("Nothing was opened.", vbInformation + vbOKOnly, strTitle)
     End Sub
 
     Private Sub MakeAppointment_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles MakeAppointment.OnClick
         Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-            Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-            ' MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
-            Dim myAttachments As Outlook.Attachments = myTask.Attachments
-            With myTask
-                If myAttachments.Count > 0 Then
-                    Dim myAtt As Outlook.Attachment
-                    For Each myAtt In myAttachments
-                        ' msgbox "myAtt.DisplayName= " & myAtt.DisplayName
-                        If myAtt.DisplayName = "NewCall Appointment" Then
-                            MsgBox("This call already has an appointment. " & _
-                                "Double click on the appointment shortcut to update the appointment " & _
-                                "instead of making another appointment." & Chr(13) & Chr(13) & _
-                                "If double clicking on the appointment shortcut doesn't open the appointment, " & _
-                                "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, "Make Appointment")
-                            Exit Sub
-                        End If
-                    Next
-                End If
-
-                If Right(.Subject, 1) = "/" Then
-                Else
-                    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
-                        .Subject = .Subject & "; SS; " & Left(.UserProperties("Screener").Value, 3) & "/"
-                    ElseIf Left(.UserProperties("TypeOfCase").Value, 1) = "A" Then
-                        .Subject = .Subject & "; A; " & Left(.UserProperties("Screener").Value, 3) & "/"
-                    Else
-                        .Subject = .Subject & "; " & Left(.UserProperties("TypeOfCase").Value, 2) & "; " & _
-                            Left(.UserProperties("Screener").Value, 3) & "/"
-                    End If
-                End If
-                .Save()
-            End With
-
-            Dim myNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-            Dim myFolder As Outlook.Folder
-            For Each myFolder In myNameSpace.Folders
-                If Left(myFolder.Name, 14) = strPublicFolders Then
-                    Exit For
-                End If
-            Next
-
-            Dim myAllPublic As Outlook.Folder = myFolder.Folders("All Public Folders")
-            Dim myApptCal As Outlook.Folder
-            With myTask
-                If Len(.UserProperties("ApptLocation").Value) = 0 Then
-                    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
-                        .UserProperties("ApptLocation").Value = "SSI"
-                    Else
-                        .UserProperties("ApptLocation").Value = "Wanda"
-                    End If
-                End If
-                If .UserProperties("ApptLocation").Value = "SSI" Then
-                    myApptCal = myAllPublic.Folders("Appointment SSI")
-                Else
-                    myApptCal = myAllPublic.Folders("Appointment Calendar")
-                End If
-            End With
-
-            Dim myAppt As Outlook.AppointmentItem = myApptCal.Items.Add
-            myAppt.Display()
-            With myTask
-                myAppt.Subject = .Subject
-                If .UserProperties("ApptLocation").Value = "Wanda" _
-                    Or .UserProperties("ApptLocation").Value = "219" _
-                    Or .UserProperties("ApptLocation").Value = "SSI" Then
-                    myAppt.Location = .UserProperties("ApptLocation").Value
-                End If
-            End With
-
-            ' add the NewCallTracking item to the Appointment
-            Dim myNote As Outlook.NoteItem = OutlookApp.CreateItem(5)
-            myNote.Body = "NewCall Tracking Item" & Chr(13) & Chr(10) & myTask.EntryID
-            myNote.Save()
-
-            myAttachments = myAppt.Attachments
-            myAttachments.Add(myNote, 1)
-            myAppt.Save()
-
-            ' add the Appointment to the NewCallTracking item
-            If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
-            myNote = OutlookApp.CreateItem(5)
-            myNote.Body = "NewCall Appointment" & Chr(13) & Chr(10) & myAppt.EntryID
-            myNote.Save()
-            myAttachments = myTask.Attachments
-            myAttachments.Add(myNote, 1)
-            myTask.UserProperties("ApptMade").Value = "Y"
-            myTask.Save()
+        Else
+            MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, "Make Appointment")
+            Exit Sub
         End If
+        Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+        ' MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
+        Dim myAttachments As Outlook.Attachments = myTask.Attachments
+        With myTask
+            If myAttachments.Count > 0 Then
+                Dim myAtt As Outlook.Attachment
+                For Each myAtt In myAttachments
+                    ' msgbox "myAtt.DisplayName= " & myAtt.DisplayName
+                    If myAtt.DisplayName = strNewCallAppointmentTag Then
+                        MsgBox("This call already has an appointment. " & _
+                            "Double click on the appointment shortcut to update the appointment " & _
+                            "instead of making another appointment." & Chr(13) & Chr(13) & _
+                            "If double clicking on the appointment shortcut doesn't open the appointment, " & _
+                            "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, "Make Appointment")
+                        Exit Sub
+                    End If
+                Next
+            End If
+
+            If Right(.Subject, 1) = "/" Then
+            Else
+                If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
+                    .Subject = .Subject & "; SS; " & Left(.UserProperties("Screener").Value, 3) & "/"
+                ElseIf Left(.UserProperties("TypeOfCase").Value, 1) = "A" Then
+                    .Subject = .Subject & "; A; " & Left(.UserProperties("Screener").Value, 3) & "/"
+                Else
+                    .Subject = .Subject & "; " & Left(.UserProperties("TypeOfCase").Value, 2) & "; " & _
+                        Left(.UserProperties("Screener").Value, 3) & "/"
+                End If
+            End If
+            .Save()
+        End With
+
+        Dim myNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
+        Dim myFolder As Outlook.Folder = Nothing
+        For Each myFolder In myNameSpace.Folders
+            If Left(myFolder.Name, 14) = strPublicFolders Then
+                GoTo HavePublic
+            End If
+        Next
+        MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, "Make Appointment")
+        Exit Sub
+
+HavePublic:
+        Dim myAllPublic As Outlook.Folder = myFolder.Folders("All Public Folders")
+        Dim myApptCal As Outlook.Folder
+        With myTask
+            If Len(.UserProperties("ApptLocation").Value) = 0 Then
+                If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
+                    .UserProperties("ApptLocation").Value = "SSI"
+                Else
+                    .UserProperties("ApptLocation").Value = "Wanda"
+                End If
+            End If
+            If .UserProperties("ApptLocation").Value = "SSI" Then
+                myApptCal = myAllPublic.Folders("Appointment SSI")
+            Else
+                myApptCal = myAllPublic.Folders("Appointment Calendar")
+            End If
+        End With
+
+        Dim myAppt As Outlook.AppointmentItem = myApptCal.Items.Add
+        myAppt.Display()
+        With myTask
+            myAppt.Subject = .Subject
+            If .UserProperties("ApptLocation").Value = "Wanda" _
+                Or .UserProperties("ApptLocation").Value = "219" _
+                Or .UserProperties("ApptLocation").Value = "SSI" Then
+                myAppt.Location = .UserProperties("ApptLocation").Value
+            End If
+        End With
+
+        ' add the Note with the EntryID of NewCallTracking item to the Appointment
+        Dim myNote As Outlook.NoteItem = OutlookApp.CreateItem(5)
+        myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
+        myNote.Save()
+        myAttachments = myAppt.Attachments
+        myAttachments.Add(myNote, 1)
+        myAppt.Save()
+
+        ' add the Note with the EntryId of the Appointment to the NewCallTracking item
+        If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
+        myNote = OutlookApp.CreateItem(5)
+        myNote.Body = strNewCallAppointmentTag & Chr(13) & Chr(10) & myAppt.EntryID
+        myNote.Save()
+        myAttachments = myTask.Attachments
+        myAttachments.Add(myNote, 1)
+        myTask.UserProperties("ApptMade").Value = "Y"
+        myTask.Save()
+
+        ' add a link to the NewCallTracking item to the Appointment (not the Note with the EntryID on it)
+        ' these all create a COPY of the Appointment, which doesn't update the Appointment Calendar in the Public Folder if it's changed
+        'myAttachments = myTask.Attachments
+        'myAttachments.Add(myAppt, Outlook.OlAttachmentType.olEmbeddeditem)
+        'myTask.Save()
     End Sub
 End Class
 

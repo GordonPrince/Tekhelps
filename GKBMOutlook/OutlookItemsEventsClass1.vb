@@ -110,7 +110,7 @@ Public Class OutlookItemsEventsClass1
             For Each myAttachment In myMailItem.Attachments
                 strScratch = myAttachment.DisplayName
                 ' added 10/25/2010
-                If strScratch = "NewCall Tracking Item" Then
+                If strScratch = strNewCallTrackingTag Then
                 Else
                     intA = InStr(1, strScratch, strIFdocNo)
                     If intA Then
