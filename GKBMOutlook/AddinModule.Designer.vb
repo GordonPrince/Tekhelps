@@ -52,6 +52,8 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
+        Me.AdxRibbonSeparator4 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
+        Me.AdxRibbonSeparator5 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -70,9 +72,11 @@ Partial Public Class AddinModule
         Me.AdxRibbonGroup1.Controls.Add(Me.SaveClose)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator1)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator5)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
         Me.AdxRibbonGroup1.Controls.Add(Me.MakeAppointment)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator4)
         Me.AdxRibbonGroup1.Controls.Add(Me.OpenItemFromNote)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator2)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
@@ -106,10 +110,12 @@ Partial Public Class AddinModule
         'AdxRibbonSeparator1
         '
         Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_644376ddea174afdbe6095b070a6339c"
-        Me.AdxRibbonSeparator1.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+        Me.AdxRibbonSeparator1.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
         '
         'CopyContact2InstantFile
         '
@@ -166,10 +172,7 @@ Partial Public Class AddinModule
         'AdxRibbonSeparator2
         '
         Me.AdxRibbonSeparator2.Id = "adxRibbonSeparator_3b3486f982d94626afeeaacb820d8686"
-        Me.AdxRibbonSeparator2.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.AdxRibbonSeparator2.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookAppointment Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
         '
         'AdxRibbonButton1
         '
@@ -242,6 +245,16 @@ Partial Public Class AddinModule
         'AdxOutlookAppEvents1
         '
         '
+        'AdxRibbonSeparator4
+        '
+        Me.AdxRibbonSeparator4.Id = "adxRibbonSeparator_81545993843d4e66aa25cab258f35721"
+        Me.AdxRibbonSeparator4.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
+        '
+        'AdxRibbonSeparator5
+        '
+        Me.AdxRibbonSeparator5.Id = "adxRibbonSeparator_d30c2775514e4ff7960047d7e3ba2371"
+        Me.AdxRibbonSeparator5.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookContact
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -264,6 +277,8 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonSeparator1 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents AdxRibbonSeparator2 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents AdxRibbonSeparator3 As AddinExpress.MSO.ADXRibbonSeparator
+    Friend WithEvents AdxRibbonSeparator5 As AddinExpress.MSO.ADXRibbonSeparator
+    Friend WithEvents AdxRibbonSeparator4 As AddinExpress.MSO.ADXRibbonSeparator
 
 End Class
 
