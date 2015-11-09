@@ -771,7 +771,92 @@ Link2Contacts_Exit:
         Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
             Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-            MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
+            ' MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
+            Dim myAppt As Outlook.AppointmentItem
+            With myTask
+                If myTask.Attachments.Count > 0 Then
+                    For Each myAtt In myTask.Attachments
+                        ' msgbox "myAtt.DisplayName= " & myAtt.DisplayName
+                        If myAtt.DisplayName = "NewCall Appointment" Then
+                            MsgBox("This call already has an appointment. " & _
+                                "Double click on the appointment shortcut to update the appointment " & _
+                                "instead of making another appointment." & Chr(13) & Chr(13) & _
+                                "If double clicking on the appointment shortcut doesn't open the appointment, " & _
+                                "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, "Make Appointment")
+                            Exit Sub
+                        End If
+                    Next
+                End If
+
+                If Right(.Subject, 1) = "/" Then
+                Else
+                    If Left(.UserProperties.value("TypeOfCase"), 2) = "SS" Then
+                        .Subject = .Subject & "; SS; " & Left(.UserProperties.value("Screener"), 3) & "/"
+                    ElseIf Left(.UserProperties.value("TypeOfCase"), 1) = "A" Then
+                        .Subject = .Subject & "; A; " & Left(.UserProperties.value("Screener"), 3) & "/"
+                    Else
+                        .Subject = .Subject & "; " & Left(.UserProperties.value("TypeOfCase"), 2) & "; " & _
+                            Left(.UserProperties.value("Screener"), 3) & "/"
+                    End If
+                End If
+                .Save()
+            End With
+
+            Dim myNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
+            Dim myFolder As Outlook.Folder
+            For Each myFolder In myNameSpace.Folders
+                If Left(myFolder.Name, 14) = strPublicFolders Then
+                    Exit For
+                End If
+            Next
+
+            'Dim myAttachments, myInspector
+            'Dim myNote, myAtt
+            Dim myAllPublic As Outlook.Folder = myFolder.Folders("All Public Folders")
+            Dim myApptCal As Outlook.Folder
+            With myTask
+                If Len(.UserProperties.Value("ApptLocation")) = 0 Then
+                    If Left(.UserProperties.Value("TypeOfCase"), 2) = "SS" Then
+                        .UserProperties.Value("ApptLocation") = "SSI"
+                    Else
+                        .UserProperties.Value("ApptLocation") = "Wanda"
+                    End If
+                End If
+                If .UserProperties.Value("ApptLocation") = "SSI" Then
+                    myApptCal = myAllPublic.Folders("Appointment SSI")
+                Else
+                    myApptCal = myAllPublic.Folders("Appointment Calendar")
+                End If
+            End With
+
+            myAppt = myApptCal.Items.Add
+            myAppt.Display()
+            With myTask
+                myAppt.Subject = myTask.Subject
+                If .UserProperties.Value("ApptLocation") = "Wanda" _
+                    Or .UserProperties.Value("ApptLocation") = "219" _
+                    Or .UserProperties.Value("ApptLocation") = "SSI" Then
+                    myAppt.Location = .UserProperties.Value("ApptLocation")
+                End If
+            End With
+
+            ' add the NewCallTracking item to the Appointment
+            Dim myNote As Outlook.NoteItem = OutlookApp.CreateItem(5)
+            myNote.Body = "NewCall Tracking Item" & Chr(13) & Chr(10) & myTask.EntryID
+            myNote.Save()
+            Dim myAttachments As Outlook.Attachments = myAppt.Attachments
+            myAttachments.Add(myNote, 1)
+            myAppt.Save()
+
+            ' add the Appointment to the NewCallTracking item
+            If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
+            myNote = OutlookApp.CreateItem(5)
+            myNote.Body = "NewCall Appointment" & Chr(13) & Chr(10) & myAppt.EntryID
+            myNote.Save()
+            myAttachments = myTask.Attachments
+            myAttachments.Add(myNote, 1)
+            myTask.UserProperties.Value("ApptMade") = "Y"
+            myTask.Save()
         End If
     End Sub
 End Class
