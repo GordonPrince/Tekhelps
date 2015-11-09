@@ -772,10 +772,11 @@ Link2Contacts_Exit:
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
             Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
             ' MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
-            Dim myAppt As Outlook.AppointmentItem
+            Dim myAttachments As Outlook.Attachments = myTask.Attachments
             With myTask
-                If myTask.Attachments.Count > 0 Then
-                    For Each myAtt In myTask.Attachments
+                If myAttachments.Count > 0 Then
+                    Dim myAtt As Outlook.Attachment
+                    For Each myAtt In myAttachments
                         ' msgbox "myAtt.DisplayName= " & myAtt.DisplayName
                         If myAtt.DisplayName = "NewCall Appointment" Then
                             MsgBox("This call already has an appointment. " & _
@@ -790,13 +791,13 @@ Link2Contacts_Exit:
 
                 If Right(.Subject, 1) = "/" Then
                 Else
-                    If Left(.UserProperties.value("TypeOfCase"), 2) = "SS" Then
-                        .Subject = .Subject & "; SS; " & Left(.UserProperties.value("Screener"), 3) & "/"
-                    ElseIf Left(.UserProperties.value("TypeOfCase"), 1) = "A" Then
-                        .Subject = .Subject & "; A; " & Left(.UserProperties.value("Screener"), 3) & "/"
+                    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
+                        .Subject = .Subject & "; SS; " & Left(.UserProperties("Screener").Value, 3) & "/"
+                    ElseIf Left(.UserProperties("TypeOfCase").Value, 1) = "A" Then
+                        .Subject = .Subject & "; A; " & Left(.UserProperties("Screener").Value, 3) & "/"
                     Else
-                        .Subject = .Subject & "; " & Left(.UserProperties.value("TypeOfCase"), 2) & "; " & _
-                            Left(.UserProperties.value("Screener"), 3) & "/"
+                        .Subject = .Subject & "; " & Left(.UserProperties("TypeOfCase").Value, 2) & "; " & _
+                            Left(.UserProperties("Screener").Value, 3) & "/"
                     End If
                 End If
                 .Save()
@@ -810,33 +811,31 @@ Link2Contacts_Exit:
                 End If
             Next
 
-            'Dim myAttachments, myInspector
-            'Dim myNote, myAtt
             Dim myAllPublic As Outlook.Folder = myFolder.Folders("All Public Folders")
             Dim myApptCal As Outlook.Folder
             With myTask
-                If Len(.UserProperties.Value("ApptLocation")) = 0 Then
-                    If Left(.UserProperties.Value("TypeOfCase"), 2) = "SS" Then
-                        .UserProperties.Value("ApptLocation") = "SSI"
+                If Len(.UserProperties("ApptLocation").Value) = 0 Then
+                    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
+                        .UserProperties("ApptLocation").Value = "SSI"
                     Else
-                        .UserProperties.Value("ApptLocation") = "Wanda"
+                        .UserProperties("ApptLocation").Value = "Wanda"
                     End If
                 End If
-                If .UserProperties.Value("ApptLocation") = "SSI" Then
+                If .UserProperties("ApptLocation").Value = "SSI" Then
                     myApptCal = myAllPublic.Folders("Appointment SSI")
                 Else
                     myApptCal = myAllPublic.Folders("Appointment Calendar")
                 End If
             End With
 
-            myAppt = myApptCal.Items.Add
+            Dim myAppt As Outlook.AppointmentItem = myApptCal.Items.Add
             myAppt.Display()
             With myTask
-                myAppt.Subject = myTask.Subject
-                If .UserProperties.Value("ApptLocation") = "Wanda" _
-                    Or .UserProperties.Value("ApptLocation") = "219" _
-                    Or .UserProperties.Value("ApptLocation") = "SSI" Then
-                    myAppt.Location = .UserProperties.Value("ApptLocation")
+                myAppt.Subject = .Subject
+                If .UserProperties("ApptLocation").Value = "Wanda" _
+                    Or .UserProperties("ApptLocation").Value = "219" _
+                    Or .UserProperties("ApptLocation").Value = "SSI" Then
+                    myAppt.Location = .UserProperties("ApptLocation").Value
                 End If
             End With
 
@@ -844,7 +843,8 @@ Link2Contacts_Exit:
             Dim myNote As Outlook.NoteItem = OutlookApp.CreateItem(5)
             myNote.Body = "NewCall Tracking Item" & Chr(13) & Chr(10) & myTask.EntryID
             myNote.Save()
-            Dim myAttachments As Outlook.Attachments = myAppt.Attachments
+
+            myAttachments = myAppt.Attachments
             myAttachments.Add(myNote, 1)
             myAppt.Save()
 
@@ -855,7 +855,7 @@ Link2Contacts_Exit:
             myNote.Save()
             myAttachments = myTask.Attachments
             myAttachments.Add(myNote, 1)
-            myTask.UserProperties.Value("ApptMade") = "Y"
+            myTask.UserProperties("ApptMade").Value = "Y"
             myTask.Save()
         End If
     End Sub
