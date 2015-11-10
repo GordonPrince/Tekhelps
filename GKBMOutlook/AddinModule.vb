@@ -856,10 +856,9 @@ Link2Contacts_Exit:
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
         Else
             MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, "Make Appointment")
-            Exit Sub
+            Return
         End If
         Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-        ' MsgBox("Make an Appointment for " & myTask.Subject & "?", vbQuestion + vbOKOnly, "MakeAppointment_OnClick")
         Dim myAttachments As Outlook.Attachments = myTask.Attachments
         With myTask
             If myAttachments.Count > 0 Then
@@ -946,13 +945,7 @@ HavePublic:
         myAttachments = myTask.Attachments
         myAttachments.Add(myNote, 1)
         myTask.UserProperties("ApptMade").Value = "Y"
-        myTask.Save()
-
-        ' add a link to the NewCallTracking item to the Appointment (not the Note with the EntryID on it)
-        ' these all create a COPY of the Appointment, which doesn't update the Appointment Calendar in the Public Folder if it's changed
-        'myAttachments = myTask.Attachments
-        'myAttachments.Add(myAppt, Outlook.OlAttachmentType.olEmbeddeditem)
-        'myTask.Save()
+        myTask.Close(Outlook.OlInspectorClose.olSave)
     End Sub
 
     Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
