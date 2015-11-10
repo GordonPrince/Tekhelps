@@ -948,7 +948,7 @@ HavePublic:
                 Next
             End If
         Next
-        MsgBox("Could not find the folder.", vbExclamation, "Show New Call Tracking folder")
+        MsgBox("Could not find the folder.", vbExclamation, "Show Appointment Calendar folder")
     End Sub
 End Class
 

@@ -62,7 +62,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        Debug.Print("ProcessOpen fired. Considering canceling display of the Note item here.")
+        ' Debug.Print("ProcessOpen fired. Considering canceling display of the Note item here.")
     End Sub
 
     Public Overrides Sub ProcessPropertyChange(ByVal Name As String)
