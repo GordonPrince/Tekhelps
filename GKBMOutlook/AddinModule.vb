@@ -279,22 +279,16 @@ Startup_Error:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
-        On Error GoTo AdxOutlookAppEvents1_Error
         Dim appAccess As Access.Application
-        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-        If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
-                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
-            appAccess.Quit(Access.AcQuitOption.acQuitSaveNone)
-        End If
-        Exit Sub
-
-AdxOutlookAppEvents1_Error:
-        If Err.Number = 429 Or Err.Number = 2467 Then
-            ' Access not running
-        Else
-            MsgBox(Err.Description, vbExclamation, "AdxOutlookAppEvents1_Quit")
-        End If
+        Try
+            appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+            If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
+                MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
+                        "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
+                appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+            End If
+        Catch
+        End Try
     End Sub
 
     Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
@@ -681,6 +675,13 @@ Link2Contacts_Exit:
                     'Next
                 End If
             End If
+        Else
+            ' 11/10/2015 added
+            'Debug.Print("AdxOutlookAppEvents1_NewInspector() " & folderName)
+            'If Right(folderName, 35) = "Public Folders\Appointment Calendar" _
+            '    Or Right(folderName, 32) = "Public Folders\New Call Tracking" Then
+            '    AdxRibbonTab1.Activate()
+            'End If
         End If
     End Sub
 
@@ -911,5 +912,10 @@ HavePublic:
         'myAttachments.Add(myAppt, Outlook.OlAttachmentType.olEmbeddeditem)
         'myTask.Save()
     End Sub
+
+    Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
+        MsgBox("Display the New Call Tracking in Explorer")
+    End Sub
+
 End Class
 
