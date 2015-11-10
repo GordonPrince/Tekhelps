@@ -831,14 +831,17 @@ Link2Contacts_Exit:
                     Dim x As Int16
                     For x = OutlookApp.Inspectors.Count To 1 Step -1
                         myInsp = OutlookApp.Inspectors(x)
+                        ' don't close emails and other types of items -- only Appointments and Tasks and Notes
                         If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
                             Try
                                 myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                             Catch
                                 myInsp.WindowState = Outlook.OlWindowState.olMinimized
                             End Try
-                        ElseIf TypeName(myInsp.CurrentItem) = strOriginalType Then
-                            myInsp.Close(Outlook.OlInspectorClose.olSave)
+                        ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                            If TypeName(myInsp.CurrentItem) = strOriginalType Then
+                                myInsp.Close(Outlook.OlInspectorClose.olSave)
+                            End If
                         End If
                     Next
                     Return
