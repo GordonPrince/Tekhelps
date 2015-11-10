@@ -326,7 +326,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-10 11:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-10 13:20.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -803,14 +803,14 @@ Link2Contacts_Exit:
 
         Dim strOriginalType As String = TypeName(myInsp.CurrentItem)
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-        Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-        myAttachments = myTask.Attachments
+            Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+            myAttachments = myTask.Attachments
         ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
-        Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
-        myAttachments = myAppt.Attachments
+            Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
+            myAttachments = myAppt.Attachments
         Else
-        MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
-        Exit Sub
+            MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
+            Exit Sub
         End If
 
         If myAttachments.Count = 0 Then
@@ -818,6 +818,11 @@ Link2Contacts_Exit:
             Return
         End If
 
+        Dim datAppt As Date
+        If TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
+            Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
+            datAppt = myAppt.Start
+        End If
         Dim myAttach As Outlook.Attachment
         For Each myAttach In myAttachments
             With myAttach
@@ -841,6 +846,18 @@ Link2Contacts_Exit:
                         ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                             If TypeName(myInsp.CurrentItem) = strOriginalType Then
                                 myInsp.Close(Outlook.OlInspectorClose.olSave)
+                            ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                                Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+                                Const strField As String = "ApptDateTime"
+                                Try
+                                    If myTask.UserProperties(strField).Value = datAppt Then
+                                    Else
+                                        myTask.UserProperties(strField).Value = datAppt
+                                        myTask.Save()
+                                        ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
+                                    End If
+                                Catch ex As Exception
+                                End Try
                             End If
                         End If
                     Next
