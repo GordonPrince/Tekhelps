@@ -55,6 +55,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
+        Me.AppointmentCalendar = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -72,6 +73,7 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonGroup1.Caption = "Custom Functions"
         Me.AdxRibbonGroup1.Controls.Add(Me.NewCallTracking)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AppointmentCalendar)
         Me.AdxRibbonGroup1.Controls.Add(Me.SaveClose)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator1)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
@@ -271,6 +273,19 @@ Partial Public Class AddinModule
         'AdxOutlookAppEvents1
         '
         '
+        'AppointmentCalendar
+        '
+        Me.AppointmentCalendar.Caption = "Appointment Calendar"
+        Me.AppointmentCalendar.Id = "adxRibbonButton_0bba54f1190c4c62b8f84191be4195a2"
+        Me.AppointmentCalendar.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.AppointmentCalendar.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.AppointmentCalendar.ScreenTip = "Display the Appointment Calendar folder."
+        Me.AppointmentCalendar.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -296,6 +311,7 @@ Partial Public Class AddinModule
     Friend WithEvents AdxRibbonSeparator5 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents AdxRibbonSeparator4 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents NewCallTracking As AddinExpress.MSO.ADXRibbonButton
+    Friend WithEvents AppointmentCalendar As AddinExpress.MSO.ADXRibbonButton
 
 End Class
 
