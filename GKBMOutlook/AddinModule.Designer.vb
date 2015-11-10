@@ -37,10 +37,11 @@ Partial Public Class AddinModule
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.AdxRibbonTab1 = New AddinExpress.MSO.ADXRibbonTab(Me.components)
-        Me.AdxRibbonGroup1 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
+        Me.AdxRibbonGroup2 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
+        Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.NewCallTracking = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AppointmentCalendar = New AddinExpress.MSO.ADXRibbonButton(Me.components)
-        Me.SaveClose = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxRibbonGroup1 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
         Me.CopyContact2InstantFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonSeparator5 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.AdxRibbonButton2 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
@@ -48,14 +49,12 @@ Partial Public Class AddinModule
         Me.MakeAppointment = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonSeparator4 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.OpenItemFromNote = New AddinExpress.MSO.ADXRibbonButton(Me.components)
-        Me.AdxRibbonSeparator2 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.CopyAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.About = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
-        Me.AdxRibbonGroup2 = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
-        Me.About = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -71,26 +70,33 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         '
-        'AdxRibbonGroup1
+        'AdxRibbonGroup2
         '
-        Me.AdxRibbonGroup1.Caption = "Functions"
-        Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator5)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
-        Me.AdxRibbonGroup1.Controls.Add(Me.MakeAppointment)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator4)
-        Me.AdxRibbonGroup1.Controls.Add(Me.OpenItemFromNote)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator2)
-        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
-        Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
-        Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
-        Me.AdxRibbonGroup1.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.AdxRibbonGroup1.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+        Me.AdxRibbonGroup2.Caption = "Items"
+        Me.AdxRibbonGroup2.Controls.Add(Me.SaveClose)
+        Me.AdxRibbonGroup2.Controls.Add(Me.NewCallTracking)
+        Me.AdxRibbonGroup2.Controls.Add(Me.AppointmentCalendar)
+        Me.AdxRibbonGroup2.Id = "adxRibbonGroup_9810b0e61d06422397f5d3ddba5337a1"
+        Me.AdxRibbonGroup2.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.AdxRibbonGroup2.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        '
+        'SaveClose
+        '
+        Me.SaveClose.Caption = "Save && Close"
+        Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
+        Me.SaveClose.IdMso = "SaveAndClose"
+        Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.SaveClose.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+        Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'NewCallTracking
         '
@@ -120,20 +126,25 @@ Partial Public Class AddinModule
         Me.AppointmentCalendar.ScreenTip = "Display the Appointment Calendar folder."
         Me.AppointmentCalendar.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
-        'SaveClose
+        'AdxRibbonGroup1
         '
-        Me.SaveClose.Caption = "Save && Close"
-        Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
-        Me.SaveClose.IdMso = "SaveAndClose"
-        Me.SaveClose.ImageMso = "SaveAndClose"
-        Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.SaveClose.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+        Me.AdxRibbonGroup1.Caption = "Functions"
+        Me.AdxRibbonGroup1.Controls.Add(Me.CopyContact2InstantFile)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator5)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton2)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButtonSaveAttachments)
+        Me.AdxRibbonGroup1.Controls.Add(Me.MakeAppointment)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator4)
+        Me.AdxRibbonGroup1.Controls.Add(Me.OpenItemFromNote)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
+        Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
+        Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
+        Me.AdxRibbonGroup1.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.AdxRibbonGroup1.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
-        Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         '
         'CopyContact2InstantFile
         '
@@ -197,11 +208,6 @@ Partial Public Class AddinModule
     " currently displayed item."
         Me.OpenItemFromNote.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
-        'AdxRibbonSeparator2
-        '
-        Me.AdxRibbonSeparator2.Id = "adxRibbonSeparator_3b3486f982d94626afeeaacb820d8686"
-        Me.AdxRibbonSeparator2.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookAppointment Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
-        '
         'AdxRibbonButton1
         '
         Me.AdxRibbonButton1.Caption = "E-mail Copy of This Item"
@@ -224,6 +230,19 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
         Me.CopyAttachments.ScreenTip = "Copy the attachments from another E-mail to this E-mail."
         Me.CopyAttachments.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        '
+        'About
+        '
+        Me.About.Caption = "Help"
+        Me.About.Controls.Add(Me.OpenApptFromFile)
+        Me.About.Controls.Add(Me.AdxRibbonButton4)
+        Me.About.Id = "adxRibbonGroup_5a2f9b298cd04e71bac140e4dac5c235"
+        Me.About.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.About.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         '
         'AdxRibbonButton4
         '
@@ -265,39 +284,12 @@ Partial Public Class AddinModule
         'AdxOutlookAppEvents1
         '
         '
-        'AdxRibbonGroup2
-        '
-        Me.AdxRibbonGroup2.Caption = "Items"
-        Me.AdxRibbonGroup2.Controls.Add(Me.SaveClose)
-        Me.AdxRibbonGroup2.Controls.Add(Me.NewCallTracking)
-        Me.AdxRibbonGroup2.Controls.Add(Me.AppointmentCalendar)
-        Me.AdxRibbonGroup2.Id = "adxRibbonGroup_9810b0e61d06422397f5d3ddba5337a1"
-        Me.AdxRibbonGroup2.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.AdxRibbonGroup2.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
-        '
-        'About
-        '
-        Me.About.Caption = "About"
-        Me.About.Controls.Add(Me.AdxRibbonButton4)
-        Me.About.Controls.Add(Me.OpenApptFromFile)
-        Me.About.Id = "adxRibbonGroup_5a2f9b298cd04e71bac140e4dac5c235"
-        Me.About.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.About.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
-        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
         Me.SupportedApps = AddinExpress.MSO.ADXOfficeHostApp.ohaOutlook
 
-    End Sub
+End Sub
     Private WithEvents AdxRibbonTab1 As AddinExpress.MSO.ADXRibbonTab
     Friend WithEvents AdxRibbonGroup1 As AddinExpress.MSO.ADXRibbonGroup
     Friend WithEvents CopyContact2InstantFile As AddinExpress.MSO.ADXRibbonButton
@@ -311,7 +303,6 @@ Partial Public Class AddinModule
     Friend WithEvents OpenApptFromFile As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents OpenItemFromNote As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents MakeAppointment As AddinExpress.MSO.ADXRibbonButton
-    Friend WithEvents AdxRibbonSeparator2 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents AdxRibbonSeparator5 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents AdxRibbonSeparator4 As AddinExpress.MSO.ADXRibbonSeparator
     Friend WithEvents NewCallTracking As AddinExpress.MSO.ADXRibbonButton

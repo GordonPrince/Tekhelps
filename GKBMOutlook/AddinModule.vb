@@ -108,7 +108,15 @@ Public Class AddinModule
         'and connects to events of the item which is opened (InspectorActivate) or selected (ExplorerActivate). 
         'The ExplorerSelectionChange allows you to follow the user selecting another item. 
 
-        Dim myExplorer As Outlook.Explorer = CType(explorer, Outlook.Explorer)
+        ' Dim myExplorer As Outlook.Explorer = CType(explorer, Outlook.Explorer)
+        ' 11/10/2015 added this for CallPilot errors
+        Dim myExplorer As Outlook.Explorer = Nothing
+        Try
+            myExplorer = CType(explorer, Outlook.Explorer)
+        Catch
+        End Try
+        If myExplorer Is Nothing Then Return
+
         Dim sel As Outlook.Selection = Nothing
         Try
             sel = myExplorer.Selection
@@ -116,6 +124,7 @@ Public Class AddinModule
             'skip the exception which occurs when in certain folders such as RSS Feeds   
         End Try
         If sel Is Nothing Then Return
+
         If sel.Count = 1 Then
             Dim outlookItem As Object = sel.Item(1)
             If TypeOf outlookItem Is Outlook.MailItem Then
@@ -153,19 +162,41 @@ Public Class AddinModule
         ' this seems to fire only when the first Inspector window is activated, 
         ' not when a second or third item is opened in another Inspector window
         ' so it doesn't work for closing Notes from NewCallTracking
+        'Try
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
+        'Catch
+        '    MsgBox("error on Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)")
+        '    Return
+        'End Try
+        ' 11/10/2015 added this for CallPilot errors
+        If myInsp Is Nothing Then
+            ' MsgBox("myInsp is Nothing")
+            Return
+        End If
         Dim outlookItem As Object = inspector.CurrentItem
+        If outlookItem Is Nothing Then
+            MsgBox("outlookItem is Nothing")
+            Return
+        End If
         'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
-            If myMailItem.Sent Then
-                ' disconnect from the currently connected item 
-                itemEvents.RemoveConnection()
-                ' connect to events of myMailItem 
-                itemEvents.ConnectTo(myMailItem, True)
+            ' Debug.Print(myMailItem.Application.Session.ExchangeMailboxServerName)
+            ' If myMailItem.Application.Session.ExchangeMailboxServerName = "gkbmsrv1.gkbm.com" Then
+            'Dim obj As Object = myMailItem.Application.Session.Parent.GetType
+            'Debug.Print(obj.ToString)
+            If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then  ' don't try working with CallPilot items
+                If myMailItem.Sent Then
+                    ' disconnect from the currently connected item 
+                    itemEvents.RemoveConnection()
+                    ' connect to events of myMailItem 
+                    itemEvents.ConnectTo(myMailItem, True)
+                Else
+                    Marshal.ReleaseComObject(outlookItem)
+                End If
+            Else
+                Marshal.ReleaseComObject(outlookItem)
             End If
-        Else
-            Marshal.ReleaseComObject(outlookItem)
         End If
         'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
     End Sub
@@ -275,14 +306,13 @@ Startup_Error:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
-        Dim appAccess As Access.Application
         Try
-            appAccess = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
-            If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-                MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
-                        "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
-                appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
-            End If
+            Dim appAccess As Access.Application = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+            'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
+            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
+                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
+            appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+            'End If
         Catch
         End Try
     End Sub
@@ -292,7 +322,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-9  14:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-10  9:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -766,9 +796,11 @@ Link2Contacts_Exit:
         Dim strTitle As String = "Open Item from Attached Note"
         Dim myAttachments As Outlook.Attachments
         Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
+        Dim bCloseTask As Boolean = False
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
             Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
             myAttachments = myTask.Attachments
+            bCloseTask = True
         ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
             Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
             myAttachments = myAppt.Attachments
@@ -779,7 +811,7 @@ Link2Contacts_Exit:
 
         If myAttachments.Count = 0 Then
             MsgBox("There are no Notes attached to this item.", vbInformation + vbOKOnly, strTitle)
-            Exit Sub
+            Return
         End If
         Dim myAttach As Outlook.Attachment
         For Each myAttach In myAttachments
@@ -789,13 +821,19 @@ Link2Contacts_Exit:
                     .SaveAsFile(strFileName)
                     Dim myNote As Outlook.NoteItem = OutlookApp.CreateItemFromTemplate(strFileName)
                     myNote.Display()
-                    For Each myInsp In OutlookApp.Inspectors
+                    ' For Each myInsp In OutlookApp.Inspectors
+                    ' stepping through these backward worked, the For Each loop didn't
+                    Dim x As Int16
+                    For x = OutlookApp.Inspectors.Count To 1 Step -1
+                        myInsp = OutlookApp.Inspectors(x)
                         If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
                             Try
                                 myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                             Catch
                                 myInsp.WindowState = Outlook.OlWindowState.olMinimized
                             End Try
+                        ElseIf bCloseTask AndAlso TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                            myInsp.Close(Outlook.OlInspectorClose.olSave)
                         End If
                     Next
                     Exit Sub
