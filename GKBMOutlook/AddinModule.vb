@@ -77,10 +77,6 @@ Public Class AddinModule
     Public WithEvents myTaskItems As Outlook.Items
     Public WithEvents olInstantFileInbox As Outlook.Items
     Public WithEvents olInstantFileTasks As Outlook.Items
-
-    Private Shared WithEvents myTimer As New System.Windows.Forms.Timer()
-    Private Shared alarmCounter As Integer = 1
-    Private Shared exitFlag As Boolean = False
 #End Region
 
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
@@ -914,8 +910,27 @@ HavePublic:
     End Sub
 
     Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
-        MsgBox("Display the New Call Tracking in Explorer")
+        'Debug.Print("OutlookApp.ActiveExplorer.CurrentFolder.Name = " & OutlookApp.ActiveExplorer.CurrentFolder.Name)
+        'OutlookApp.ActiveExplorer.CurrentFolder.Name = Appointment Calendar
+        'OutlookApp.ActiveExplorer.CurrentFolder.Name = New Call Tracking
+        Dim olPublicFolder As Outlook.Folder
+        For Each olPublicFolder In OutlookApp.Session.Folders
+            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                Dim olFolder As Outlook.Folder
+                For Each olFolder In olPublicFolder.Folders
+                    If olFolder.Name = strAllPublicFolders Then
+                        Dim olTarget As Outlook.Folder
+                        For Each olTarget In olFolder.Folders
+                            If olTarget.Name = "New Call Tracking" Then
+                                OutlookApp.ActiveExplorer.CurrentFolder = olTarget
+                                Exit Sub
+                            End If
+                        Next
+                    End If
+                Next
+            End If
+        Next
+        MsgBox("Could not find the folder.", vbExclamation, "Show New Call Tracking folder")
     End Sub
-
 End Class
 
