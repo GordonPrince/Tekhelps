@@ -326,7 +326,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-10 13:20.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-10 13:25.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -846,18 +846,19 @@ Link2Contacts_Exit:
                         ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                             If TypeName(myInsp.CurrentItem) = strOriginalType Then
                                 myInsp.Close(Outlook.OlInspectorClose.olSave)
-                            ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                                Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-                                Const strField As String = "ApptDateTime"
-                                Try
-                                    If myTask.UserProperties(strField).Value = datAppt Then
-                                    Else
-                                        myTask.UserProperties(strField).Value = datAppt
-                                        myTask.Save()
-                                        ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
-                                    End If
-                                Catch ex As Exception
-                                End Try
+                                '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
+                                'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                                '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+                                '    Const strField As String = "ApptDateTime"
+                                '    Try
+                                '        If myTask.UserProperties(strField).Value = datAppt Then
+                                '        Else
+                                '            myTask.UserProperties(strField).Value = datAppt
+                                '            myTask.Save()
+                                '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
+                                '        End If
+                                '    Catch ex As Exception
+                                '    End Try
                             End If
                         End If
                     Next
