@@ -181,22 +181,26 @@ Public Class AddinModule
         'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
-            ' Debug.Print(myMailItem.Application.Session.ExchangeMailboxServerName)
-            ' If myMailItem.Application.Session.ExchangeMailboxServerName = "gkbmsrv1.gkbm.com" Then
-            'Dim obj As Object = myMailItem.Application.Session.Parent.GetType
-            'Debug.Print(obj.ToString)
-            If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then  ' don't try working with CallPilot items
-                If myMailItem.Sent Then
-                    ' disconnect from the currently connected item 
-                    itemEvents.RemoveConnection()
-                    ' connect to events of myMailItem 
-                    itemEvents.ConnectTo(myMailItem, True)
+            If myMailItem.SendUsingAccount Is Nothing Then
+            Else
+                If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
                 Else
+                    ' don't try working with CallPilot items
+                    MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
                     Marshal.ReleaseComObject(outlookItem)
+                    Return
                 End If
+            End If
+            If myMailItem.Sent Then
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of myMailItem 
+                itemEvents.ConnectTo(myMailItem, True)
             Else
                 Marshal.ReleaseComObject(outlookItem)
             End If
+        Else
+            Marshal.ReleaseComObject(outlookItem)
         End If
         'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
     End Sub
@@ -322,7 +326,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-10  9:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-10 11:05.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick

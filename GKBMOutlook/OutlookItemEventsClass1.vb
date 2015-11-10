@@ -116,8 +116,8 @@ HaveItem:
             ' 11/4/2015 Replying to an email that was Forwarded to you won't work without this
             Dim str1 As String = RemoveREFW(myOriginal.Subject)
             Dim str2 As String = RemoveREFW(myResponse.Subject)
-            Debug.Print("str1 = " & str1)
-            Debug.Print("str2 = " & str2)
+            'Debug.Print("str1 = " & str1)
+            'Debug.Print("str2 = " & str2)
             ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
 
             If InStr(str1, str2) > 0 Then

@@ -55,6 +55,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
+        Me.AdxRibbonSeparator1 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -136,6 +137,7 @@ Partial Public Class AddinModule
         Me.AdxRibbonGroup1.Controls.Add(Me.MakeAppointment)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator4)
         Me.AdxRibbonGroup1.Controls.Add(Me.OpenItemFromNote)
+        Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonSeparator1)
         Me.AdxRibbonGroup1.Controls.Add(Me.AdxRibbonButton1)
         Me.AdxRibbonGroup1.Controls.Add(Me.CopyAttachments)
         Me.AdxRibbonGroup1.Id = "adxRibbonGroup_072621b7e27f4dc6966496c4216ab446"
@@ -284,6 +286,11 @@ Partial Public Class AddinModule
         'AdxOutlookAppEvents1
         '
         '
+        'AdxRibbonSeparator1
+        '
+        Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ab15ec8bc2634c16b73d15434c77cde1"
+        Me.AdxRibbonSeparator1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -309,6 +316,7 @@ End Sub
     Friend WithEvents AppointmentCalendar As AddinExpress.MSO.ADXRibbonButton
     Friend WithEvents AdxRibbonGroup2 As AddinExpress.MSO.ADXRibbonGroup
     Friend WithEvents About As AddinExpress.MSO.ADXRibbonGroup
+    Friend WithEvents AdxRibbonSeparator1 As AddinExpress.MSO.ADXRibbonSeparator
 
 End Class
 
