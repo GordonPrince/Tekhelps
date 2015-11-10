@@ -186,7 +186,7 @@ Public Class AddinModule
                 If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
                 Else
                     ' don't try working with CallPilot items
-                    MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
+                    ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
                     Marshal.ReleaseComObject(outlookItem)
                     Return
                 End If
@@ -326,7 +326,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-10 11:05.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-10 11:30.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -800,23 +800,24 @@ Link2Contacts_Exit:
         Dim strTitle As String = "Open Item from Attached Note"
         Dim myAttachments As Outlook.Attachments
         Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
-        Dim bCloseTask As Boolean = False
+
+        Dim strOriginalType As String = TypeName(myInsp.CurrentItem)
         If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-            Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-            myAttachments = myTask.Attachments
-            bCloseTask = True
+        Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+        myAttachments = myTask.Attachments
         ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
-            Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
-            myAttachments = myAppt.Attachments
+        Dim myAppt As Outlook.AppointmentItem = myInsp.CurrentItem
+        myAttachments = myAppt.Attachments
         Else
-            MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
-            Exit Sub
+        MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
+        Exit Sub
         End If
 
         If myAttachments.Count = 0 Then
             MsgBox("There are no Notes attached to this item.", vbInformation + vbOKOnly, strTitle)
             Return
         End If
+
         Dim myAttach As Outlook.Attachment
         For Each myAttach In myAttachments
             With myAttach
@@ -836,11 +837,11 @@ Link2Contacts_Exit:
                             Catch
                                 myInsp.WindowState = Outlook.OlWindowState.olMinimized
                             End Try
-                        ElseIf bCloseTask AndAlso TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                        ElseIf TypeName(myInsp.CurrentItem) = strOriginalType Then
                             myInsp.Close(Outlook.OlInspectorClose.olSave)
                         End If
                     Next
-                    Exit Sub
+                    Return
                 End If
             End With
         Next
