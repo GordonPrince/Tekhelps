@@ -373,7 +373,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-11  5:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-11  10:20.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -777,26 +777,45 @@ Link2Contacts_Exit:
     'End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
-        Dim olPublicFolder As Outlook.Folder
-        For Each olPublicFolder In OutlookApp.Session.Folders
-            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                Dim strPublicStoreID As String = olPublicFolder.StoreID
-                For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = strAllPublicFolders Then
-                        Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-                        Try
-                            Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-                            item.Display()
-                            Return True
-                        Catch
-                            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
-                            Return False
-                        End Try
-                    End If
-                Next
-            End If
-        Next
-        Return False
+        If strPublicStoreID Is Nothing Then
+            Debug.Print("strPublicStoreID Is Nothing")
+            Stop
+            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "OpenItemFromID() strPublicStoreID Is Nothing", vbInformation, "Call Gordon")
+            'Dim olPublicFolder As Outlook.Folder
+            'For Each olPublicFolder In OutlookApp.Session.Folders
+            '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+            '        ' Dim strPublicStoreID As String = olPublicFolder.StoreID
+            '        For Each olFolder In olPublicFolder.Folders
+            '            If olFolder.Name = strAllPublicFolders Then
+            '                Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
+            '                Try
+            '                    Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            '                    item.Display()
+            '                    Return True
+            '                Catch
+            '                    MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
+            '                    Return False
+            '                End Try
+            '            End If
+            '        Next
+            '    End If
+            'Next
+            'Return False        
+        End If
+        Dim olNameSpace As Outlook.NameSpace = Nothing
+        Dim item As Object = Nothing
+        Try
+            olNameSpace = OutlookApp.Session
+            item = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            item.Display()
+            Return True
+        Catch
+            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
+            Return False
+        Finally
+            Marshal.ReleaseComObject(item) : item = Nothing
+            Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
+        End Try
     End Function
 
     Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
