@@ -936,6 +936,16 @@ Link2Contacts_Exit:
         Dim myAtt As Outlook.Attachment = Nothing
         Dim myUserPropT As Outlook.UserProperty = Nothing
         Dim myUserPropS As Outlook.UserProperty = Nothing
+        Dim myNameSpace As Outlook.NameSpace = Nothing
+        Dim myFolders As Outlook.Folders = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
+        Dim myAllPublic As Outlook.Folder = Nothing
+        Dim myApptCal As Outlook.Folder = Nothing
+        Dim myUserPropL As Outlook.UserProperty = Nothing
+        Dim myAppt As Outlook.AppointmentItem = Nothing
+        Dim myItems As Outlook.Items = Nothing
+        Dim myNote As Outlook.NoteItem = Nothing
+
         Try
             myInsp = OutlookApp.ActiveInspector
             If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
@@ -985,47 +995,55 @@ Link2Contacts_Exit:
                 .Save()
             End With
 
-            Dim myNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-            Dim myFolder As Outlook.Folder = Nothing
-            For Each myFolder In myNameSpace.Folders
+            myNameSpace = OutlookApp.GetNamespace("MAPI")
+            ' For Each myFolder In myNameSpace.Folders
+            myFolders = myNameSpace.Folders
+            For x = 1 To myFolders.Count
+                myFolder = myFolders(x)
                 If Left(myFolder.Name, 14) = strPublicFolders Then
                     GoTo HavePublic
                 End If
             Next
             MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, "Make Appointment")
             Exit Sub
-
 HavePublic:
-            Dim myAllPublic As Outlook.Folder = myFolder.Folders("All Public Folders")
-            Dim myApptCal As Outlook.Folder
+            myAllPublic = myFolder.Folders(strAllPublicFolders)
             With myTask
-                If Len(.UserProperties("ApptLocation").Value) = 0 Then
-                    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
-                        .UserProperties("ApptLocation").Value = "SSI"
+                'If Len(.UserProperties("ApptLocation").Value) = 0 Then
+                '    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
+                '        .UserProperties("ApptLocation").Value = "SSI"
+                '    Else
+                '        .UserProperties("ApptLocation").Value = "Wanda"
+                '    End If
+                'End If
+                myUserPropL = .UserProperties("ApptLocation")
+                If Len(myUserPropL.Value) = 0 Then
+                    If Left(myUserPropT.Value, 2) = "SS" Then
+                        myUserPropL.Value = "SSI"
                     Else
-                        .UserProperties("ApptLocation").Value = "Wanda"
+                        myUserPropL.Value = "Wanda"
                     End If
                 End If
-                If .UserProperties("ApptLocation").Value = "SSI" Then
+                If myUserPropL.Value = "SSI" Then
                     myApptCal = myAllPublic.Folders("Appointment SSI")
                 Else
                     myApptCal = myAllPublic.Folders("Appointment Calendar")
                 End If
             End With
 
-            Dim myAppt As Outlook.AppointmentItem = myApptCal.Items.Add
+            ' myAppt = myApptCal.Items.Add
+            myItems = myApptCal.Items
+            myAppt = myItems.Add
             myAppt.Display()
-            With myTask
-                myAppt.Subject = .Subject
-                If .UserProperties("ApptLocation").Value = "Wanda" _
-                    Or .UserProperties("ApptLocation").Value = "219" _
-                    Or .UserProperties("ApptLocation").Value = "SSI" Then
-                    myAppt.Location = .UserProperties("ApptLocation").Value
-                End If
-            End With
+            myAppt.Subject = myTask.Subject
+            If myUserPropL.Value = "Wanda" _
+                Or myUserPropL.Value = "219" _
+                Or myUserPropL.Value = "SSI" Then
+                myAppt.Location = myUserPropL.Value
+            End If
 
             ' add the Note with the EntryID of NewCallTracking item to the Appointment
-            Dim myNote As Outlook.NoteItem = OutlookApp.CreateItem(5)
+            myNote = OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem)
             myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
             myNote.Save()
             myAttachments = myAppt.Attachments
@@ -1043,6 +1061,21 @@ HavePublic:
             myTask.Close(Outlook.OlInspectorClose.olSave)
         Catch ex As Exception
         Finally
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
+            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
+            If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
+            If myApptCal IsNot Nothing Then Marshal.ReleaseComObject(myApptCal) : myApptCal = Nothing
+            If myAllPublic IsNot Nothing Then Marshal.ReleaseComObject(myAllPublic) : myAllPublic = Nothing
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
+            If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
+            If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
+            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
 
