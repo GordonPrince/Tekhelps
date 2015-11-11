@@ -162,7 +162,15 @@ Public Class AddinModule
         ' this seems to fire only when the first Inspector window is activated, 
         ' not when a second or third item is opened in another Inspector window
         ' so it doesn't work for closing Notes from NewCallTracking
-        Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
+        Dim myInsp As Outlook.Inspector = Nothing
+        Try
+            If TypeOf inspector Is Outlook.Inspector Then
+                myInsp = CType(inspector, Outlook.Inspector)
+            End If
+        Catch
+            ' Marshal.ReleaseComObject(myInsp)
+            Return
+        End Try
         ' 11/10/2015 added this for CallPilot errors
         If myInsp Is Nothing Then
             Marshal.ReleaseComObject(myInsp)
@@ -179,10 +187,8 @@ Public Class AddinModule
                     Try
                     Catch ex As Exception
                     Finally
-                        Marshal.ReleaseComObject(myMailItem)
-                        myMailItem = Nothing
-                        Marshal.ReleaseComObject(myInsp)
-                        myInsp = Nothing
+                        Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+                        Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
                         itemEvents.RemoveConnection()
                     End Try
                     Return
@@ -197,15 +203,13 @@ Public Class AddinModule
             Try
             Catch ex As Exception
             Finally
-                Marshal.ReleaseComObject(myMailItem)
-                myMailItem = Nothing
+                Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
             End Try
         End If
         Try
         Catch ex As Exception
         Finally
-            Marshal.ReleaseComObject(myInsp)
-            myInsp = Nothing
+            Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
 
