@@ -53,16 +53,33 @@ Public Class OutlookItemEventsClass1
                 myAttachment = myAttachments(x)
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                        Dim myProps As Outlook.UserProperties = myMailItem.UserProperties
-                        Dim myUserProp As Outlook.UserProperty = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-                        myUserProp.Value = "Forward"
+                        'Dim myProps As Outlook.UserProperties = myMailItem.UserProperties
+                        'Dim myUserProp As Outlook.UserProperty = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        'myUserProp.Value = "Forward"
+                        'Try
+                        'Catch ex As System.Exception
+                        'Finally
+                        '    Marshal.ReleaseComObject(myUserProp)
+                        '    myUserProp = Nothing
+                        '    Marshal.ReleaseComObject(myProps)
+                        '    myProps = Nothing
+                        Dim myProps As Outlook.UserProperties = Nothing
+                        Dim myUserProp As Outlook.UserProperty = Nothing
                         Try
+                            myProps = myMailItem.UserProperties
+                            myUserProp = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                            myUserProp.Value = "Forward"
                         Catch ex As System.Exception
+                            ' add some exception handling there; otherwise, you wouldn't know that the userproperty isn't added   
                         Finally
-                            Marshal.ReleaseComObject(myUserProp)
-                            myUserProp = Nothing
-                            Marshal.ReleaseComObject(myProps)
-                            myProps = Nothing
+                            If myUserProp IsNot Nothing Then
+                                Marshal.ReleaseComObject(myUserProp)
+                                myUserProp = Nothing
+                            End If
+                            If myProps IsNot Nothing Then
+                                Marshal.ReleaseComObject(myProps)
+                                myProps = Nothing
+                            End If
                         End Try
                         Exit For
                     End If
