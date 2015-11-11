@@ -46,18 +46,38 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         If TypeOf Forward Is Outlook.MailItem Then
             Dim myMailItem As Outlook.MailItem = Forward
-            ' Debug.Print("ProcessForward() myMailItem.BillingInformation = " & myMailItem.BillingInformation)
             myMailItem.BillingInformation = vbNullString
-            Dim myAttachment As Outlook.Attachment
-            For Each myAttachment In myMailItem.Attachments
+            Dim myAttachments As Outlook.Attachments = myMailItem.Attachments
+            Dim myAttachment As Outlook.Attachment = Nothing, x As Int16
+            For x = 1 To myAttachments.Count
+                myAttachment = myAttachments(x)
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                        Dim myUserProp As Outlook.UserProperty = myMailItem.UserProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        Dim myProps As Outlook.UserDefinedProperties = myMailItem.UserProperties
+                        Dim myUserProp As Outlook.UserProperty = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                         myUserProp.Value = "Forward"
-                        Exit Sub
+                        Try
+                        Catch ex As System.Exception
+                        Finally
+                            Marshal.ReleaseComObject(myUserProp)
+                            myUserProp = Nothing
+                            Marshal.ReleaseComObject(myProps)
+                            myProps = Nothing
+                        End Try
+                        Exit For
                     End If
                 End If
-            Next myAttachment
+            Next
+            Try
+            Catch ex As System.Exception
+            Finally
+                Marshal.ReleaseComObject(myAttachment)
+                myAttachment = Nothing
+                Marshal.ReleaseComObject(myAttachments)
+                myAttachments = Nothing
+                Marshal.ReleaseComObject(myMailItem)
+                myMailItem = Nothing
+            End Try
         End If
     End Sub
 
@@ -93,12 +113,12 @@ Public Class OutlookItemEventsClass1
         If TypeOf Response Is Outlook.MailItem Then
             myResponse = Response
             ' outlookApp = myResponse.Application
-            If outlookApp.Inspectors.Count = 0 Then
+            If OutlookApp.Inspectors.Count = 0 Then
                 ' the user hit Reply from the Explorer window -- there's not item open in an Inspector window
-                myOriginal = outlookApp.ActiveExplorer.Selection.Item(1)
+                myOriginal = OutlookApp.ActiveExplorer.Selection.Item(1)
                 GoTo HaveItem
             Else
-                For Each myInsp In outlookApp.Inspectors
+                For Each myInsp In OutlookApp.Inspectors
                     myOriginal = myInsp.CurrentItem
                     If TypeOf myOriginal Is Outlook.MailItem Then
                         GoTo HaveItem
