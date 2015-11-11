@@ -317,6 +317,7 @@ Startup_Error:
                     "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
             appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
             Marshal.ReleaseComObject(appAccess)
+            appAccess = Nothing
             'End If
         Catch
         End Try

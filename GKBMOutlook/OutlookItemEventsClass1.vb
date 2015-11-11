@@ -187,6 +187,7 @@ HaveItem:
                     appAccess.Run("DisplayDocument", lngDocNo)
                     ' NAR(appAccess)
                     Marshal.ReleaseComObject(appAccess)
+                    appAccess = Nothing
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
                 End Try
@@ -205,6 +206,7 @@ HaveItem:
                     appAccess.Run("DisplayMatter", dblMatNo)
                     ' NAR(appAccess)
                     Marshal.ReleaseComObject(appAccess)
+                    appAccess = Nothing
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
                 End Try
