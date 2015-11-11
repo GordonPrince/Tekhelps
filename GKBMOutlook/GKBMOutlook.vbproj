@@ -25,7 +25,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <RegisterForComInterop>false</RegisterForComInterop>
+    <RegisterForComInterop>true</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -78,7 +78,6 @@
     <Compile Include="AddinModule.Designer.vb">
       <DependentUpon>AddinModule.vb</DependentUpon>
     </Compile>
-    <Compile Include="Timer.vb" />
     <Compile Include="GKBMOutlook.vb" />
     <Compile Include="Globals.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

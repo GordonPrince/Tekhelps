@@ -311,11 +311,12 @@ Startup_Error:
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
         Try
-            Dim appAccess As Access.Application = CType(Marshal.GetActiveObject("Access.Application"), Microsoft.Office.Interop.Access.Application)
+            Dim appAccess As Access.Application = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
             'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
             MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
-                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "Warning")
+                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
             appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+            Marshal.ReleaseComObject(appAccess)
             'End If
         Catch
         End Try
@@ -326,7 +327,7 @@ Startup_Error:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-10 13:25.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-11  5:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick

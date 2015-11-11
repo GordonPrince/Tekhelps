@@ -173,8 +173,8 @@ HaveItem:
         Dim myAttachment As Outlook.Attachment
         Dim appAccess As Access.Application
         myAttachment = attachment
-        Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
-        Debug.Print("myAttachment.Type = " & myAttachment.Type)
+        'Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
+        'Debug.Print("myAttachment.Type = " & myAttachment.Type)
         If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
             Const strDoc As String = "Open InstantFile Document"
             Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
@@ -185,10 +185,13 @@ HaveItem:
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayDocument", lngDocNo)
+                    ' NAR(appAccess)
+                    Marshal.ReleaseComObject(appAccess)
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
                 End Try
                 e.Cancel = True
+                Return
             End If
         ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
             Const strMat As String = "Show Matter in InstantFile"
@@ -200,12 +203,26 @@ HaveItem:
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayMatter", dblMatNo)
+                    ' NAR(appAccess)
+                    Marshal.ReleaseComObject(appAccess)
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
                 End Try
                 e.Cancel = True
+                Return
             End If
         End If
+    End Sub
+
+    Private Sub NAR(ByVal o As Object)
+        ' copied from https://support.microsoft.com/en-us/kb/317109
+        Try
+            While (Marshal.ReleaseComObject(o) > 0)
+            End While
+        Catch
+        Finally
+            o = Nothing
+        End Try
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
