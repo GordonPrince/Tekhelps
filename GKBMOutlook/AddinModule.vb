@@ -162,32 +162,29 @@ Public Class AddinModule
         ' this seems to fire only when the first Inspector window is activated, 
         ' not when a second or third item is opened in another Inspector window
         ' so it doesn't work for closing Notes from NewCallTracking
-        'Try
         Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)
-        'Catch
-        '    MsgBox("error on Dim myInsp As Outlook.Inspector = CType(inspector, Outlook.Inspector)")
-        '    Return
-        'End Try
         ' 11/10/2015 added this for CallPilot errors
         If myInsp Is Nothing Then
-            ' MsgBox("myInsp is Nothing")
+            Marshal.ReleaseComObject(myInsp)
             Return
         End If
-        Dim outlookItem As Object = inspector.CurrentItem
-        If outlookItem Is Nothing Then
-            MsgBox("outlookItem is Nothing")
-            Return
-        End If
-        'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() fired at " & Now & " TypeName(outlookItem)=" & TypeName(outlookItem))
         If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
-            Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
+            Dim myMailItem As Outlook.MailItem = myInsp.CurrentItem
             If myMailItem.SendUsingAccount Is Nothing Then
             Else
                 If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
                 Else
                     ' don't try working with CallPilot items
                     ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
-                    Marshal.ReleaseComObject(outlookItem)
+                    Try
+                    Catch ex As Exception
+                    Finally
+                        Marshal.ReleaseComObject(myMailItem)
+                        myMailItem = Nothing
+                        Marshal.ReleaseComObject(myInsp)
+                        myInsp = Nothing
+                        itemEvents.RemoveConnection()
+                    End Try
                     Return
                 End If
             End If
@@ -196,13 +193,20 @@ Public Class AddinModule
                 itemEvents.RemoveConnection()
                 ' connect to events of myMailItem 
                 itemEvents.ConnectTo(myMailItem, True)
-            Else
-                Marshal.ReleaseComObject(outlookItem)
             End If
-        Else
-            Marshal.ReleaseComObject(outlookItem)
+            Try
+            Catch ex As Exception
+            Finally
+                Marshal.ReleaseComObject(myMailItem)
+                myMailItem = Nothing
+            End Try
         End If
-        'Debug.Print("AdxOutlookAppEvents1_InspectorActivate() exit")
+        Try
+        Catch ex As Exception
+        Finally
+            Marshal.ReleaseComObject(myInsp)
+            myInsp = Nothing
+        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup

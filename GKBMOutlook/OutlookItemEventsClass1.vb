@@ -272,16 +272,16 @@ Public Class OutlookItemEventsClass1
         End If
     End Sub
 
-    Private Sub NAR(ByVal o As Object)
-        ' copied from https://support.microsoft.com/en-us/kb/317109
-        Try
-            While (Marshal.ReleaseComObject(o) > 0)
-            End While
-        Catch
-        Finally
-            o = Nothing
-        End Try
-    End Sub
+    'Private Sub NAR(ByVal o As Object)
+    '    ' copied from https://support.microsoft.com/en-us/kb/317109
+    '    Try
+    '        While (Marshal.ReleaseComObject(o) > 0)
+    '        End While
+    '    Catch
+    '    Finally
+    '        o = Nothing
+    '    End Try
+    'End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         'Debug.Print("ProcessBeforeAttachmentPreview fired.")
