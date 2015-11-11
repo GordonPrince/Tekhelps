@@ -945,12 +945,13 @@ Link2Contacts_Exit:
         Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myItems As Outlook.Items = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
+        Const strTitle As String = "Make New Appointment"
 
         Try
             myInsp = OutlookApp.ActiveInspector
             If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
             Else
-                MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, "Make Appointment")
+                MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, strTitle)
                 Return
             End If
             myTask = myInsp.CurrentItem
@@ -966,7 +967,7 @@ Link2Contacts_Exit:
                                 "Double click on the appointment shortcut to update the appointment " & _
                                 "instead of making another appointment." & Chr(13) & Chr(13) & _
                                 "If double clicking on the appointment shortcut doesn't open the appointment, " & _
-                                "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, "Make Appointment")
+                                "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, strTitle)
                             Exit Sub
                         End If
                     Next
@@ -1004,7 +1005,7 @@ Link2Contacts_Exit:
                     GoTo HavePublic
                 End If
             Next
-            MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, "Make Appointment")
+            MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, strTitle)
             Exit Sub
 HavePublic:
             myAllPublic = myFolder.Folders(strAllPublicFolders)
@@ -1080,45 +1081,95 @@ HavePublic:
     End Sub
 
     Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
-        Dim olPublicFolder As Outlook.Folder
-        For Each olPublicFolder In OutlookApp.Session.Folders
-            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                Dim olFolder As Outlook.Folder
-                For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = strAllPublicFolders Then
-                        Dim olTarget As Outlook.Folder
-                        For Each olTarget In olFolder.Folders
-                            If olTarget.Name = "New Call Tracking" Then
-                                OutlookApp.ActiveExplorer.CurrentFolder = olTarget
-                                Exit Sub
-                            End If
-                        Next
-                    End If
-                Next
-            End If
-        Next
-        MsgBox("Could not find the folder.", vbExclamation, "Show New Call Tracking folder")
+        'Dim olPublicFolder As Outlook.Folder
+        'For Each olPublicFolder In OutlookApp.Session.Folders
+        '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+        '        Dim olFolder As Outlook.Folder
+        '        For Each olFolder In olPublicFolder.Folders
+        '            If olFolder.Name = strAllPublicFolders Then
+        '                Dim olTarget As Outlook.Folder
+        '                For Each olTarget In olFolder.Folders
+        '                    If olTarget.Name = "New Call Tracking" Then
+        '                        OutlookApp.ActiveExplorer.CurrentFolder = olTarget
+        '                        Exit Sub
+        '                    End If
+        '                Next
+        '            End If
+        '        Next
+        '    End If
+        'Next
+        'MsgBox("Could not find the folder.", vbExclamation, "Show New Call Tracking folder")
+        ActivateExplorer("New Call Tracking")
     End Sub
 
     Private Sub AppointmentCalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AppointmentCalendar.OnClick
-        Dim olPublicFolder As Outlook.Folder
-        For Each olPublicFolder In OutlookApp.Session.Folders
-            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                Dim olFolder As Outlook.Folder
-                For Each olFolder In olPublicFolder.Folders
-                    If olFolder.Name = strAllPublicFolders Then
-                        Dim olTarget As Outlook.Folder
-                        For Each olTarget In olFolder.Folders
-                            If olTarget.Name = "Appointment Calendar" Then
-                                OutlookApp.ActiveExplorer.CurrentFolder = olTarget
-                                Exit Sub
-                            End If
-                        Next
-                    End If
-                Next
-            End If
-        Next
-        MsgBox("Could not find the folder.", vbExclamation, "Show Appointment Calendar folder")
+        'Dim olPublicFolder As Outlook.Folder
+        'For Each olPublicFolder In OutlookApp.Session.Folders
+        '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+        '        Dim olFolder As Outlook.Folder
+        '        For Each olFolder In olPublicFolder.Folders
+        '            If olFolder.Name = strAllPublicFolders Then
+        '                Dim olTarget As Outlook.Folder
+        '                For Each olTarget In olFolder.Folders
+        '                    If olTarget.Name = "Appointment Calendar" Then
+        '                        OutlookApp.ActiveExplorer.CurrentFolder = olTarget
+        '                        Exit Sub
+        '                    End If
+        '                Next
+        '            End If
+        '        Next
+        '    End If
+        'Next
+        'MsgBox("Could not find the folder.", vbExclamation, "Show Appointment Calendar folder")
+        ActivateExplorer("Appointment Calendar")
+    End Sub
+
+    Public Sub ActivateExplorer(FolderName As String)
+        Dim mySession As Outlook.NameSpace = Nothing
+        Dim myFolders As Outlook.Folders = Nothing
+        Dim myPublicFolder As Outlook.Folder = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
+        Dim myTarget As Outlook.Folder = Nothing
+        Dim myExplorer As Outlook.Explorer = Nothing
+
+        Try
+            Dim x As Short
+            ' For Each olPublicFolder In OutlookApp.Session.Folders
+            mySession = OutlookApp.Session
+            myFolders = mySession.Folders
+            For x = 1 To myFolders.Count
+                myPublicFolder = myFolders(x)
+                If Left(myPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                    Dim y As Short
+                    ' For Each myFolder In myPublicFolder.Folders
+                    myFolders = myPublicFolder.Folders
+                    For y = 1 To myFolders.Count
+                        myFolder = myFolders(y)
+                        If myFolder.Name = strAllPublicFolders Then
+                            myFolders = myFolder.Folders
+                            Dim z As Short
+                            ' For Each myTarget In olFolder.Folders
+                            For z = 1 To myFolders.Count
+                                myTarget = myFolders(z)
+                                If myTarget.Name = "Appointment Calendar" Then
+                                    myExplorer = OutlookApp.ActiveExplorer
+                                    myExplorer.CurrentFolder = myTarget
+                                    Return
+                                End If
+                            Next
+                        End If
+                    Next
+                End If
+            Next
+        Catch ex As Exception
+        Finally
+            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer):myExplorer = Nothing)
+            If myTarget IsNot Nothing Then Marshal.ReleaseComObject(myTarget):myTarget = Nothing)
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder):myFolder = Nothing)
+            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder):myPublicFolder = Nothing)
+            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders):myFolders = Nothing)
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession):mySession = Nothing)
+        End Try
     End Sub
 End Class
 
