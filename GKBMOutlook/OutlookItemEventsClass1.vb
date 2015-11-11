@@ -53,7 +53,7 @@ Public Class OutlookItemEventsClass1
                 myAttachment = myAttachments(x)
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                        Dim myProps As Outlook.UserDefinedProperties = myMailItem.UserProperties
+                        Dim myProps As Outlook.UserProperties = myMailItem.UserProperties
                         Dim myUserProp As Outlook.UserProperty = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                         myUserProp.Value = "Forward"
                         Try
@@ -107,14 +107,13 @@ Public Class OutlookItemEventsClass1
         Dim myResponse As Outlook.MailItem = Nothing
         Dim myInsp As Outlook.Inspector, myOriginal As Outlook.MailItem = Nothing
         Dim myAttachment As Outlook.Attachment, strFileName As String
-        ' Dim myNoteA As Outlook.NoteItem
         Dim myUserProp As Outlook.UserProperty
 
         If TypeOf Response Is Outlook.MailItem Then
             myResponse = Response
             ' outlookApp = myResponse.Application
             If OutlookApp.Inspectors.Count = 0 Then
-                ' the user hit Reply from the Explorer window -- there's not item open in an Inspector window
+                ' the user hit Reply from the Explorer window -- there's not an item open in an Inspector window
                 myOriginal = OutlookApp.ActiveExplorer.Selection.Item(1)
                 GoTo HaveItem
             Else
