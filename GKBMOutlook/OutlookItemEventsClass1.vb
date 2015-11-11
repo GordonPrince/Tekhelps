@@ -227,7 +227,7 @@ Public Class OutlookItemEventsClass1
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
                                  "Open InstantFile, then try this again."
         Dim myAttachment As Outlook.Attachment
-        Dim appAccess As Access.Application
+        Dim appAccess As Access.Application = Nothing
         myAttachment = attachment
         'Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
         'Debug.Print("myAttachment.Type = " & myAttachment.Type)
@@ -241,11 +241,11 @@ Public Class OutlookItemEventsClass1
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayDocument", lngDocNo)
-                    ' NAR(appAccess)
-                    Marshal.ReleaseComObject(appAccess)
-                    appAccess = Nothing
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
+                Finally
+                    Marshal.ReleaseComObject(appAccess)
+                    appAccess = Nothing
                 End Try
                 e.Cancel = True
                 Return
@@ -260,11 +260,11 @@ Public Class OutlookItemEventsClass1
                     appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                     If Not appAccess.Visible Then appAccess.Visible = True
                     appAccess.Run("DisplayMatter", dblMatNo)
-                    ' NAR(appAccess)
-                    Marshal.ReleaseComObject(appAccess)
-                    appAccess = Nothing
                 Catch
                     MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
+                Finally
+                    Marshal.ReleaseComObject(appAccess)
+                    appAccess = Nothing
                 End Try
                 e.Cancel = True
                 Return
