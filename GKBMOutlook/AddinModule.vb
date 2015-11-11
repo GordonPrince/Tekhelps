@@ -1124,7 +1124,7 @@ HavePublic:
         ActivateExplorer("Appointment Calendar")
     End Sub
 
-    Public Sub ActivateExplorer(FolderName As String)
+    Public Sub ActivateExplorer(strFolderName As String)
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myPublicFolder As Outlook.Folder = Nothing
@@ -1151,7 +1151,7 @@ HavePublic:
                             ' For Each myTarget In olFolder.Folders
                             For z = 1 To myFolders.Count
                                 myTarget = myFolders(z)
-                                If myTarget.Name = "Appointment Calendar" Then
+                                If myTarget.Name = strFolderName Then
                                     myExplorer = OutlookApp.ActiveExplorer
                                     myExplorer.CurrentFolder = myTarget
                                     Return
@@ -1163,12 +1163,12 @@ HavePublic:
             Next
         Catch ex As Exception
         Finally
-            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer):myExplorer = Nothing)
-            If myTarget IsNot Nothing Then Marshal.ReleaseComObject(myTarget):myTarget = Nothing)
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder):myFolder = Nothing)
-            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder):myPublicFolder = Nothing)
-            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders):myFolders = Nothing)
-            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession):mySession = Nothing)
+            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
+            If myTarget IsNot Nothing Then Marshal.ReleaseComObject(myTarget) : myTarget = Nothing
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
+            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
         End Try
     End Sub
 End Class
