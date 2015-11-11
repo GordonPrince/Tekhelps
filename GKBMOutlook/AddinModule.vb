@@ -86,13 +86,10 @@ Public Class AddinModule
                 If TypeOf item Is Outlook.MailItem Then
                     If itemEvents.IsConnected Then
                         itemEvents.RemoveConnection()
-                        'Debug.Print("Disconnected from the previously connected item.")
                     End If
                     itemEvents.ConnectTo(item, True)
-                    'Debug.Print("Connected to this Outlook item.")
                 Else
                     Marshal.ReleaseComObject(item)
-                    'Debug.Print("Do not connect to this Outlook item.")
                 End If
             End If
         End If
@@ -379,28 +376,31 @@ HaveNewCallTracking:
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
         ' copied from http://www.howto-outlook.com/howto/saveembeddedpictures.htm
         Const strTitle As String = "Save Attachments"
-        Dim myOlSelection As Outlook.Selection
+        Dim mySelection As Outlook.Selection
         Dim mySelectedItem As Object, intPos As Integer
         Dim colAttachments As Outlook.Attachments, objAttachment As Outlook.Attachment
         Dim DateStamp As String, MyFile As String
         Dim intCounter As Integer
+        ' 11/11/2015 skipped this
+        '1. release objects
+        '2. make sure it works with either an Inspector or an Explorer
 
         'Get all selected items
-        myOlSelection = OutlookApp.ActiveExplorer.Selection
+        mySelection = OutlookApp.ActiveExplorer.Selection
         'Make sure at least one item is selected
-        If myOlSelection.Count = 0 Then
+        If mySelection.Count = 0 Then
             RetVal = MsgBox("Please select an item first.", vbExclamation, strTitle)
             Exit Sub
         End If
 
         'Make sure only one item is selected
-        If myOlSelection.Count > 1 Then
+        If mySelection.Count > 1 Then
             RetVal = MsgBox("Please select only one item.", vbExclamation, strTitle)
             Exit Sub
         End If
 
         'Retrieve the selected item
-        mySelectedItem = myOlSelection.Item(1)
+        mySelectedItem = mySelection.Item(1)
 
         'Retrieve all attachments from the selected item
         colAttachments = mySelectedItem.Attachments
@@ -727,9 +727,15 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        Dim obj As Object = inspector.CurrentItem
-        If TypeOf obj Is Outlook.NoteItem Then
-            Dim myNote As Outlook.NoteItem = obj
+        Dim obj As Object = Nothing
+        Dim myNote As Outlook.NoteItem = Nothing
+        Try
+            obj = inspector.CurrentItem
+            If TypeOf obj Is Outlook.NoteItem Then
+            Else
+                Exit Sub
+            End If
+            myNote = obj
             Dim strID As String = Nothing
             If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
                 strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
@@ -740,47 +746,22 @@ Link2Contacts_Exit:
             End If
             If Len(strID) > 0 Then
                 If OpenItemFromID(strID) Then
-                    'Dim myInsp As Outlook.Inspector = inspector
-                    '' inspector is the Note, not the Task or Appointment that had the note on it
-                    'For Each myInsp In OutlookApp.Inspectors
-                    '    If TypeName(myInsp.CurrentItem) = TypeName(OutlookApp.ActiveInspector.CurrentItem) Then
-                    '    Else
-                    '        If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                    '            myInsp.Close(Outlook.OlInspectorClose.olSave)
-                    '        End If
-                    '    End If
-                    'Next
+                Else
+                    MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
                 End If
             End If
-        Else
-            ' 11/10/2015 added
-            'Debug.Print("AdxOutlookAppEvents1_NewInspector() " & folderName)
-            'If Right(folderName, 35) = "Public Folders\Appointment Calendar" _
-            '    Or Right(folderName, 32) = "Public Folders\New Call Tracking" Then
-            '    AdxRibbonTab1.Activate()
-            'End If
-        End If
+        Catch ex As Exception
+        Finally
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            Marshal.ReleaseComObject(obj) : obj = Nothing
+        End Try
     End Sub
-
-    'Private Shared Sub TimerEventProcessor(myObject As Object,    ByVal myEventArgs As EventArgs)   Handles myTimer.Tick
-    '    myTimer.Stop()
-
-    '    ' Displays a message box asking whether to continue running the timer. 
-    '    If MessageBox.Show("Continue running?", "Count is: " & alarmCounter,  MessageBoxButtons.YesNo) = DialogResult.Yes Then
-    '        ' Restarts the timer and increments the counter.
-    '        alarmCounter += 1
-    '        myTimer.Enabled = True
-    '    Else
-    '        ' Stops the timer.
-    '        exitFlag = True
-    '    End If
-    'End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
         If strPublicStoreID Is Nothing Then
             Debug.Print("strPublicStoreID Is Nothing")
             Stop
-            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "OpenItemFromID() strPublicStoreID Is Nothing", vbInformation, "Call Gordon")
+            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, "OpenItemFromID()")
             'Dim olPublicFolder As Outlook.Folder
             'For Each olPublicFolder In OutlookApp.Session.Folders
             '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
@@ -844,25 +825,26 @@ Link2Contacts_Exit:
         'Debug.Print("AdxOutlookAppEvents1_InspectorClose fired for Object " & TypeName(myInsp.CurrentItem))
     End Sub
 
-    Private Sub OpenNoteFromFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenApptFromFile.OnClick
-        Dim myNote As Outlook.NoteItem = OutlookApp.CreateItemFromTemplate("C:\tmp\NewCall Appointment.msg")
-        myNote.Display()
-        Dim myInsp As Outlook.Inspector
-        For Each myInsp In OutlookApp.Inspectors
-            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                Try
-                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                Catch
-                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
-                End Try
-            End If
-        Next
-    End Sub
+    'Private Sub OpenNoteFromFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenApptFromFile.OnClick
+    '    Dim myNote As Outlook.NoteItem = OutlookApp.CreateItemFromTemplate("C:\tmp\NewCall Appointment.msg")
+    '    myNote.Display()
+    '    Dim myInsp As Outlook.Inspector
+    '    For Each myInsp In OutlookApp.Inspectors
+    '        If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+    '            Try
+    '                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+    '            Catch
+    '                myInsp.WindowState = Outlook.OlWindowState.olMinimized
+    '            End Try
+    '        End If
+    '    Next
+    'End Sub
 
     Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
         ' look for Note attachments with the right Display property 
         ' read the EntryID from the Note
         ' open the item using the EntryID
+        ' 11/11/2015 
         Dim strTitle As String = "Open Item from Attached Note"
         Dim myAttachments As Outlook.Attachments
         Dim myInsp As Outlook.Inspector = OutlookApp.ActiveInspector
