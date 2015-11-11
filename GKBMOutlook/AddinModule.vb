@@ -920,12 +920,12 @@ Link2Contacts_Exit:
             MsgBox("Nothing was opened.", vbInformation + vbOKOnly, strTitle)
         Catch ex As Exception
         Finally
-            Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            Marshal.ReleaseComObject(myTask) : myTask = Nothing
-            Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
+            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
 
