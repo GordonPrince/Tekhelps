@@ -344,16 +344,16 @@ HaveNewCallTracking:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
+        Dim appAccess As Access.Application = Nothing
         Try
-            Dim appAccess As Access.Application = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+            appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
             'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
             MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
                     "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
             appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
-            Marshal.ReleaseComObject(appAccess)
-            appAccess = Nothing
             'End If
-        Catch
+        Finally
+            Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
         End Try
     End Sub
 
@@ -430,7 +430,7 @@ HaveNewCallTracking:
         Dim olFolder As Outlook.MAPIFolder
         Dim olContactsFolder As Outlook.MAPIFolder
         Dim olIFContact As Outlook.ContactItem
-
+        ' skipped
         ' make sure a Contact is the active item
         If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.ContactItem Then
             olContact = OutlookApp.ActiveInspector.CurrentItem
@@ -508,6 +508,7 @@ CopyContact2InstantFile_Error:
     End Sub
 
     Private Sub Link2Contacts2EachOther_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
+        ' skipped
         ' link two open Contacts to each other
         Const strTitle As String = "Link Two Contacts to Each Other"
         Dim myInspector As Outlook.Inspector
@@ -586,6 +587,7 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
+        ' skipped
         Const strTitle As String = "Copy Item to Drafts Folder"
         If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
             Cursor.Current = Cursors.WaitCursor
@@ -661,6 +663,7 @@ Link2Contacts_Exit:
     End Sub
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
+        ' skipped
         Const strTitle As String = "Copy Attachments from Another MailItem"
         Const strMsg As String = ".msg"
         Dim myAttachment As Outlook.Attachment, strFileName As String
@@ -725,7 +728,7 @@ Link2Contacts_Exit:
             obj = inspector.CurrentItem
             If TypeOf obj Is Outlook.NoteItem Then
             Else
-                Exit Sub
+                Return
             End If
             myNote = obj
             Dim strID As String = Nothing
@@ -745,7 +748,7 @@ Link2Contacts_Exit:
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            Marshal.ReleaseComObject(obj) : obj = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
         End Try
     End Sub
 
@@ -881,11 +884,11 @@ Link2Contacts_Exit:
                             myInsp = OutlookApp.Inspectors(y)
                             ' don't close emails and other types of items -- only Appointments and Tasks and Notes
                             If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                                Try
-                                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                                Catch
-                                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
-                                End Try
+                                'Try
+                                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                                'Catch
+                                'myInsp.WindowState = Outlook.OlWindowState.olMinimized
+                                'End Try
                             ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                                 If TypeName(myInsp.CurrentItem) = strOriginalType Then
                                     myInsp.Close(Outlook.OlInspectorClose.olSave)
