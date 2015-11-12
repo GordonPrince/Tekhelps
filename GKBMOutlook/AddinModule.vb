@@ -162,52 +162,42 @@ Public Class AddinModule
         ' not when a second or third item is opened in another Inspector window
         ' so it doesn't work for closing Notes from NewCallTracking
         Dim myInsp As Outlook.Inspector = Nothing
+        Dim myMailItem As Outlook.MailItem = Nothing
+        Dim mySendUsing As Object = Nothing
         Try
             If TypeOf inspector Is Outlook.Inspector Then
                 myInsp = CType(inspector, Outlook.Inspector)
-            End If
-        Catch
-            ' Marshal.ReleaseComObject(myInsp)
-            Return
-        End Try
-        ' 11/10/2015 added this for CallPilot errors
-        If myInsp Is Nothing Then
-            Marshal.ReleaseComObject(myInsp)
-            Return
-        End If
-        If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
-            Dim myMailItem As Outlook.MailItem = myInsp.CurrentItem
-            If myMailItem.SendUsingAccount Is Nothing Then
             Else
-                If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
+                Return
+            End If
+
+            ' 11/10/2015 added this for CallPilot errors
+            If myInsp Is Nothing Then Return
+
+            If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
+                myMailItem = myInsp.CurrentItem
+                If myMailItem.SendUsingAccount Is Nothing Then
                 Else
-                    ' don't try working with CallPilot items
-                    ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
-                    Try
-                    Catch ex As Exception
-                    Finally
-                        Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-                        Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+                    ' If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
+                    mySendUsing = myMailItem.SendUsingAccount
+                    If mySendUsing.DisplayName = "Microsoft Exchange" Then
+                    Else
+                        ' don't try working with CallPilot items
+                        ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
                         itemEvents.RemoveConnection()
-                    End Try
-                    Return
+                        Return
+                    End If
+                End If
+                If myMailItem.Sent Then
+                    ' disconnect from the currently connected item 
+                    itemEvents.RemoveConnection()
+                    ' connect to events of myMailItem 
+                    itemEvents.ConnectTo(myMailItem, True)
                 End If
             End If
-            If myMailItem.Sent Then
-                ' disconnect from the currently connected item 
-                itemEvents.RemoveConnection()
-                ' connect to events of myMailItem 
-                itemEvents.ConnectTo(myMailItem, True)
-            End If
-            Try
-            Catch ex As Exception
-            Finally
-                Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            End Try
-        End If
-        Try
-        Catch ex As Exception
         Finally
+            Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
+            Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
             Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
