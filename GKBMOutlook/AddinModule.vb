@@ -133,10 +133,10 @@ Public Class AddinModule
                 End If
             End If
         Finally
-            Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
-            Marshal.ReleaseComObject(sel) : sel = Nothing
-            Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
+            If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+            If outlookItem IsNot Nothing Then Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
+            If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
+            ' Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
         End Try
     End Sub
 
@@ -146,14 +146,18 @@ Public Class AddinModule
         Try
             theExplorer = TryCast(explorer, Outlook.Explorer)
             If theExplorer IsNot Nothing Then
-                selection = theExplorer.Selection
+                ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=2200
+                Try
+                    selection = theExplorer.Selection
+                Catch
+                End Try
                 If selection IsNot Nothing Then
                     ConnectToSelectedItem(selection)
                 End If
             End If
         Finally
-            Marshal.ReleaseComObject(selection) : selection = Nothing
-            Marshal.ReleaseComObject(theExplorer) : theExplorer = Nothing
+            If selection IsNot Nothing Then Marshal.ReleaseComObject(selection) : selection = Nothing
+            ' If theExplorer IsNot Nothing Then Marshal.ReleaseComObject(theExplorer) : theExplorer = Nothing
         End Try
     End Sub
 
@@ -196,9 +200,9 @@ Public Class AddinModule
                 End If
             End If
         Finally
-            Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
-            Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If mySendUsing IsNot Nothing Then Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
+            If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+            ' Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
 
@@ -344,17 +348,17 @@ HaveNewCallTracking:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
-        Dim appAccess As Access.Application = Nothing
-        Try
-            appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-            'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-            MsgBox("InstantFile should be closed before Outlook is closed." & vbNewLine & vbNewLine & _
-                    "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
-            appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
-            'End If
-        Finally
-            Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
-        End Try
+        'Dim appAccess As Access.Application = Nothing
+        'Try
+        '    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+        '    'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
+        '    MsgBox("You should close InstantFile before closing Outlook." & vbNewLine & vbNewLine & _
+        '            "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
+        '    appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+        '    'End If
+        'Finally
+        '    If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
+        'End Try
     End Sub
 
     Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
@@ -362,7 +366,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-11  10:20.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-12 5:52.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
