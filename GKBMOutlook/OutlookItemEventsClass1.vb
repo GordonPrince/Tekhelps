@@ -45,57 +45,40 @@ Public Class OutlookItemEventsClass1
 
     Public Overrides Sub ProcessForward(ByVal Forward As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         If TypeOf Forward Is Outlook.MailItem Then
-            Dim myMailItem As Outlook.MailItem = Forward
+        Else
+            Return
+        End If
+
+        Dim myMailItem As Outlook.MailItem = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttachment As Outlook.Attachment = Nothing
+        Dim myProps As Outlook.UserProperties = Nothing
+        Dim myUserProp As Outlook.UserProperty = Nothing
+        Try
+            myMailItem = Forward
             myMailItem.BillingInformation = vbNullString
-            Dim myAttachments As Outlook.Attachments = myMailItem.Attachments
-            Dim myAttachment As Outlook.Attachment = Nothing, x As Int16
+            myAttachments = myMailItem.Attachments
+            Dim x As Short
             For x = 1 To myAttachments.Count
                 myAttachment = myAttachments(x)
                 If Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
                     If EmailMatNo(myAttachment, myMailItem.Subject) > 0 Then
-                        'Dim myProps As Outlook.UserProperties = myMailItem.UserProperties
-                        'Dim myUserProp As Outlook.UserProperty = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-                        'myUserProp.Value = "Forward"
-                        'Try
-                        'Catch ex As System.Exception
-                        'Finally
-                        '    Marshal.ReleaseComObject(myUserProp)
-                        '    myUserProp = Nothing
-                        '    Marshal.ReleaseComObject(myProps)
-                        '    myProps = Nothing
-                        Dim myProps As Outlook.UserProperties = Nothing
-                        Dim myUserProp As Outlook.UserProperty = Nothing
-                        Try
-                            myProps = myMailItem.UserProperties
-                            myUserProp = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-                            myUserProp.Value = "Forward"
-                        Catch ex As System.Exception
-                            ' add some exception handling there; otherwise, you wouldn't know that the userproperty isn't added   
-                        Finally
-                            If myUserProp IsNot Nothing Then
-                                Marshal.ReleaseComObject(myUserProp)
-                                myUserProp = Nothing
-                            End If
-                            If myProps IsNot Nothing Then
-                                Marshal.ReleaseComObject(myProps)
-                                myProps = Nothing
-                            End If
-                        End Try
+                        myProps = myMailItem.UserProperties
+                        myUserProp = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                        myUserProp.Value = "Forward"
+                        ' add some exception handling there; otherwise, you wouldn't know that the userproperty isn't added   
                         Exit For
                     End If
                 End If
             Next
-            Try
-            Catch ex As System.Exception
-            Finally
-                Marshal.ReleaseComObject(myAttachment)
-                myAttachment = Nothing
-                Marshal.ReleaseComObject(myAttachments)
-                myAttachments = Nothing
-                Marshal.ReleaseComObject(myMailItem)
-                myMailItem = Nothing
-            End Try
-        End If
+
+        Finally
+            If myUserProp IsNot Nothing Then Marshal.ReleaseComObject(myUserProp) : myUserProp = Nothing
+            If myProps IsNot Nothing Then Marshal.ReleaseComObject(myProps) : myProps = Nothing
+            If myAttachment IsNot Nothing Then Marshal.ReleaseComObject(myAttachment) : myAttachment = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            ' Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+        End Try
     End Sub
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
