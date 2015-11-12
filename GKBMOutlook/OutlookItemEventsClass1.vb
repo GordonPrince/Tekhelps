@@ -102,6 +102,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
+        ' skipped
         ' adds Outlook attachments from original message to Reply or ReplyAll
         If TypeOf Response Is Outlook.MailItem Then
         Else
@@ -220,56 +221,53 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        Debug.Print("ProcessBeforeAttachmentPreview")
+        ' Debug.Print("ProcessBeforeAttachmentPreview")
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
                                  "Open InstantFile, then try this again."
-        Dim myAttachment As Outlook.Attachment
+        Dim myAttachment As Outlook.Attachment = Nothing
         Dim appAccess As Access.Application = Nothing
-        myAttachment = attachment
-        'Debug.Print("ProcessBeforeAttachmentRead() " & Now & " TypeName(myAttachment) = " & TypeName(myAttachment))
-        'Debug.Print("myAttachment.Type = " & myAttachment.Type)
-        If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
-            Const strDoc As String = "Open InstantFile Document"
-            Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
-            If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                MsgBox("The item does not have a DocNo.", vbExclamation, strDoc)
-            Else
-                Try
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                    If Not appAccess.Visible Then appAccess.Visible = True
-                    appAccess.Run("DisplayDocument", lngDocNo)
-                Catch
-                    MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
-                Finally
-                    Marshal.ReleaseComObject(appAccess)
-                    appAccess = Nothing
-                End Try
-                e.Cancel = True
-                Return
+        Try
+            myAttachment = attachment
+            If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
+                Const strDoc As String = "Open InstantFile Document"
+                Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
+                If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
+                    MsgBox("The item does not have a DocNo.", vbExclamation, strDoc)
+                Else
+                    Try
+                        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                        If Not appAccess.Visible Then appAccess.Visible = True
+                        appAccess.Run("DisplayDocument", lngDocNo)
+                    Catch
+                        MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
+                    End Try
+                    e.Cancel = True
+                    Return
+                End If
+            ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
+                Const strMat As String = "Show Matter in InstantFile"
+                Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
+                If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
+                    MsgBox("The item does not have a MatterNo.", vbExclamation, strMat)
+                Else
+                    Try
+                        appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+                        If Not appAccess.Visible Then appAccess.Visible = True
+                        appAccess.Run("DisplayMatter", dblMatNo)
+                    Catch
+                        MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
+                    End Try
+                    e.Cancel = True
+                    Return
+                End If
             End If
-        ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
-            Const strMat As String = "Show Matter in InstantFile"
-            Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
-            If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                MsgBox("The item does not have a MatterNo.", vbExclamation, strMat)
-            Else
-                Try
-                    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-                    If Not appAccess.Visible Then appAccess.Visible = True
-                    appAccess.Run("DisplayMatter", dblMatNo)
-                Catch
-                    MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
-                Finally
-                    Marshal.ReleaseComObject(appAccess)
-                    appAccess = Nothing
-                End Try
-                e.Cancel = True
-                Return
-            End If
-        End If
+        Finally
+            If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
+            ' myAttachment refers to object that was passed into procedure, so don't release it
+        End Try
     End Sub
 
     'Private Sub NAR(ByVal o As Object)
