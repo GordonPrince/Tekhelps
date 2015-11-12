@@ -96,8 +96,8 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-        ' Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
-        ' In the same fashion you handle the ExplorerActivate event. 
+        'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
+        'In the same fashion you handle the ExplorerActivate event. 
         'That is, InspectorActivate and ExplorerActivate let you handle this scenario: 
         'the user presses Alt+Tab to switch between Outlook windows. 
         'Whenever an Outlook window becomes active, 
@@ -108,35 +108,36 @@ Public Class AddinModule
         ' Dim myExplorer As Outlook.Explorer = CType(explorer, Outlook.Explorer)
         ' 11/10/2015 added this for CallPilot errors
         Dim myExplorer As Outlook.Explorer = Nothing
+        Dim sel As Outlook.Selection = Nothing
+        Dim outlookItem As Object = Nothing
+        Dim myMailItem As Outlook.MailItem = Nothing
         Try
             myExplorer = CType(explorer, Outlook.Explorer)
-        Catch
-        End Try
-        If myExplorer Is Nothing Then Return
-
-        Dim sel As Outlook.Selection = Nothing
-        Try
-            sel = myExplorer.Selection
-        Catch ex As Exception
-            'skip the exception which occurs when in certain folders such as RSS Feeds   
-        End Try
-        If sel Is Nothing Then Return
-
-        If sel.Count = 1 Then
-            Dim outlookItem As Object = sel.Item(1)
-            If TypeOf outlookItem Is Outlook.MailItem Then
-                Dim myMailItem As Outlook.MailItem = CType(outlookItem, Outlook.MailItem)
-                If myMailItem.Sent Then
-                    ' disconnect from the currently connected item 
-                    itemEvents.RemoveConnection()
-                    ' connect to events of myMailItem  
-                    itemEvents.ConnectTo(myMailItem, True)
+            If myExplorer Is Nothing Then Return
+            Try
+                sel = myExplorer.Selection
+            Catch ex As Exception
+                'skip the exception which occurs when in certain folders such as RSS Feeds   
+            End Try
+            If sel Is Nothing Then Return
+            If sel.Count = 1 Then
+                outlookItem = sel.Item(1)
+                If TypeOf outlookItem Is Outlook.MailItem Then
+                    myMailItem = CType(outlookItem, Outlook.MailItem)
+                    If myMailItem.Sent Then
+                        ' disconnect from the currently connected item 
+                        itemEvents.RemoveConnection()
+                        ' connect to events of myMailItem  
+                        itemEvents.ConnectTo(myMailItem, True)
+                    End If
                 End If
-            Else
-                Marshal.ReleaseComObject(outlookItem)
             End If
-        End If
-        Marshal.ReleaseComObject(sel)
+        Finally
+            Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+            Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
+            Marshal.ReleaseComObject(sel) : sel = Nothing
+            Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
+        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
