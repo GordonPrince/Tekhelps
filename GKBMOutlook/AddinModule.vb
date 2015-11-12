@@ -141,19 +141,20 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        Dim theExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-        If theExplorer IsNot Nothing Then
-            Dim selection As Outlook.Selection = Nothing
-            Try
+        Dim theExplorer As Outlook.Explorer = Nothing
+        Dim selection As Outlook.Selection = Nothing
+        Try
+            theExplorer = TryCast(explorer, Outlook.Explorer)
+            If theExplorer IsNot Nothing Then
                 selection = theExplorer.Selection
-            Catch
-            End Try
-
-            If selection IsNot Nothing Then
-                ConnectToSelectedItem(selection)
-                Marshal.ReleaseComObject(selection)
+                If selection IsNot Nothing Then
+                    ConnectToSelectedItem(selection)
+                End If
             End If
-        End If
+        Finally
+            Marshal.ReleaseComObject(selection) : selection = Nothing
+            Marshal.ReleaseComObject(theExplorer) : theExplorer = Nothing
+        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
