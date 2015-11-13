@@ -231,14 +231,18 @@ Public Class AddinModule
             Next
 
             ' myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
+            Marshal.ReleaseComObject(myFolder)
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox)
             myInboxItems = myFolder.Items
             ' mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
+            Marshal.ReleaseComObject(myFolder)
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail)
             mySentItems = myFolder.Items
             ' myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
+            Marshal.ReleaseComObject(myFolder)
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks)
             myTaskItems = myFolder.Items
+            Marshal.ReleaseComObject(myFolder)
 
             ' this won't work if the user is working offline
             ' If OutlookApp.Session.Offline Then
@@ -305,6 +309,7 @@ Public Class AddinModule
                         '    End If
                         'Next
                     End If
+                    Marshal.ReleaseComObject(myPublicFolder)
                 Next
                 MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & "Try to get Outlook working Online if possible.", vbExclamation, "New Call Tracking Not Available")
             End If
@@ -890,6 +895,7 @@ Link2Contacts_Exit:
                         Return
                     End If
                 End With
+                Marshal.ReleaseComObject(myAttach)
             Next
             MsgBox("Nothing was opened.", vbInformation + vbOKOnly, strTitle)
         Catch ex As Exception
@@ -944,6 +950,7 @@ Link2Contacts_Exit:
                                 "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, strTitle)
                             Exit Sub
                         End If
+                        Marshal.ReleaseComObject(myAtt)
                     Next
                 End If
 
@@ -978,6 +985,7 @@ Link2Contacts_Exit:
                 If Left(myFolder.Name, 14) = strPublicFolders Then
                     GoTo HavePublic
                 End If
+                Marshal.ReleaseComObject(myFolder)
             Next
             MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, strTitle)
             Exit Sub
@@ -1130,10 +1138,13 @@ HavePublic:
                                     myExplorer.CurrentFolder = myTarget
                                     Return
                                 End If
+                                Marshal.ReleaseComObject(myTarget)
                             Next
                         End If
+                        Marshal.ReleaseComObject(myFolder)
                     Next
                 End If
+                Marshal.ReleaseComObject(myPublicFolder)
             Next
         Catch ex As Exception
         Finally

@@ -70,6 +70,7 @@ Public Class OutlookItemEventsClass1
                         Exit For
                     End If
                 End If
+                Marshal.ReleaseComObject(myAttachment)
             Next
 
         Finally
@@ -168,6 +169,7 @@ Public Class OutlookItemEventsClass1
                     Catch
                     End Try
                 End If
+                Marshal.ReleaseComObject(myAttachment)
             Next
             ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
             Dim myProps As Outlook.UserProperties = myResponse.UserProperties
