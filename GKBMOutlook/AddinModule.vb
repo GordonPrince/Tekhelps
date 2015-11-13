@@ -69,14 +69,14 @@ Public Class AddinModule
 
 #Region "Tekhelps definitions"
 
-    Public WithEvents myInspectors As Outlook.Inspectors
-    Public WithEvents myInsp As Outlook.Inspector
-    Public WithEvents myMailItem As Outlook.MailItem
-    Public WithEvents myInboxItems As Outlook.Items
-    Public WithEvents mySentItems As Outlook.Items
-    Public WithEvents myTaskItems As Outlook.Items
-    Public WithEvents olInstantFileInbox As Outlook.Items
-    Public WithEvents olInstantFileTasks As Outlook.Items
+    'Public WithEvents myInspectors As Outlook.Inspectors
+    'Public WithEvents myInsp As Outlook.Inspector
+    'Public WithEvents myMailItem As Outlook.MailItem
+    'Public WithEvents myInboxItems As Outlook.Items
+    'Public WithEvents mySentItems As Outlook.Items
+    'Public WithEvents myTaskItems As Outlook.Items
+    'Public WithEvents olInstantFileInbox As Outlook.Items
+    'Public WithEvents olInstantFileTasks As Outlook.Items
 #End Region
 
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
@@ -171,11 +171,10 @@ Public Class AddinModule
         'Dim mySendUsing As Object = Nothing
         Try
             If TypeOf item Is Outlook.MailItem Then
-                myMailItem = item.CurrentItem
+                myMailItem = myInsp.CurrentItem
             Else
                 Return
             End If
-
             'If myMailItem.SendUsingAccount Is Nothing Then
             'Else
             '    mySendUsing = myMailItem.SendUsingAccount
@@ -193,6 +192,7 @@ Public Class AddinModule
                 ' connect to events of myMailItem 
                 itemEvents.ConnectTo(myMailItem, True)
             End If
+        Catch
         Finally
             'If mySendUsing IsNot Nothing Then Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
 
@@ -201,7 +201,7 @@ Public Class AddinModule
             'If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
 
-            ' don't release myInsp -- it will release the inspector object that was passed into the procedure
+            'don't release myInsp -- it will release the inspector object that was passed into the procedure
         End Try
     End Sub
 
@@ -230,19 +230,19 @@ Public Class AddinModule
                 End If
             Next
 
-            ' myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
-            Marshal.ReleaseComObject(myFolder)
-            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox)
-            myInboxItems = myFolder.Items
-            ' mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
-            Marshal.ReleaseComObject(myFolder)
-            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail)
-            mySentItems = myFolder.Items
-            ' myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
-            Marshal.ReleaseComObject(myFolder)
-            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks)
-            myTaskItems = myFolder.Items
-            Marshal.ReleaseComObject(myFolder)
+            '' myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
+            'Marshal.ReleaseComObject(myFolder)
+            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox)
+            'myInboxItems = myFolder.Items
+            '' mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
+            'Marshal.ReleaseComObject(myFolder)
+            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail)
+            'mySentItems = myFolder.Items
+            '' myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
+            'Marshal.ReleaseComObject(myFolder)
+            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks)
+            'myTaskItems = myFolder.Items
+            'Marshal.ReleaseComObject(myFolder)
 
             ' this won't work if the user is working offline
             ' If OutlookApp.Session.Offline Then
