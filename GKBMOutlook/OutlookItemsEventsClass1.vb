@@ -17,6 +17,7 @@ Public Class OutlookItemsEventsClass1
     End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
+        ' skipped
         Const strTitle As String = "Save Sent E-mail in InstantFile"
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
@@ -32,7 +33,7 @@ Public Class OutlookItemsEventsClass1
         Static strLastID As String
 
         Dim myFolder As Outlook.Folder = SourceFolder
-        'Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
+        Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
 
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
@@ -345,7 +346,7 @@ EmailMatNo_Error:
     End Function
 
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
-        'TODO: Add some code
+        Debug.Print("ItemChange() fired")
     End Sub
 
     Public Overrides Sub ItemRemove(ByVal SourceFolder As Object)

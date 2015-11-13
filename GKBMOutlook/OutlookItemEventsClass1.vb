@@ -82,7 +82,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessOpen(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' Debug.Print("ProcessOpen fired. Considering canceling display of the Note item here.")
+        ' Debug.Print("ProcessOpen() fired")
     End Sub
 
     Public Overrides Sub ProcessPropertyChange(ByVal Name As String)
@@ -286,7 +286,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessUnload()
-        ' TODO: Add some code
+        ' Debug.Print("ProcessUnload() fired")
     End Sub
 
     Public Overrides Sub ProcessBeforeAutoSave(ByVal E As AddinExpress.MSO.ADXCancelEventArgs)

@@ -89,8 +89,8 @@ Public Class AddinModule
                     End If
                     itemEvents.ConnectTo(item, True)
                 Else
-                    Marshal.ReleaseComObject(item)
                 End If
+                Marshal.ReleaseComObject(item) : item = Nothing
             End If
         End If
     End Sub
@@ -368,7 +368,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-12 5:52.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-13  5:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
