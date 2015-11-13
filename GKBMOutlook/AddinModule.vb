@@ -911,140 +911,151 @@ Link2Contacts_Exit:
 
     Private Sub MakeAppointment_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles MakeAppointment.OnClick
         Dim myInsp As Outlook.Inspector = Nothing
-        Dim myTask As Outlook.TaskItem = Nothing
-        Dim myAttachments As Outlook.Attachments = Nothing
-        Dim myAtt As Outlook.Attachment = Nothing
-        Dim myUserPropT As Outlook.UserProperty = Nothing
-        Dim myUserPropS As Outlook.UserProperty = Nothing
-        Dim myNameSpace As Outlook.NameSpace = Nothing
-        Dim myFolders As Outlook.Folders = Nothing
-        Dim myFolder As Outlook.Folder = Nothing
-        Dim myAllPublic As Outlook.Folder = Nothing
-        Dim myApptCal As Outlook.Folder = Nothing
-        Dim myUserPropL As Outlook.UserProperty = Nothing
-        Dim myAppt As Outlook.AppointmentItem = Nothing
-        Dim myItems As Outlook.Items = Nothing
-        Dim myNote As Outlook.NoteItem = Nothing
+        'Dim myTask As Outlook.TaskItem = Nothing
+        'Dim myAttachments As Outlook.Attachments = Nothing
+        'Dim myAtt As Outlook.Attachment = Nothing
+        'Dim myUserPropT As Outlook.UserProperty = Nothing
+        'Dim myUserPropS As Outlook.UserProperty = Nothing
+        'Dim myNameSpace As Outlook.NameSpace = Nothing
+        'Dim myFolders As Outlook.Folders = Nothing
+        'Dim myFolder As Outlook.Folder = Nothing
+        'Dim myAllPublic As Outlook.Folder = Nothing
+        'Dim myApptCal As Outlook.Folder = Nothing
+        'Dim myUserPropL As Outlook.UserProperty = Nothing
+        'Dim myAppt As Outlook.AppointmentItem = Nothing
+        'Dim myItems As Outlook.Items = Nothing
+        'Dim myNote As Outlook.NoteItem = Nothing
         Const strTitle As String = "Make New Appointment"
+        Dim item As Object = Nothing
 
         Try
             myInsp = OutlookApp.ActiveInspector
-            If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+            item = myInsp.CurrentItem
+            If TypeOf item Is Outlook.TaskItem Then
             Else
                 MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, strTitle)
                 Return
             End If
-            myTask = myInsp.CurrentItem
-            myAttachments = myTask.Attachments
-            With myTask
-                If myAttachments.Count > 0 Then
-                    ' For Each myAtt In myAttachments
-                    Dim x As Short
-                    For x = 1 To myAttachments.Count
-                        myAtt = myAttachments(x)
-                        If myAtt.DisplayName = strNewCallAppointmentTag Then
-                            MsgBox("This call already has an appointment. " & _
-                                "Open the existing appointment and update it " & _
-                                "(instead of making a new appointment).", vbInformation + vbOKOnly, strTitle)
-                            Exit Sub
-                        End If
-                        Marshal.ReleaseComObject(myAtt)
-                    Next
-                End If
 
-                If Right(.Subject, 1) = "/" Then
-                Else
-                    myUserPropT = .UserProperties("TypeOfCase")
-                    myUserPropS = .UserProperties("Screener")
-                    If Left(myUserPropT.Value, 2) = "SS" Then
-                        .Subject = .Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
-                    ElseIf Left(myUserPropT.Value, 1) = "A" Then
-                        .Subject = .Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
-                    Else
-                        .Subject = .Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
-                    End If
-                End If
-                .Save()
-            End With
+            'Cursor.Current = Cursors.WaitCursor
 
-            myNameSpace = OutlookApp.GetNamespace("MAPI")
-            ' For Each myFolder In myNameSpace.Folders
-            myFolders = myNameSpace.Folders
-            For x = 1 To myFolders.Count
-                myFolder = myFolders(x)
-                If Left(myFolder.Name, 14) = strPublicFolders Then
-                    GoTo HavePublic
-                End If
-                Marshal.ReleaseComObject(myFolder)
-            Next
-            MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, strTitle)
-            Exit Sub
-HavePublic:
-            myAllPublic = myFolder.Folders(strAllPublicFolders)
-            With myTask
-                myUserPropL = .UserProperties("ApptLocation")
-                If Len(myUserPropL.Value) = 0 Then
-                    If Left(myUserPropT.Value, 2) = "SS" Then
-                        myUserPropL.Value = "SSI"
-                    Else
-                        myUserPropL.Value = "Wanda"
-                    End If
-                End If
-                If myUserPropL.Value = "SSI" Then
-                    myApptCal = myAllPublic.Folders("Appointment SSI")
-                Else
-                    myApptCal = myAllPublic.Folders("Appointment Calendar")
-                End If
-            End With
+            'myTask = myInsp.CurrentItem
+            'myAttachments = myTask.Attachments
+            'With myTask
+            'If myAttachments.Count > 0 Then
+            '    ' For Each myAtt In myAttachments
+            '    Dim x As Short
+            '    For x = 1 To myAttachments.Count
+            '        myAtt = myAttachments(x)
+            '        If myAtt.DisplayName = strNewCallAppointmentTag Then
+            '            MsgBox("This caller already has an appointment." & vbNewLine & vbNewLine & _
+            '                "Open the existing appointment and update it " & _
+            '                "(instead of making a new appointment).", vbInformation + vbOKOnly, strTitle)
+            '            Return
+            '        End If
+            '        Marshal.ReleaseComObject(myAtt)
+            '    Next
+            'End If
 
-            myItems = myApptCal.Items
-            myAppt = myItems.Add
-            myAppt.Display()
-            myAppt.Subject = myTask.Subject
-            If myUserPropL.Value = "Wanda" _
-                Or myUserPropL.Value = "219" _
-                Or myUserPropL.Value = "SSI" Then
-                myAppt.Location = myUserPropL.Value
-            End If
+            'If Right(.Subject, 1) = "/" Then
+            'Else
+            '    myUserPropT = .UserProperties("TypeOfCase")
+            '    myUserPropS = .UserProperties("Screener")
+            '    If Left(myUserPropT.Value, 2) = "SS" Then
+            '        .Subject = .Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
+            '    ElseIf Left(myUserPropT.Value, 1) = "A" Then
+            '        .Subject = .Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
+            '    Else
+            '        .Subject = .Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
+            '    End If
+            'End If
+            '.Save()
+            'End With
 
-            ' add the Note with the EntryID of NewCallTracking item to the Appointment
-            myNote = OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem)
-            myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
-            myNote.Save()
-            myAttachments = myAppt.Attachments
-            myAttachments.Add(myNote, 1)
-            myAppt.Save()
+            '            myNameSpace = OutlookApp.GetNamespace("MAPI")
+            '            myFolders = myNameSpace.Folders
+            '            Dim s As String = Nothing
+            '            For x = 1 To myFolders.Count
+            '                myFolder = myFolders(x)
+            '                s = myFolder.Name
+            '                If Left(s, 14) = strPublicFolders Then
+            '                    GoTo HavePublic
+            '                End If
+            '                Marshal.ReleaseComObject(myFolder)
+            '            Next
+            '            MsgBox("Could not find Outlook folder '" & strPublicFolders & "'.", vbExclamation + vbOKOnly, strTitle)
+            '            Exit Sub
+            'HavePublic:
+            '            myAllPublic = myFolder.Folders(strAllPublicFolders)
+            '            With myTask
+            '                myUserPropL = .UserProperties("ApptLocation")
+            '                If Len(myUserPropL.Value) = 0 Then
+            '                    If Left(myUserPropT.Value, 2) = "SS" Then
+            '                        myUserPropL.Value = "SSI"
+            '                    Else
+            '                        myUserPropL.Value = "Wanda"
+            '                    End If
+            '                End If
+            '                If myUserPropL.Value = "SSI" Then
+            '                    myApptCal = myAllPublic.Folders("Appointment SSI")
+            '                Else
+            '                    myApptCal = myAllPublic.Folders("Appointment Calendar")
+            '                End If
+            '            End With
 
-            ' add the Note with the EntryId of the Appointment to the NewCallTracking item
-            If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
-            myNote = OutlookApp.CreateItem(5)
-            myNote.Body = strNewCallAppointmentTag & Chr(13) & Chr(10) & myAppt.EntryID
-            myNote.Save()
-            myAttachments = myTask.Attachments
-            myAttachments.Add(myNote, 1)
-            ' myTask.UserProperties("ApptMade").Value = "Y"
-            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
-            myUserPropT = myTask.UserProperties("ApptMade")
-            myUserPropT.Value = "Y"
-            myTask.Close(Outlook.OlInspectorClose.olSave)
+            'myItems = myApptCal.Items
+            'myAppt = myItems.Add
+            'myAppt.Display()
+            'myAppt.Subject = myTask.Subject
+            'If myUserPropL.Value = "Wanda" _
+            '    Or myUserPropL.Value = "219" _
+            '    Or myUserPropL.Value = "SSI" Then
+            '    myAppt.Location = myUserPropL.Value
+            'End If
+
+            '' add the Note with the EntryID of NewCallTracking item to the Appointment
+            'myNote = OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem)
+            'myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
+            'myNote.Save()
+            'myAttachments = myAppt.Attachments
+            'myAttachments.Add(myNote, 1)
+            'myAppt.Save()
+
+            '' add the Note with the EntryId of the Appointment to the NewCallTracking item
+            'If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
+            'myNote = OutlookApp.CreateItem(5)
+            'myNote.Body = strNewCallAppointmentTag & Chr(13) & Chr(10) & myAppt.EntryID
+            'myNote.Save()
+            'myAttachments = myTask.Attachments
+            'myAttachments.Add(myNote, 1)
+            '' myTask.UserProperties("ApptMade").Value = "Y"
+            'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            'myUserPropT = myTask.UserProperties("ApptMade")
+            'myUserPropT.Value = "Y"
+
+            ' myTask.Close(Outlook.OlInspectorClose.olSave)
+
         Catch ex As Exception
         Finally
-            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
-            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
-            If myApptCal IsNot Nothing Then Marshal.ReleaseComObject(myApptCal) : myApptCal = Nothing
-            If myAllPublic IsNot Nothing Then Marshal.ReleaseComObject(myAllPublic) : myAllPublic = Nothing
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
-            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
-            If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
-            If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
-            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
-            If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
-            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            '    If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            '    If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
+            '    If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
+            '    If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
+            '    If myApptCal IsNot Nothing Then Marshal.ReleaseComObject(myApptCal) : myApptCal = Nothing
+            '    If myAllPublic IsNot Nothing Then Marshal.ReleaseComObject(myAllPublic) : myAllPublic = Nothing
+            '    If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            '    If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
+            '    If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
+            '    If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
+            '    If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            '    If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
+            '    If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            '    If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            Cursor.Current = Cursors.Default
         End Try
+        MsgBox("Done", , strTitle)
     End Sub
 
     Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
