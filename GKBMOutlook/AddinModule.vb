@@ -735,28 +735,26 @@ Link2Contacts_Exit:
         Try
             obj = inspector.CurrentItem
             If TypeOf obj Is Outlook.NoteItem Then
-            Else
-                Return
-            End If
-            myNote = obj
-            Dim strID As String = Nothing
-            If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-            End If
-            If Len(strID) > 0 Then
-                If OpenItemFromID(strID) Then
-                Else
-                    MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
+                myNote = obj
+                Dim strID As String = Nothing
+                If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+                    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+                ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+                    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+                ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+                End If
+                If Len(strID) > 0 Then
+                    If OpenItemFromID(strID) Then
+                    Else
+                        MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
+                    End If
                 End If
             End If
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            ' If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
         End Try
     End Sub
 
