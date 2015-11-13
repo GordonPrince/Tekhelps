@@ -346,7 +346,7 @@ EmailMatNo_Error:
     End Function
 
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
-        Debug.Print("ItemChange() fired")
+        ' Debug.Print("ItemChange() fired")
     End Sub
 
     Public Overrides Sub ItemRemove(ByVal SourceFolder As Object)
