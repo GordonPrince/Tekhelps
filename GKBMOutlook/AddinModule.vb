@@ -372,7 +372,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-13  6:20.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-13  10:45.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -944,10 +944,8 @@ Link2Contacts_Exit:
                         myAtt = myAttachments(x)
                         If myAtt.DisplayName = strNewCallAppointmentTag Then
                             MsgBox("This call already has an appointment. " & _
-                                "Double click on the appointment shortcut to update the appointment " & _
-                                "instead of making another appointment." & Chr(13) & Chr(13) & _
-                                "If double clicking on the appointment shortcut doesn't open the appointment, " & _
-                                "call Gordon and he'll tell you how to fix your computer.", vbInformation + vbOKOnly, strTitle)
+                                "Open the existing appointment and update it " & _
+                                "(instead of making a new appointment).", vbInformation + vbOKOnly, strTitle)
                             Exit Sub
                         End If
                         Marshal.ReleaseComObject(myAtt)
@@ -956,14 +954,6 @@ Link2Contacts_Exit:
 
                 If Right(.Subject, 1) = "/" Then
                 Else
-                    'If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
-                    '    .Subject = .Subject & "; SS; " & Left(.UserProperties("Screener").Value, 3) & "/"
-                    'ElseIf Left(.UserProperties("TypeOfCase").Value, 1) = "A" Then
-                    '    .Subject = .Subject & "; A; " & Left(.UserProperties("Screener").Value, 3) & "/"
-                    'Else
-                    '    .Subject = .Subject & "; " & Left(.UserProperties("TypeOfCase").Value, 2) & "; " & _
-                    '        Left(.UserProperties("Screener").Value, 3) & "/"
-                    'End If
                     myUserPropT = .UserProperties("TypeOfCase")
                     myUserPropS = .UserProperties("Screener")
                     If Left(myUserPropT.Value, 2) = "SS" Then
@@ -992,13 +982,6 @@ Link2Contacts_Exit:
 HavePublic:
             myAllPublic = myFolder.Folders(strAllPublicFolders)
             With myTask
-                'If Len(.UserProperties("ApptLocation").Value) = 0 Then
-                '    If Left(.UserProperties("TypeOfCase").Value, 2) = "SS" Then
-                '        .UserProperties("ApptLocation").Value = "SSI"
-                '    Else
-                '        .UserProperties("ApptLocation").Value = "Wanda"
-                '    End If
-                'End If
                 myUserPropL = .UserProperties("ApptLocation")
                 If Len(myUserPropL.Value) = 0 Then
                     If Left(myUserPropT.Value, 2) = "SS" Then
@@ -1014,7 +997,6 @@ HavePublic:
                 End If
             End With
 
-            ' myAppt = myApptCal.Items.Add
             myItems = myApptCal.Items
             myAppt = myItems.Add
             myAppt.Display()
@@ -1040,7 +1022,10 @@ HavePublic:
             myNote.Save()
             myAttachments = myTask.Attachments
             myAttachments.Add(myNote, 1)
-            myTask.UserProperties("ApptMade").Value = "Y"
+            ' myTask.UserProperties("ApptMade").Value = "Y"
+            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            myUserPropT = myTask.UserProperties("ApptMade")
+            myUserPropT.Value = "Y"
             myTask.Close(Outlook.OlInspectorClose.olSave)
         Catch ex As Exception
         Finally
