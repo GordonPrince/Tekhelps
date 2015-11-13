@@ -49,13 +49,13 @@ Partial Public Class AddinModule
         Me.MakeAppointment = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxRibbonSeparator4 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.OpenItemFromNote = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxRibbonSeparator1 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         Me.AdxRibbonButton1 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.CopyAttachments = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.About = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
-        Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.OpenApptFromFile = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
-        Me.AdxRibbonSeparator1 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -210,6 +210,11 @@ Partial Public Class AddinModule
     " currently displayed item."
         Me.OpenItemFromNote.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
+        'AdxRibbonSeparator1
+        '
+        Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ab15ec8bc2634c16b73d15434c77cde1"
+        Me.AdxRibbonSeparator1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
+        '
         'AdxRibbonButton1
         '
         Me.AdxRibbonButton1.Caption = "E-mail Copy of This Item"
@@ -246,6 +251,17 @@ Partial Public Class AddinModule
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
         '
+        'OpenApptFromFile
+        '
+        Me.OpenApptFromFile.Caption = "Open Note from File"
+        Me.OpenApptFromFile.Id = "adxRibbonButton_fd25b74e412c4e36a85c28c29d6c6e1a"
+        Me.OpenApptFromFile.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.OpenApptFromFile.Ribbons = AddinExpress.MSO.ADXRibbons.msrNone
+        Me.OpenApptFromFile.ScreenTip = "Open the test Appointment."
+        Me.OpenApptFromFile.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        Me.OpenApptFromFile.SuperTip = "Opens the test Appointment from ""C:\tmp\NewCall Appointment.msg"""
+        Me.OpenApptFromFile.Visible = False
+        '
         'AdxRibbonButton4
         '
         Me.AdxRibbonButton4.Caption = "About"
@@ -272,24 +288,8 @@ Partial Public Class AddinModule
         Me.AdxRibbonButton4.ScreenTip = "Display information about this ribbon tab."
         Me.AdxRibbonButton4.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
-        'OpenApptFromFile
-        '
-        Me.OpenApptFromFile.Caption = "Open Note from File"
-        Me.OpenApptFromFile.Id = "adxRibbonButton_fd25b74e412c4e36a85c28c29d6c6e1a"
-        Me.OpenApptFromFile.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.OpenApptFromFile.Ribbons = AddinExpress.MSO.ADXRibbons.msrNone
-        Me.OpenApptFromFile.ScreenTip = "Open the test Appointment."
-        Me.OpenApptFromFile.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
-        Me.OpenApptFromFile.SuperTip = "Opens the test Appointment from ""C:\tmp\NewCall Appointment.msg"""
-        Me.OpenApptFromFile.Visible = False
-        '
         'AdxOutlookAppEvents1
         '
-        '
-        'AdxRibbonSeparator1
-        '
-        Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ab15ec8bc2634c16b73d15434c77cde1"
-        Me.AdxRibbonSeparator1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
         '
         'AddinModule
         '

@@ -95,49 +95,49 @@ Public Class AddinModule
         End If
     End Sub
 
-    Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-        'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
-        'In the same fashion you handle the ExplorerActivate event. 
-        'That is, InspectorActivate and ExplorerActivate let you handle this scenario: 
-        'the user presses Alt+Tab to switch between Outlook windows. 
-        'Whenever an Outlook window becomes active, 
-        'your code disconnects from events of the currently connected item 
-        'and connects to events of the item which is opened (InspectorActivate) or selected (ExplorerActivate). 
-        'The ExplorerSelectionChange allows you to follow the user selecting another item. 
+    'Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
+    '    'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
+    '    'In the same fashion you handle the ExplorerActivate event. 
+    '    'That is, InspectorActivate and ExplorerActivate let you handle this scenario: 
+    '    'the user presses Alt+Tab to switch between Outlook windows. 
+    '    'Whenever an Outlook window becomes active, 
+    '    'your code disconnects from events of the currently connected item 
+    '    'and connects to events of the item which is opened (InspectorActivate) or selected (ExplorerActivate). 
+    '    'The ExplorerSelectionChange allows you to follow the user selecting another item. 
 
-        ' 11/10/2015 added this for CallPilot errors
-        Dim myExplorer As Outlook.Explorer = Nothing
-        Dim sel As Outlook.Selection = Nothing
-        Dim outlookItem As Object = Nothing
-        Dim myMailItem As Outlook.MailItem = Nothing
-        Try
-            myExplorer = CType(explorer, Outlook.Explorer)
-            If myExplorer Is Nothing Then Return
-            Try
-                sel = myExplorer.Selection
-            Catch ex As Exception
-                'skip the exception which occurs when in certain folders such as RSS Feeds   
-            End Try
-            If sel Is Nothing Then Return
-            If sel.Count = 1 Then
-                outlookItem = sel.Item(1)
-                If TypeOf outlookItem Is Outlook.MailItem Then
-                    myMailItem = CType(outlookItem, Outlook.MailItem)
-                    If myMailItem.Sent Then
-                        ' disconnect from the currently connected item 
-                        itemEvents.RemoveConnection()
-                        ' connect to events of myMailItem  
-                        itemEvents.ConnectTo(myMailItem, True)
-                    End If
-                End If
-            End If
-        Finally
-            If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            If outlookItem IsNot Nothing Then Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
-            If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
-            ' Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
-        End Try
-    End Sub
+    '    ' 11/10/2015 added this for CallPilot errors
+    '    Dim myExplorer As Outlook.Explorer = Nothing
+    '    Dim sel As Outlook.Selection = Nothing
+    '    Dim outlookItem As Object = Nothing
+    '    Dim myMailItem As Outlook.MailItem = Nothing
+    '    Try
+    '        myExplorer = CType(explorer, Outlook.Explorer)
+    '        If myExplorer Is Nothing Then Return
+    '        Try
+    '            sel = myExplorer.Selection
+    '        Catch ex As Exception
+    '            'skip the exception which occurs when in certain folders such as RSS Feeds   
+    '        End Try
+    '        If sel Is Nothing Then Return
+    '        If sel.Count = 1 Then
+    '            outlookItem = sel.Item(1)
+    '            If TypeOf outlookItem Is Outlook.MailItem Then
+    '                myMailItem = CType(outlookItem, Outlook.MailItem)
+    '                If myMailItem.Sent Then
+    '                    ' disconnect from the currently connected item 
+    '                    itemEvents.RemoveConnection()
+    '                    ' connect to events of myMailItem  
+    '                    itemEvents.ConnectTo(myMailItem, True)
+    '                End If
+    '            End If
+    '        End If
+    '    Finally
+    '        If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+    '        If outlookItem IsNot Nothing Then Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
+    '        If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
+    '        ' Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
+    '    End Try
+    'End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
         Dim theExplorer As Outlook.Explorer = Nothing
@@ -165,45 +165,44 @@ Public Class AddinModule
         'not when a second or third item is opened in another Inspector window
         'so it doesn't work for closing Notes from NewCallTracking
         ' 11/13/2015 fix this
-        'Dim myInsp As Outlook.Inspector = Nothing
-        'Dim myMailItem As Outlook.MailItem = Nothing
+        Dim myInsp As Outlook.Inspector = inspector
+        Dim item As Object = myInsp.CurrentItem
+        Dim myMailItem As Outlook.MailItem = Nothing
         'Dim mySendUsing As Object = Nothing
-        'Try
-        '    If TypeOf inspector Is Outlook.Inspector Then
-        '        myInsp = CType(inspector, Outlook.Inspector)
-        '    Else
-        '        Return
-        '    End If
+        Try
+            If TypeOf item Is Outlook.MailItem Then
+                myMailItem = item.CurrentItem
+            Else
+                Return
+            End If
 
-        '    ' 11/10/2015 added this for CallPilot errors
-        '    If myInsp Is Nothing Then Return
+            'If myMailItem.SendUsingAccount Is Nothing Then
+            'Else
+            '    mySendUsing = myMailItem.SendUsingAccount
+            '    If mySendUsing.DisplayName = "Microsoft Exchange" Then
+            '    Else
+            '        ' don't try working with CallPilot items
+            '        ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
+            '        itemEvents.RemoveConnection()
+            '        Return
+            '    End If
+            'End If
+            If myMailItem.Sent Then
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of myMailItem 
+                itemEvents.ConnectTo(myMailItem, True)
+            End If
+        Finally
+            'If mySendUsing IsNot Nothing Then Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
 
-        '    If TypeOf myInsp.CurrentItem Is Outlook.MailItem Then
-        '        myMailItem = myInsp.CurrentItem
-        '        If myMailItem.SendUsingAccount Is Nothing Then
-        '        Else
-        '            ' If myMailItem.SendUsingAccount.DisplayName = "Microsoft Exchange" Then
-        '            mySendUsing = myMailItem.SendUsingAccount
-        '            If mySendUsing.DisplayName = "Microsoft Exchange" Then
-        '            Else
-        '                ' don't try working with CallPilot items
-        '                ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
-        '                itemEvents.RemoveConnection()
-        '                Return
-        '            End If
-        '        End If
-        '        If myMailItem.Sent Then
-        '            ' disconnect from the currently connected item 
-        '            itemEvents.RemoveConnection()
-        '            ' connect to events of myMailItem 
-        '            itemEvents.ConnectTo(myMailItem, True)
-        '        End If
-        '    End If
-        'Finally
-        '    If mySendUsing IsNot Nothing Then Marshal.ReleaseComObject(mySendUsing) : mySendUsing = Nothing
-        '    If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-        '    If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
-        'End Try
+            '11/15/2015 from Andrei: Don’t release mailItem if you’ve connected to its events. 
+            'And remember that item and mailitem both point to the same COM object.
+            'If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+
+            ' don't release myInsp -- it will release the inspector object that was passed into the procedure
+        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
@@ -730,12 +729,12 @@ Link2Contacts_Exit:
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
         ' 11/13/2015
-        Dim obj As Object = Nothing
+        Dim item As Object = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Try
-            obj = inspector.CurrentItem
-            If TypeOf obj Is Outlook.NoteItem Then
-                myNote = obj
+            item = inspector.CurrentItem
+            If TypeOf item Is Outlook.NoteItem Then
+                myNote = item
                 Dim strID As String = Nothing
                 If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
                     strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
@@ -754,7 +753,7 @@ Link2Contacts_Exit:
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
         End Try
     End Sub
 
@@ -799,32 +798,6 @@ Link2Contacts_Exit:
             Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
         End Try
     End Function
-
-    Private Sub AdxOutlookAppEvents1_InspectorDeactivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorDeactivate
-        'Dim myInsp As Outlook.Inspector = inspector
-        'Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate fired for Object " & TypeName(myInsp.CurrentItem) & " " & Now)
-        ' opening a NewCallTracking or Appointment attached note triggers this event
-        'Dim myInsp As Outlook.Inspector
-        'For Each myInsp In OutlookApp.Inspectors
-        '    'Debug.Print("Subject = " & myInsp.CurrentItem.subject)
-        '    'Debug.Print("Body    = " & myInsp.CurrentItem.body)
-        '    If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-        '        Dim myNote As Outlook.NoteItem = myInsp.CurrentItem
-        '        If myNote.Subject = strNewCallTrackingTag Or myNote.Subject = strNewCallAppointmentTag Then
-        '            Try
-        '                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-        '            Catch
-        '            End Try
-        '        End If
-        '    End If
-        'Next
-        'Debug.Print("AdxOutlookAppEvents1_InspectorDeactivate exit")
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_InspectorClose(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorClose
-        'Dim myInsp As Outlook.Inspector = inspector
-        'Debug.Print("AdxOutlookAppEvents1_InspectorClose fired for Object " & TypeName(myInsp.CurrentItem))
-    End Sub
 
     'Private Sub OpenNoteFromFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenApptFromFile.OnClick
     '    Dim myNote As Outlook.NoteItem = OutlookApp.CreateItemFromTemplate("C:\tmp\NewCall Appointment.msg")
