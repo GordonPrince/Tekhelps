@@ -374,7 +374,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-14  8:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-14 11:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -898,33 +898,34 @@ LinkContacts:
 
     Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
         ' look for Note attachments with the right Display property 
-        ' read the EntryID from the Note
-        ' open the item using the EntryID
-        ' 11/11/2015 
+        ' read the EntryID from the Note & open the item using the EntryID
+        Const strTitle As String = "Open Item from Attached Note"
         Dim myInsp As Outlook.Inspector = Nothing
+        Dim myInspectors As Outlook.Inspectors = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myTask As Outlook.TaskItem = Nothing
         Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Try
-            myInsp = OutlookApp.ActiveInspector
-            Dim strOriginalType As String = TypeName(myInsp.CurrentItem)
-            Dim strTitle As String = "Open Item from Attached Note"
+            Dim strOriginalType As String
             Dim datAppt As Date
+            myInsp = OutlookApp.ActiveInspector
             If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                 myTask = myInsp.CurrentItem
+                strOriginalType = TypeName(myTask)
                 myAttachments = myTask.Attachments
             ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
                 myAppt = myInsp.CurrentItem
+                strOriginalType = TypeName(myAppt)
                 datAppt = myAppt.Start
                 myAttachments = myAppt.Attachments
             Else
-                MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation + vbOKOnly, strTitle)
+                MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation, strTitle)
                 Return
             End If
             If myAttachments.Count = 0 Then
-                MsgBox("There are no Notes attached to this item.", vbInformation + vbOKOnly, strTitle)
+                MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
                 Return
             End If
 
@@ -941,15 +942,16 @@ LinkContacts:
                         ' For Each myInsp In OutlookApp.Inspectors
                         ' stepping through these backward worked, the For Each loop didn't
                         Dim y As Int16
-                        For y = OutlookApp.Inspectors.Count To 1 Step -1
-                            myInsp = OutlookApp.Inspectors(y)
+                        myInspectors = OutlookApp.Inspectors
+                        For y = myInspectors.Count To 1 Step -1
+                            myInsp = myInspectors(y)
                             ' don't close emails and other types of items -- only Appointments and Tasks and Notes
                             If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
-                                'Try
-                                myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                                'Catch
-                                'myInsp.WindowState = Outlook.OlWindowState.olMinimized
-                                'End Try
+                                Try
+                                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                                Catch
+                                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
+                                End Try
                             ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                                 If TypeName(myInsp.CurrentItem) = strOriginalType Then
                                     myInsp.Close(Outlook.OlInspectorClose.olSave)
@@ -968,20 +970,23 @@ LinkContacts:
                                     '    End Try
                                 End If
                             End If
+                            Marshal.ReleaseComObject(myInsp)
                         Next
                         Return
                     End If
                 End With
                 Marshal.ReleaseComObject(myAttach)
             Next
-            MsgBox("Nothing was opened.", vbInformation + vbOKOnly, strTitle)
+            MsgBox("Nothing was opened.", vbInformation, strTitle)
         Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
             If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
