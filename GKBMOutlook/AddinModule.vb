@@ -1031,36 +1031,24 @@ HavePublic:
             'End If
 
             ' add the Note with the EntryID of NewCallTracking item to the Appointment
-            'myNote = OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem)
-            '11/13/2015 rewrote this, partly because the above references left an unreleased COM object
-
-            'mySession = OutlookApp.GetNamespace("MAPI")
-            'If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder)
-            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes)
-            'myNotes = myFolder.Items
-            'myNote = myNotes.add
             ' from https://www.add-in-express.com/creating-addins-blog/2012/07/16/create-outlook-task-appointment-note-email/
             myNote = TryCast(OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem), Outlook.NoteItem)
             myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
-            myNote.Save()
-            ' myNote.SaveAs("C:\tmp\NewCallTracking.msg")
-            myNote.Close(Outlook.OlInspectorClose.olDiscard)
-            ' Marshal.ReleaseComObject(myNote)
-
+            myNote.Close(Outlook.OlInspectorClose.olSave)
             myAttachments = myAppt.Attachments
             myAttachments.Add(myNote, 1)
             Marshal.ReleaseComObject(myNote)
-            ' myAttachments.Add("C:\tmp\NewCallTracking.msg")
             Marshal.ReleaseComObject(myAttachments)
-            ' myAppt.Save()
+            myAppt.Save()
             ' add the Note with the EntryID of the Appointment to the NewCallTracking item
-            'If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
-            'myNote = OutlookApp.CreateItem(5)
-            'myNote.Body = strNewCallAppointmentTag & Chr(13) & Chr(10) & myAppt.EntryID
-            'myNote.Save()
-            'myAttachments = myTask.Attachments
-            'myAttachments.Add(myNote, 1)
-
+            If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
+            myNote = TryCast(OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem), Outlook.NoteItem)
+            myNote.Body = strNewCallAppointmentTag & Chr(13) & Chr(10) & myAppt.EntryID
+            myNote.Close(Outlook.OlInspectorClose.olSave)
+            myAttachments = myTask.Attachments
+            myAttachments.Add(myNote, 1)
+            Marshal.ReleaseComObject(myNote)
+            Marshal.ReleaseComObject(myAttachments)
             ' myTask.UserProperties("ApptMade").Value = "Y"
             'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
             'myUserPropT = myTask.UserProperties("ApptMade")
