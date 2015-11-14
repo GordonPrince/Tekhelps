@@ -917,7 +917,7 @@ Link2Contacts_Exit:
         Dim myTask As Outlook.TaskItem = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAtt As Outlook.Attachment = Nothing
-        'Dim myUserPropT As Outlook.UserProperty = Nothing
+        Dim myUserPropT As Outlook.UserProperty = Nothing
         'Dim myUserPropS As Outlook.UserProperty = Nothing
         Dim myNameSpace As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
@@ -1021,8 +1021,7 @@ HavePublic:
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
-            ' 11/14/2015 don't display until everything else is done & released
-            ' myAppt.Display()
+            myAppt.Display()
             myAppt.Subject = myTask.Subject
             'If myUserPropL.Value = "Wanda" _
             '    Or myUserPropL.Value = "219" _
@@ -1052,14 +1051,14 @@ HavePublic:
             Marshal.ReleaseComObject(myNote)
             Marshal.ReleaseComObject(myAttachments)
 
-            ' myTask.UserProperties("ApptMade").Value = "Y"
+            'can't use this -- double dot issue -- myTask.UserProperties("ApptMade").Value = "Y"
             'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
             'myUserPropT = myTask.UserProperties("ApptMade")
             'myUserPropT.Value = "Y"
+            'Marshal.ReleaseComObject(myUserPropT)
 
             myTask.Close(Outlook.OlInspectorClose.olSave)
             Marshal.ReleaseComObject(myTask)
-            myAppt.Display()
             Marshal.ReleaseComObject(myAppt)
             Marshal.ReleaseComObject(myAllPublic)
         Catch ex As Exception
@@ -1077,7 +1076,7 @@ HavePublic:
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
             'If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
-            'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
             If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
