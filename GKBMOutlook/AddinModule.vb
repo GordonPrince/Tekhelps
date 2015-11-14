@@ -374,7 +374,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-13  10:45.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-14  8:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -552,82 +552,103 @@ CopyContact:
     End Sub
 
     Private Sub Link2Contacts2EachOther_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
-        ' skipped
         ' link two open Contacts to each other
         Const strTitle As String = "Link Two Contacts to Each Other"
-        Dim myInspector As Outlook.Inspector
-        Dim myCont1 As Outlook.ContactItem, myCont2 As Outlook.ContactItem
+        Dim myInspectors As Outlook.Inspectors = Nothing
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim myCont1 As Outlook.ContactItem = Nothing
+        Dim myCont2 As Outlook.ContactItem = Nothing
         Dim strCompanyDept As String
-        Dim bHave1 As Boolean
+        Dim myLinks As Outlook.Links = Nothing
+
         ' make sure there are exactly two Contacts open
-        myCont1 = Nothing
-        For Each myInspector In OutlookApp.Inspectors
-            If TypeOf myInspector.CurrentItem Is Outlook.ContactItem Then
-                If Not bHave1 Then
-                    myCont1 = myInspector.CurrentItem
-                    bHave1 = True
-                Else
-                    myCont2 = myInspector.CurrentItem
-                    GoTo LinkContacts
+        Try
+            ' For Each myInspector In OutlookApp.Inspectors
+            myInspectors = OutlookApp.Inspectors
+            For x = 1 To myInspectors.Count
+                Dim bHave1 As Boolean
+                myInsp = myInspectors(x)
+                If TypeOf myInsp.CurrentItem Is Outlook.ContactItem Then
+                    If Not bHave1 Then
+                        myCont1 = myInsp.CurrentItem
+                        bHave1 = True
+                    Else
+                        myCont2 = myInsp.CurrentItem
+                        GoTo LinkContacts
+                    End If
                 End If
-            End If
-        Next myInspector
-        MsgBox("Did not find two Contacts open." & vbNewLine & vbNewLine & _
-                "Open the two Contacts you want to link to each other, then try this again.", vbExclamation, strTitle)
-        GoTo Link2Contacts_Exit
+            Next 'myInspector
+            MsgBox("Did not find two Contacts open." & vbNewLine & vbNewLine & _
+                    "Open the two Contacts you want to link to each other, then try this again.", vbExclamation, strTitle)
+            Return
 
 LinkContacts:
-        ' if there are individual names in the Contacts, ask whether or not the link should display the individual's name or the company's name
-        With myCont2
-            strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
-            If .FullName = vbNullString And .CompanyName <> vbNullString Then
-                .Subject = strCompanyDept
-            ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
-                .Subject = .FullName
-            Else
-                RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
-                If RetVal = vbNo Then
+            Marshal.ReleaseComObject(myInsp)
+            Marshal.ReleaseComObject(myInspectors)
+            ' if there are individual names in the Contacts, ask whether or not the link should display the individual's name or the company's name
+            With myCont2
+                strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
+                If .FullName = vbNullString And .CompanyName <> vbNullString Then
                     .Subject = strCompanyDept
-                ElseIf RetVal = vbYes Then
+                ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
                     .Subject = .FullName
-                ElseIf RetVal = vbCancel Then
-                    GoTo Link2Contacts_Exit
+                Else
+                    RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
+                    If RetVal = vbNo Then
+                        .Subject = strCompanyDept
+                    ElseIf RetVal = vbYes Then
+                        .Subject = .FullName
+                    ElseIf RetVal = vbCancel Then
+                        Return
+                    End If
                 End If
-            End If
-            .Save()
-        End With
+                .Save()
+            End With
 
-        With myCont1
-            strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
-            If .FullName = vbNullString And .CompanyName <> vbNullString Then
-                .Subject = strCompanyDept
-            ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
-                .Subject = .FullName
-            Else
-                RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
-                If RetVal = vbNo Then
+            With myCont1
+                strCompanyDept = .CompanyName & IIf(.Department = vbNullString, vbNullString, " (" & .Department & ")")
+                If .FullName = vbNullString And .CompanyName <> vbNullString Then
                     .Subject = strCompanyDept
-                ElseIf RetVal = vbYes Then
+                ElseIf .FullName <> vbNullString And .CompanyName = vbNullString Then
                     .Subject = .FullName
-                ElseIf RetVal = vbCancel Then
-                    GoTo Link2Contacts_Exit
+                Else
+                    RetVal = MsgBox("Show the link as" & vbNewLine & "'" & .FullName & "' [Yes]" & vbNewLine & "or as" & vbNewLine & "'" & strCompanyDept & "' [No]?", vbQuestion + vbYesNoCancel + vbDefaultButton2, "Show Individual or Company Name")
+                    If RetVal = vbNo Then
+                        .Subject = strCompanyDept
+                    ElseIf RetVal = vbYes Then
+                        .Subject = .FullName
+                    ElseIf RetVal = vbCancel Then
+                        Return
+                    End If
                 End If
+                .Save()
+            End With
+
+            If MsgBox("LINK:" & vbNewLine & myCont1.Subject & vbNewLine & vbNewLine & _
+                      "AND:" & vbNewLine & myCont2.Subject, vbQuestion + vbYesNo, strTitle) = vbYes Then
+                ' link 1 to 2
+                ' myCont1.Links.Add(myCont2)
+                myLinks = myCont1.Links
+                myLinks.Add(myCont2)
+                myCont1.Save()
+                Marshal.ReleaseComObject(myLinks)
+                ' link 2 to 1
+                ' myCont2.Links.Add(myCont1)
+                myLinks = myCont2.Links
+                myLinks.Add(myCont1)
+                myCont2.Save()
+                Marshal.ReleaseComObject(myLinks)
+                MsgBox("The two Contacts were successfully linked to each other.", vbInformation, strTitle)
             End If
-            .Save()
-        End With
-
-        If MsgBox("LINK:" & vbNewLine & myCont1.Subject & vbNewLine & vbNewLine & _
-                           "AND:" & vbNewLine & myCont2.Subject, vbQuestion + vbYesNo, strTitle) = vbYes Then
-            ' link 1 to 2
-            myCont1.Links.Add(myCont2)
-            myCont1.Save()
-            ' link 2 to 1
-            myCont2.Links.Add(myCont1)
-            myCont2.Save()
-            MsgBox("The two Contacts were successfully linked to each other.", vbInformation, strTitle)
-        End If
-
-Link2Contacts_Exit:
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+        Finally
+            If myLinks IsNot Nothing Then Marshal.ReleaseComObject(myLinks) : myLinks = Nothing
+            If myCont2 IsNot Nothing Then Marshal.ReleaseComObject(myCont2) : myCont2 = Nothing
+            If myCont1 IsNot Nothing Then Marshal.ReleaseComObject(myCont1) : myCont1 = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
+        End Try
     End Sub
 
     Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
