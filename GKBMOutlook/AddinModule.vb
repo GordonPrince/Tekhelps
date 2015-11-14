@@ -934,45 +934,46 @@ Link2Contacts_Exit:
             myInsp = OutlookApp.ActiveInspector
             item = myInsp.CurrentItem
             If TypeOf item Is Outlook.TaskItem Then
+                myTask = item
             Else
                 MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, strTitle)
                 Return
             End If
+            Marshal.ReleaseComObject(myInsp)
 
             Cursor.Current = Cursors.WaitCursor
 
-            myTask = myInsp.CurrentItem
             myAttachments = myTask.Attachments
-            With myTask
-                If myAttachments.Count > 0 Then
-                    ' For Each myAtt In myAttachments
-                    Dim x As Short
-                    For x = 1 To myAttachments.Count
-                        myAtt = myAttachments(x)
-                        If myAtt.DisplayName = strNewCallAppointmentTag Then
-                            MsgBox("This caller already has an appointment." & vbNewLine & vbNewLine & _
-                                "Open the existing appointment and update it " & _
-                                "(instead of making a new appointment).", vbInformation + vbOKOnly, strTitle)
-                            Return
-                        End If
-                        Marshal.ReleaseComObject(myAtt)
-                    Next
-                End If
-
-                If Right(.Subject, 1) = "/" Then
-                Else
-                    myUserPropT = .UserProperties("TypeOfCase")
-                    myUserPropS = .UserProperties("Screener")
-                    If Left(myUserPropT.Value, 2) = "SS" Then
-                        .Subject = .Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
-                    ElseIf Left(myUserPropT.Value, 1) = "A" Then
-                        .Subject = .Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
-                    Else
-                        .Subject = .Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
+            If myAttachments.Count > 0 Then
+                ' For Each myAtt In myAttachments
+                Dim x As Short
+                For x = 1 To myAttachments.Count
+                    myAtt = myAttachments(x)
+                    If myAtt.DisplayName = strNewCallAppointmentTag Then
+                        MsgBox("This caller already has an appointment." & vbNewLine & vbNewLine & _
+                            "Open the existing appointment and update it " & _
+                            "(instead of making a new appointment).", vbInformation + vbOKOnly, strTitle)
+                        Return
                     End If
+                    Marshal.ReleaseComObject(myAtt)
+                Next
+            End If
+
+            If Right(myTask.Subject, 1) = "/" Then
+            Else
+                myUserPropT = myTask.UserProperties("TypeOfCase")
+                myUserPropS = myTask.UserProperties("Screener")
+                If Left(myUserPropT.Value, 2) = "SS" Then
+                    myTask.Subject = myTask.Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
+                ElseIf Left(myUserPropT.Value, 1) = "A" Then
+                    myTask.Subject = myTask.Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
+                Else
+                    myTask.Subject = myTask.Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
                 End If
-                .Save()
-            End With
+                myTask.Save()
+                Marshal.ReleaseComObject(myUserPropT)
+                Marshal.ReleaseComObject(myUserPropS)
+            End If
 
             myNameSpace = OutlookApp.GetNamespace("MAPI")
             myFolders = myNameSpace.Folders
@@ -981,6 +982,9 @@ Link2Contacts_Exit:
                 myFolder = myFolders(x)
                 s = myFolder.Name
                 If Left(s, 14) = strPublicFolders Then
+                    Marshal.ReleaseComObject(myFolder)
+                    Marshal.ReleaseComObject(myFolders)
+                    Marshal.ReleaseComObject(myNameSpace)
                     GoTo HavePublic
                 End If
                 Marshal.ReleaseComObject(myFolder)
@@ -1043,6 +1047,7 @@ HavePublic:
             Marshal.ReleaseComObject(myAttachments)
             myAppt.Save()
             Marshal.ReleaseComObject(myAppt)
+            Marshal.ReleaseComObject(myAllPublic)
 
             ' add the Note with the EntryID of the Appointment to the NewCallTracking item
             'If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
@@ -1058,6 +1063,7 @@ HavePublic:
             'myUserPropT.Value = "Y"
 
             myTask.Close(Outlook.OlInspectorClose.olSave)
+            Marshal.ReleaseComObject(myTask)
 
         Catch ex As Exception
         Finally
