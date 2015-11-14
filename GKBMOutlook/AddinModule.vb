@@ -435,89 +435,115 @@ HaveNewCallTracking:
 
     Private Sub CopyContact2InstantFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyContact2InstantFile.OnClick
         ' copy the active contact to InstantFile
-        On Error GoTo CopyContact2InstantFile_Error
-        Const strTitle As String = "Add Personal Contact to InstantFile"
-        Dim olContact As Outlook.ContactItem
-        Dim olNameSpace As Outlook.NameSpace
-        Dim olPublicFolder As Outlook.MAPIFolder
-        Dim olFolder As Outlook.MAPIFolder
-        Dim olContactsFolder As Outlook.MAPIFolder
-        Dim olIFContact As Outlook.ContactItem
-        ' 11/11/2015 skipped
-        ' make sure a Contact is the active item
-        If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.ContactItem Then
-            olContact = OutlookApp.ActiveInspector.CurrentItem
-            If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
-                MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
-                        "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
-                        "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
-                Exit Sub
-            End If
-        Else
-            MsgBox("Please display the Contact you wish to copy first," & vbNewLine & "then try this again.", vbExclamation, strTitle)
-            Exit Sub
-        End If
+        Const strTitle As String = "Copy Personal Contact to InstantFile"
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim olContact As Outlook.ContactItem = Nothing
+        Dim olNameSpace As Outlook.NameSpace = Nothing
+        Dim myFolders As Outlook.Folders = Nothing
+        Dim olPublicFolder As Outlook.MAPIFolder = Nothing
+        Dim olFolder As Outlook.MAPIFolder = Nothing
+        Dim olContactsFolder As Outlook.MAPIFolder = Nothing
+        Dim myItems As Outlook.Items = Nothing
+        Dim olIFContact As Outlook.ContactItem = Nothing
 
-        olNameSpace = OutlookApp.GetNamespace("MAPI")
-        For Each olPublicFolder In olNameSpace.Folders
-            If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then GoTo GetContactsFolder
-        Next olPublicFolder
-        MsgBox("Could not locate the 'Public Folders' folder.", vbExclamation, strTitle)
-        Exit Sub
+        Try
+            myInsp = OutlookApp.ActiveInspector
+            If TypeOf myInsp Is Outlook.ContactItem Then
+                olContact = OutlookApp.ActiveInspector.CurrentItem
+                If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
+                    MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
+                            "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
+                            "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
+                    Return
+                End If
+                olContact.Save()  ' otherwise changes won't get written to the new contact
+            Else
+                MsgBox("Please display the Contact you wish to copy first," & vbNewLine & "then try this again.", vbExclamation, strTitle)
+                Return
+            End If
+
+            ' For Each olPublicFolder In olNameSpace.Folders
+            olNameSpace = OutlookApp.GetNamespace("MAPI")
+            myFolders = olNameSpace.Folders
+            Dim x As Short
+            For x = 1 To myFolders.Count
+                olPublicFolder = myFolders(x)
+                If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then GoTo GetContactsFolder
+                Marshal.ReleaseComObject(olPublicFolder)
+            Next ' olPublicFolder
+            MsgBox("Could not locate the folder '" & strPublicFolders & "'.", vbExclamation, strTitle)
+            Return
 
 GetContactsFolder:
-        olContactsFolder = Nothing
-        For Each olFolder In olPublicFolder.Folders
-            If olFolder.Name = strAllPublicFolders Then
-                For Each olContactsFolder In olFolder.Folders
-                    If olContactsFolder.Name = "InstantFile Contacts" Then
-                        GoTo CopyContact
-                    End If
-                Next olContactsFolder
-            End If
-        Next olFolder
-        MsgBox("Could not locate the InstantFile Contacts folder.", vbExclamation, strTitle)
-        If IsNothing(olContactsFolder) Then GoTo CopyContact2InstantFile_Exit
+            Marshal.ReleaseComObject(myFolders)
+            ' For Each olFolder In olPublicFolder.Folders
+            myFolders = olPublicFolder.Folders
+            For x = 1 To myFolders.Count
+                olFolder = myFolders(x)
+                If olFolder.Name = strAllPublicFolders Then
+                    ' For Each olContactsFolder In olFolder.Folders
+                    Marshal.ReleaseComObject(myFolders)
+                    myFolders = olFolder.Folders
+                    Dim y As Short
+                    For y = 1 To myFolders.Count
+                        olContactsFolder = myFolders(y)
+                        If olContactsFolder.Name = "InstantFile Contacts" Then
+                            GoTo CopyContact
+                        End If
+                        Marshal.ReleaseComObject(olContactsFolder)
+                    Next ' olContactsFolder
+                End If
+            Next ' olFolder
+            MsgBox("Could not locate the InstantFile Contacts folder.", vbExclamation, strTitle)
+            Return
 
 CopyContact:
-        olContact.Save()  ' otherwise changes won't get written to the new contact
-        olIFContact = olContactsFolder.Items.Add("IPM.Contact.InstantFileContact")
-        With olIFContact
-            .FullName = olContact.FullName
-            .JobTitle = olContact.JobTitle
-            .CompanyName = olContact.CompanyName
-            .FileAs = olContact.FileAs
-            .BusinessAddress = olContact.BusinessAddress
-            .HomeAddress = olContact.HomeAddress
-            .OtherAddress = olContact.OtherAddress
-            .MailingAddress = olContact.MailingAddress
-            .BusinessTelephoneNumber = olContact.BusinessTelephoneNumber
-            .HomeTelephoneNumber = olContact.HomeTelephoneNumber
-            .MobileTelephoneNumber = olContact.MobileTelephoneNumber
-            .BusinessFaxNumber = olContact.BusinessFaxNumber
-            .Email1Address = olContact.Email1Address
-            .Email1AddressType = olContact.Email1AddressType
-            .WebPage = olContact.WebPage
-            ' from second page
-            .Department = olContact.Department
-            .ManagerName = olContact.ManagerName
-            .AssistantName = olContact.AssistantName
-            .NickName = olContact.NickName
-            .Spouse = olContact.Spouse
-        End With
-        If MsgBox("Delete '" & olContact.Subject & "' from your personal Contacts folder?", vbQuestion + vbYesNo + vbDefaultButton2, strTitle) = vbYes Then
-            olContact.Delete()
-        Else
-            olContact.Close(Outlook.OlInspectorClose.olSave)
-        End If
-        olIFContact.Display()
-
-CopyContact2InstantFile_Exit:
-        Exit Sub
-
-CopyContact2InstantFile_Error:
-        MsgBox(Err.Description, vbExclamation, strTitle)
-        GoTo CopyContact2InstantFile_Exit
+            ' olIFContact = olContactsFolder.Items.Add("IPM.Contact.InstantFileContact")
+            myItems = olContactsFolder.Items
+            olIFContact = myItems.Add("IPM.Contact.InstantFileContact")
+            Marshal.ReleaseComObject(myItems)
+            With olIFContact
+                .FullName = olContact.FullName
+                .JobTitle = olContact.JobTitle
+                .CompanyName = olContact.CompanyName
+                .FileAs = olContact.FileAs
+                .BusinessAddress = olContact.BusinessAddress
+                .HomeAddress = olContact.HomeAddress
+                .OtherAddress = olContact.OtherAddress
+                .MailingAddress = olContact.MailingAddress
+                .BusinessTelephoneNumber = olContact.BusinessTelephoneNumber
+                .HomeTelephoneNumber = olContact.HomeTelephoneNumber
+                .MobileTelephoneNumber = olContact.MobileTelephoneNumber
+                .BusinessFaxNumber = olContact.BusinessFaxNumber
+                .Email1Address = olContact.Email1Address
+                .Email1AddressType = olContact.Email1AddressType
+                .WebPage = olContact.WebPage
+                ' from second page
+                .Department = olContact.Department
+                .ManagerName = olContact.ManagerName
+                .AssistantName = olContact.AssistantName
+                .NickName = olContact.NickName
+                .Spouse = olContact.Spouse
+            End With
+            If MsgBox("Delete '" & olContact.Subject & "' from your personal Contacts folder?", vbQuestion + vbYesNo + vbDefaultButton2, strTitle) = vbYes Then
+                olContact.Delete()
+            Else
+                olContact.Close(Outlook.OlInspectorClose.olSave)
+            End If
+            olIFContact.Display()
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+        Finally
+            If olIFContact IsNot Nothing Then Marshal.ReleaseComObject(olIFContact) : olIFContact = Nothing
+            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
+            If olContactsFolder IsNot Nothing Then Marshal.ReleaseComObject(olContactsFolder) : olContactsFolder = Nothing
+            If olFolder IsNot Nothing Then Marshal.ReleaseComObject(olFolder) : olFolder = Nothing
+            If olPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(olPublicFolder) : olPublicFolder = Nothing
+            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
+            If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
+            If olContact IsNot Nothing Then Marshal.ReleaseComObject(olContact) : olContact = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+        End Try
     End Sub
 
     Private Sub Link2Contacts2EachOther_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton2.OnClick
@@ -1087,46 +1113,10 @@ HavePublic:
     End Sub
 
     Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
-        'Dim olPublicFolder As Outlook.Folder
-        'For Each olPublicFolder In OutlookApp.Session.Folders
-        '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-        '        Dim olFolder As Outlook.Folder
-        '        For Each olFolder In olPublicFolder.Folders
-        '            If olFolder.Name = strAllPublicFolders Then
-        '                Dim olTarget As Outlook.Folder
-        '                For Each olTarget In olFolder.Folders
-        '                    If olTarget.Name = "New Call Tracking" Then
-        '                        OutlookApp.ActiveExplorer.CurrentFolder = olTarget
-        '                        Exit Sub
-        '                    End If
-        '                Next
-        '            End If
-        '        Next
-        '    End If
-        'Next
-        'MsgBox("Could not find the folder.", vbExclamation, "Show New Call Tracking folder")
         ActivateExplorer("New Call Tracking")
     End Sub
 
     Private Sub AppointmentCalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AppointmentCalendar.OnClick
-        'Dim olPublicFolder As Outlook.Folder
-        'For Each olPublicFolder In OutlookApp.Session.Folders
-        '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-        '        Dim olFolder As Outlook.Folder
-        '        For Each olFolder In olPublicFolder.Folders
-        '            If olFolder.Name = strAllPublicFolders Then
-        '                Dim olTarget As Outlook.Folder
-        '                For Each olTarget In olFolder.Folders
-        '                    If olTarget.Name = "Appointment Calendar" Then
-        '                        OutlookApp.ActiveExplorer.CurrentFolder = olTarget
-        '                        Exit Sub
-        '                    End If
-        '                Next
-        '            End If
-        '        Next
-        '    End If
-        'Next
-        'MsgBox("Could not find the folder.", vbExclamation, "Show Appointment Calendar folder")
         ActivateExplorer("Appointment Calendar")
     End Sub
 
@@ -1165,6 +1155,7 @@ HavePublic:
                                     Return
                                 End If
                                 Marshal.ReleaseComObject(myTarget)
+                                MsgBox("Could not find the folder '" & strFolderName & "'.", vbExclamation)
                             Next
                         End If
                         Marshal.ReleaseComObject(myFolder)
