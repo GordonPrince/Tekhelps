@@ -165,11 +165,13 @@ Public Class AddinModule
         'not when a second or third item is opened in another Inspector window
         'so it doesn't work for closing Notes from NewCallTracking
         ' 11/13/2015 fix this
-        Dim myInsp As Outlook.Inspector = inspector
-        Dim item As Object = myInsp.CurrentItem
+        Dim myInsp As Outlook.Inspector = Nothing ' inspector
+        Dim item As Object = Nothing ' myInsp.CurrentItem
         Dim myMailItem As Outlook.MailItem = Nothing
         'Dim mySendUsing As Object = Nothing
         Try
+            myInsp = inspector
+            item = myInsp.CurrentItem
             If TypeOf item Is Outlook.MailItem Then
                 myMailItem = myInsp.CurrentItem
             Else
@@ -966,9 +968,9 @@ Link2Contacts_Exit:
             End If
             Marshal.ReleaseComObject(myAttachments)
 
+            myUserPropT = myTask.UserProperties("TypeOfCase")
             If Right(myTask.Subject, 1) = "/" Then
             Else
-                myUserPropT = myTask.UserProperties("TypeOfCase")
                 myUserPropS = myTask.UserProperties("Screener")
                 If Left(myUserPropT.Value, 2) = "SS" Then
                     myTask.Subject = myTask.Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
@@ -978,7 +980,6 @@ Link2Contacts_Exit:
                     myTask.Subject = myTask.Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
                 End If
                 myTask.Save()
-                Marshal.ReleaseComObject(myUserPropT)
                 Marshal.ReleaseComObject(myUserPropS)
             End If
 
@@ -1001,23 +1002,23 @@ HavePublic:
             Marshal.ReleaseComObject(myFolders)
             Marshal.ReleaseComObject(myNameSpace)
 
-            '11/13/2015 could not get this to work without leaving an unreleased object
-            ''myUserPropL = myTask.UserProperties("ApptLocation")
-            'If item IsNot Nothing Then Marshal.ReleaseComObject(item)
-            'item = myTask.UserProperties("ApptLocation")
-            ''If Len(myUserPropL.Value) = 0 Then
-            ''    s = myUserPropT.Value
-            ''    If Left(s, 2) = "SS" Then
-            ''        myUserPropL.Value = "SSI"
-            ''    Else
-            ''        myUserPropL.Value = "Wanda"
-            ''    End If
-            ''End If
+            '11/14/2015 could not get this to work without leaving an unreleased object
+            'myUserPropL = myTask.UserProperties("ApptLocation")
+            'If Len(myUserPropL.Value) = 0 Then
+            '    s = myUserPropT.Value
+            '    If Left(s, 2) = "SS" Then
+            '        myUserPropL.Value = "SSI"
+            '    Else
+            '        myUserPropL.Value = "Wanda"
+            '    End If
+            'End If
             'If myUserPropL.Value = "SSI" Then
             '    myApptCal = myAllPublic.Folders("Appointment SSI")
             'Else
             myApptCal = myAllPublic.Folders("Appointment Calendar")
             'End If
+            Marshal.ReleaseComObject(myUserPropL)
+            Marshal.ReleaseComObject(myUserPropT)
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
