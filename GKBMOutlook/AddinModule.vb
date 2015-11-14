@@ -932,16 +932,22 @@ Link2Contacts_Exit:
 
         Try
             myInsp = OutlookApp.ActiveInspector
+        Catch
+            MsgBox("Please open a " & strNewCallTrackingTag & " first.", vbInformation, strTitle)
+            Return
+        End Try
+
+        Try
             item = myInsp.CurrentItem
             If TypeOf item Is Outlook.TaskItem Then
+                Cursor.Current = Cursors.WaitCursor
                 myTask = item
             Else
-                MsgBox("This only works if a NewCallTracking item is displayed.", vbExclamation + vbOKOnly, strTitle)
+                MsgBox("This only works if a " & strNewCallTrackingTag & " is displayed.", vbInformation, strTitle)
                 Return
             End If
+            ' 11/14/2015 don't release item Marshal.ReleaseComObject(item)
             Marshal.ReleaseComObject(myInsp)
-
-            Cursor.Current = Cursors.WaitCursor
 
             myAttachments = myTask.Attachments
             If myAttachments.Count > 0 Then
@@ -958,6 +964,7 @@ Link2Contacts_Exit:
                     Marshal.ReleaseComObject(myAtt)
                 Next
             End If
+            Marshal.ReleaseComObject(myAttachments)
 
             If Right(myTask.Subject, 1) = "/" Then
             Else
@@ -995,7 +1002,6 @@ HavePublic:
             Marshal.ReleaseComObject(myNameSpace)
 
             '11/13/2015 could not get this to work without leaving an unreleased object
-            ''With myTask
             ''myUserPropL = myTask.UserProperties("ApptLocation")
             'If item IsNot Nothing Then Marshal.ReleaseComObject(item)
             'item = myTask.UserProperties("ApptLocation")
@@ -1012,7 +1018,6 @@ HavePublic:
             'Else
             myApptCal = myAllPublic.Folders("Appointment Calendar")
             'End If
-            'End With
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
@@ -1037,14 +1042,15 @@ HavePublic:
             ' from https://www.add-in-express.com/creating-addins-blog/2012/07/16/create-outlook-task-appointment-note-email/
             myNote = TryCast(OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem), Outlook.NoteItem)
             myNote.Body = strNewCallTrackingTag & Chr(13) & Chr(10) & myTask.EntryID
-            ' myNote.Save()
-            myNote.SaveAs("C:\tmp\NewCallTracking.msg")
+            myNote.Save()
+            ' myNote.SaveAs("C:\tmp\NewCallTracking.msg")
             myNote.Close(Outlook.OlInspectorClose.olDiscard)
-            Marshal.ReleaseComObject(myNote)
+            ' Marshal.ReleaseComObject(myNote)
 
             myAttachments = myAppt.Attachments
-            ' myAttachments.Add(myNote, 1)
-            myAttachments.Add("C:\tmp\NewCallTracking.msg")
+            myAttachments.Add(myNote, 1)
+            Marshal.ReleaseComObject(myNote)
+            ' myAttachments.Add("C:\tmp\NewCallTracking.msg")
             Marshal.ReleaseComObject(myAttachments)
             ' myAppt.Save()
             ' add the Note with the EntryID of the Appointment to the NewCallTracking item
@@ -1066,6 +1072,7 @@ HavePublic:
             Marshal.ReleaseComObject(myAppt)
             Marshal.ReleaseComObject(myAllPublic)
         Catch ex As Exception
+            MsgBox("An error has occured." & vbNewLine & vbNewLine & ex.Message, vbExclamation, strTitle)
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myNotes IsNot Nothing Then Marshal.ReleaseComObject(myNotes) : myNotes = Nothing
@@ -1083,7 +1090,7 @@ HavePublic:
             If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            ' 11/14/2015 If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
             Cursor.Current = Cursors.Default
         End Try
