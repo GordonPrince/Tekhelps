@@ -907,9 +907,11 @@ LinkContacts:
         Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
+        Dim item As Object = Nothing
+        Dim strOriginalType As String
+        Dim datAppt As Date
+
         Try
-            Dim strOriginalType As String
-            Dim datAppt As Date
             myInsp = OutlookApp.ActiveInspector
             If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
                 myTask = myInsp.CurrentItem
@@ -924,6 +926,7 @@ LinkContacts:
                 MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation, strTitle)
                 Return
             End If
+            Marshal.ReleaseComObject(myInsp)
             If myAttachments.Count = 0 Then
                 MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
                 Return
@@ -939,6 +942,7 @@ LinkContacts:
                         .SaveAsFile(strFileName)
                         myNote = OutlookApp.CreateItemFromTemplate(strFileName)
                         myNote.Display()
+                        Marshal.ReleaseComObject(myNote)
                         ' For Each myInsp In OutlookApp.Inspectors
                         ' stepping through these backward worked, the For Each loop didn't
                         Dim y As Int16
@@ -946,14 +950,15 @@ LinkContacts:
                         For y = myInspectors.Count To 1 Step -1
                             myInsp = myInspectors(y)
                             ' don't close emails and other types of items -- only Appointments and Tasks and Notes
-                            If TypeOf myInsp.CurrentItem Is Outlook.NoteItem Then
+                            item = myInsp.CurrentItem
+                            If TypeOf item Is Outlook.NoteItem Then
                                 Try
                                     myInsp.Close(Outlook.OlInspectorClose.olDiscard)
                                 Catch
                                     myInsp.WindowState = Outlook.OlWindowState.olMinimized
                                 End Try
-                            ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Or TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                                If TypeName(myInsp.CurrentItem) = strOriginalType Then
+                            ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
+                                If TypeName(item) = strOriginalType Then
                                     myInsp.Close(Outlook.OlInspectorClose.olSave)
                                     '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
                                     'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
@@ -970,24 +975,28 @@ LinkContacts:
                                     '    End Try
                                 End If
                             End If
+                            Marshal.ReleaseComObject(item)
                             Marshal.ReleaseComObject(myInsp)
                         Next
+                        Marshal.ReleaseComObject(myInspectors)
                         Return
                     End If
                 End With
                 Marshal.ReleaseComObject(myAttach)
             Next
+            Marshal.ReleaseComObject(myAttachments)
             MsgBox("Nothing was opened.", vbInformation, strTitle)
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
             If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
         End Try
     End Sub
 
