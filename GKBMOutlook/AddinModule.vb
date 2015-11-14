@@ -1138,8 +1138,8 @@ HavePublic:
         Dim myTarget As Outlook.Folder = Nothing
         Dim myExplorer As Outlook.Explorer = Nothing
 
+        Dim x As Short
         Try
-            Dim x As Short
             ' For Each olPublicFolder In OutlookApp.Session.Folders
             mySession = OutlookApp.Session
             myFolders = mySession.Folders
@@ -1148,10 +1148,12 @@ HavePublic:
                 If Left(myPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                     Dim y As Short
                     ' For Each myFolder In myPublicFolder.Folders
+                    Marshal.ReleaseComObject(myFolders)
                     myFolders = myPublicFolder.Folders
                     For y = 1 To myFolders.Count
                         myFolder = myFolders(y)
                         If myFolder.Name = strAllPublicFolders Then
+                            Marshal.ReleaseComObject(myFolders)
                             myFolders = myFolder.Folders
                             Dim z As Short
                             ' For Each myTarget In olFolder.Folders
@@ -1170,7 +1172,9 @@ HavePublic:
                 End If
                 Marshal.ReleaseComObject(myPublicFolder)
             Next
+            MsgBox("Could not find " & strPublicFolders, vbExclamation, "ActivateExplorer")
         Catch ex As Exception
+            MsgBox("Could not find " & strPublicFolders & vbNewLine & vbNewLine & ex.Message, vbExclamation, "ActivateExplorer")
         Finally
             If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
             If myTarget IsNot Nothing Then Marshal.ReleaseComObject(myTarget) : myTarget = Nothing
