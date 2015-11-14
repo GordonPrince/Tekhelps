@@ -75,8 +75,8 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonGroup2.Caption = "Items"
         Me.AdxRibbonGroup2.Controls.Add(Me.SaveClose)
-        Me.AdxRibbonGroup2.Controls.Add(Me.NewCallTracking)
         Me.AdxRibbonGroup2.Controls.Add(Me.AppointmentCalendar)
+        Me.AdxRibbonGroup2.Controls.Add(Me.NewCallTracking)
         Me.AdxRibbonGroup2.Id = "adxRibbonGroup_9810b0e61d06422397f5d3ddba5337a1"
         Me.AdxRibbonGroup2.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AdxRibbonGroup2.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _

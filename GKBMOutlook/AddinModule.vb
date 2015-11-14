@@ -917,14 +917,14 @@ Link2Contacts_Exit:
         Dim myTask As Outlook.TaskItem = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAtt As Outlook.Attachment = Nothing
-        Dim myUserPropT As Outlook.UserProperty = Nothing
-        Dim myUserPropS As Outlook.UserProperty = Nothing
+        'Dim myUserPropT As Outlook.UserProperty = Nothing
+        'Dim myUserPropS As Outlook.UserProperty = Nothing
         Dim myNameSpace As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
         Dim myAllPublic As Outlook.Folder = Nothing
         Dim myApptCal As Outlook.Folder = Nothing
-        Dim myUserPropL As Outlook.UserProperty = Nothing
+        'Dim myUserPropL As Outlook.UserProperty = Nothing
         Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myItems As Outlook.Items = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
@@ -968,20 +968,21 @@ Link2Contacts_Exit:
             End If
             Marshal.ReleaseComObject(myAttachments)
 
-            myUserPropT = myTask.UserProperties("TypeOfCase")
-            If Right(myTask.Subject, 1) = "/" Then
-            Else
-                myUserPropS = myTask.UserProperties("Screener")
-                If Left(myUserPropT.Value, 2) = "SS" Then
-                    myTask.Subject = myTask.Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
-                ElseIf Left(myUserPropT.Value, 1) = "A" Then
-                    myTask.Subject = myTask.Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
-                Else
-                    myTask.Subject = myTask.Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
-                End If
-                myTask.Save()
-                Marshal.ReleaseComObject(myUserPropS)
-            End If
+            'myUserPropT = myTask.UserProperties("TypeOfCase")
+            'If Right(myTask.Subject, 1) = "/" Then
+            'Else
+            '    myUserPropS = myTask.UserProperties("Screener")
+            '    If Left(myUserPropT.Value, 2) = "SS" Then
+            '        myTask.Subject = myTask.Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
+            '    ElseIf Left(myUserPropT.Value, 1) = "A" Then
+            '        myTask.Subject = myTask.Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
+            '    Else
+            '        myTask.Subject = myTask.Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
+            '    End If
+            '    myTask.Save()
+            '    Marshal.ReleaseComObject(myUserPropS)
+            'End If
+            'Marshal.ReleaseComObject(myUserPropT)
 
             myNameSpace = OutlookApp.GetNamespace("MAPI")
             myFolders = myNameSpace.Folders
@@ -1017,8 +1018,6 @@ HavePublic:
             'Else
             myApptCal = myAllPublic.Folders("Appointment Calendar")
             'End If
-            Marshal.ReleaseComObject(myUserPropL)
-            Marshal.ReleaseComObject(myUserPropT)
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
@@ -1030,6 +1029,7 @@ HavePublic:
             '    Or myUserPropL.Value = "SSI" Then
             '    myAppt.Location = myUserPropL.Value
             'End If
+            ' If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL)
 
             ' add the Note with the EntryID of NewCallTracking item to the Appointment
             ' from https://www.add-in-express.com/creating-addins-blog/2012/07/16/create-outlook-task-appointment-note-email/
@@ -1041,6 +1041,7 @@ HavePublic:
             Marshal.ReleaseComObject(myNote)
             Marshal.ReleaseComObject(myAttachments)
             myAppt.Save()
+
             ' add the Note with the EntryID of the Appointment to the NewCallTracking item
             If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
             myNote = TryCast(OutlookApp.CreateItem(Outlook.OlItemType.olNoteItem), Outlook.NoteItem)
@@ -1050,6 +1051,7 @@ HavePublic:
             myAttachments.Add(myNote, 1)
             Marshal.ReleaseComObject(myNote)
             Marshal.ReleaseComObject(myAttachments)
+
             ' myTask.UserProperties("ApptMade").Value = "Y"
             'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
             'myUserPropT = myTask.UserProperties("ApptMade")
@@ -1068,14 +1070,14 @@ HavePublic:
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
+            'If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
             If myApptCal IsNot Nothing Then Marshal.ReleaseComObject(myApptCal) : myApptCal = Nothing
             If myAllPublic IsNot Nothing Then Marshal.ReleaseComObject(myAllPublic) : myAllPublic = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
-            If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
-            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            'If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
+            'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
             If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
