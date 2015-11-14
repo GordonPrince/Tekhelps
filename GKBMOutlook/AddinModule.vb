@@ -675,39 +675,62 @@ LinkContacts:
     End Sub
 
     Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
-        ' skipped
-        Const strTitle As String = "Copy Item to Drafts Folder"
-        If TypeOf OutlookApp.ActiveInspector.CurrentItem Is Outlook.TaskItem Then
-            Cursor.Current = Cursors.WaitCursor
-            Dim olTask As Outlook.TaskItem = OutlookApp.ActiveInspector.CurrentItem
+        Const strTitle As String = "E-mail Copy of This Item"
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim item As Object = Nothing
+        Dim olTask As Outlook.TaskItem = Nothing
+        Dim olNew As Outlook.TaskItem = Nothing
+        Dim strSubject As String = Nothing
+        Dim myProps As Outlook.UserProperties
+        Dim myPropOld As Outlook.UserProperty = Nothing
+        Dim myPropNew As Outlook.UserProperty = Nothing
+        Dim mySession As Outlook.NameSpace = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
+
+        Try
+            myInsp = OutlookApp.ActiveInspector
+            item = myInsp.CurrentItem
+            If TypeOf item Is Outlook.TaskItem Then
+                Cursor.Current = Cursors.WaitCursor
+                olTask = item
+            Else
+                MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
+                Return
+            End If
             olTask.Save()
-            Dim olNew As Outlook.TaskItem = olTask.Copy()
-            Dim strSubject As String = olTask.Subject
+            strSubject = olTask.Subject
+            olNew = olTask.Copy()
             With olNew
-                ' otherwise olNew uses the current date/time
-                ' .UserProperties("CallDate").Value = olTask.UserProperties("CallDate")
-                'Debug.Print("the .UserProperties aren't set in the copy")
-                Dim myProp As Outlook.UserProperty
-                For Each myProp In olTask.UserProperties
-                    If myProp.Name = "Notes" Then
-                        'ElseIf myProp.Name = "Remarks" Then
-                        '    ' don't copy all the update history into the email to Wanda
-                        '    .UserProperties(myProp.Name).Value = vbNullString
+                ' For Each myProp In olTask.UserProperties
+                Dim x As Short, strName As String
+                myProps = olTask.UserProperties
+                For x = 1 To myProps.Count
+                    myPropOld = myProps(x)
+                    If myPropOld.Name = "Notes" Then
                     Else
-                        'Try
-                        '    Debug.Print("myProp." & myProp.Name & " = " & myProp.Value & _
-                        '                ", .UserProperties(myProp.Name).Value = " & .UserProperties(myProp.Name).Value)
-                        'Catch
-                        '    Stop
-                        'End Try
-                        .UserProperties(myProp.Name).Value = myProp.Value
+                        strName = myPropOld.Name
+                        ' .UserProperties(myProp.Name).Value = myProp.Value
+                        myPropNew = .UserProperties(strName)
+                        myPropNew.Value = myPropOld.Value
+                        Marshal.ReleaseComObject(myPropNew)
                     End If
+                    Marshal.ReleaseComObject(myPropOld)
                 Next
+                Marshal.ReleaseComObject(myProps)
+
                 Try
                     ' most users don't have permissions to MOVE it (deletes from NewCallTracking)
-                    .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-                Catch
+                    ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+                    mySession = OutlookApp.Session
+                    myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+                    .Move(myFolder)
+                    Marshal.ReleaseComObject(myFolder)
+                    Marshal.ReleaseComObject(mySession)
+                Catch ex As Exception
+                    MsgBox(ex.Message, vbExclamation, strTitle)
+                    Return
                 End Try
+
                 ' if it didn't move (due to permissions), make these changes and then save it
                 .UserProperties("Locked").Value = vbNullString
                 .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
@@ -744,10 +767,22 @@ LinkContacts:
                     End With
                 End If
             Next
-        Else
-            MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
-        End If
-        Cursor.Current = Cursors.Default
+
+            Cursor.Current = Cursors.Default
+
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+        Finally
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
+            If myPropNew IsNot Nothing Then Marshal.ReleaseComObject(myPropNew) : myPropNew = Nothing
+            If myPropOld IsNot Nothing Then Marshal.ReleaseComObject(myPropOld) : myPropOld = Nothing
+            If myProps IsNot Nothing Then Marshal.ReleaseComObject(myProps) : myProps = Nothing
+            If olNew IsNot Nothing Then Marshal.ReleaseComObject(olNew) : olNew = Nothing
+            If olTask IsNot Nothing Then Marshal.ReleaseComObject(olTask) : olTask = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+        End Try
     End Sub
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
