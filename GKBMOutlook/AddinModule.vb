@@ -378,59 +378,82 @@ HaveNewCallTracking:
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
-        ' 11/11/2015 skipped this        
-        '1. release objects
-        '2. make sure it works with either an Inspector or an Explorer        
+        'TO-DO make sure it works with either an Inspector or an Explorer        
 
         ' copied from http://www.howto-outlook.com/howto/saveembeddedpictures.htm
         Const strTitle As String = "Save Attachments"
-        Dim mySelection As Outlook.Selection
-        Dim mySelectedItem As Object, intPos As Integer
-        Dim colAttachments As Outlook.Attachments, objAttachment As Outlook.Attachment
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim item As Object = Nothing
+        'Dim mySelection As Outlook.Selection = Nothing
+        'Dim mySelectedItem As Object = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
         Dim DateStamp As String, MyFile As String
         Dim intCounter As Integer
 
-        'Get all selected items
-        mySelection = OutlookApp.ActiveExplorer.Selection
-        'Make sure at least one item is selected
-        If mySelection.Count = 0 Then
-            RetVal = MsgBox("Please select an item first.", vbExclamation, strTitle)
-            Exit Sub
-        End If
+        Try
+            myInsp = OutlookApp.ActiveInspector
+            item = myInsp.CurrentItem
+            'Get all selected items
+            ' mySelection = OutlookApp.ActiveExplorer.Selection
+            ' mySelection = item.Selection
+            ''Make sure at least one item is selected
+            'If mySelection.Count = 0 Then
+            '    RetVal = MsgBox("Please select an item first.", vbExclamation, strTitle)
+            '    Exit Sub
+            'End If
 
-        'Make sure only one item is selected
-        If mySelection.Count > 1 Then
-            RetVal = MsgBox("Please select only one item.", vbExclamation, strTitle)
-            Exit Sub
-        End If
+            ''Make sure only one item is selected
+            'If mySelection.Count > 1 Then
+            '    RetVal = MsgBox("Please select only one item.", vbExclamation, strTitle)
+            '    Exit Sub
+            'End If
 
-        'Retrieve the selected item
-        mySelectedItem = mySelection.Item(1)
+            'Retrieve the selected item
+            ' mySelectedItem = mySelection.Item(1)
 
-        'Retrieve all attachments from the selected item
-        colAttachments = mySelectedItem.Attachments
+            'Retrieve all attachments from the selected item
+            ' myAttachments = mySelectedItem.Attachments
+            myAttachments = item.Attachments
 
-        'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
-        For Each objAttachment In colAttachments
-            If objAttachment.Size > 7000 Then  ' don't save attached Outlook items -- especially Notes
-                MyFile = objAttachment.FileName
-                DateStamp = Space(1) & Format(mySelectedItem.CreationTime, "yyyyMMddhhmmss")
-                intPos = InStrRev(MyFile, ".")
-                If intPos > 0 Then
-                    MyFile = Left(MyFile, intPos - 1) & DateStamp & Mid(MyFile, intPos)
-                Else
-                    MyFile = MyFile & DateStamp
+            'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
+            ' For Each myAttach In myAttachments
+            Dim x As Short
+            For x = 1 To myAttachments.Count
+                myAttach = myAttachments(x)
+                If myAttach.Size > 7000 Then  ' don't save attached Outlook items -- especially Notes
+                    MyFile = myAttach.FileName
+                    DateStamp = Space(1) & Format(item.CreationTime, "yyyyMMddhhmmss")
+                    Dim intPos As Integer
+                    intPos = InStrRev(MyFile, ".")
+                    If intPos > 0 Then
+                        MyFile = Left(MyFile, intPos - 1) & DateStamp & Mid(MyFile, intPos)
+                    Else
+                        MyFile = MyFile & DateStamp
+                    End If
+                    MyFile = "C:\Scans\" & MyFile
+                    myAttach.SaveAsFile(MyFile)
+                    intCounter = intCounter + 1
                 End If
-                MyFile = "C:\Scans\" & MyFile
-                objAttachment.SaveAsFile(MyFile)
-                intCounter = intCounter + 1
+                Marshal.ReleaseComObject(myAttach)
+            Next
+            If intCounter = 0 Then
+                MsgBox("There are no attachments on this item larger than 7k.", vbInformation, strTitle)
+            Else
+                MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & _
+                       "C:\Scans.", vbInformation, strTitle)
             End If
-        Next
-        If intCounter = 0 Then
-            MsgBox("There are no attachments on this item larger than 7k.", vbInformation, strTitle)
-        Else
-            MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & "C:\Scans.", vbInformation, strTitle)
-        End If
+
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+
+        Finally
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            'If mySelection IsNot Nothing Then Marshal.ReleaseComObject(mySelection) : mySelection = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+        End Try
     End Sub
 
     Private Sub CopyContact2InstantFile_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyContact2InstantFile.OnClick
