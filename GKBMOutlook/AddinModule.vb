@@ -437,6 +437,7 @@ HaveNewCallTracking:
         ' copy the active contact to InstantFile
         Const strTitle As String = "Copy Personal Contact to InstantFile"
         Dim myInsp As Outlook.Inspector = Nothing
+        Dim item As Object = Nothing
         Dim olContact As Outlook.ContactItem = Nothing
         Dim olNameSpace As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
@@ -448,19 +449,22 @@ HaveNewCallTracking:
 
         Try
             myInsp = OutlookApp.ActiveInspector
-            If TypeOf myInsp Is Outlook.ContactItem Then
-                olContact = OutlookApp.ActiveInspector.CurrentItem
+            item = myInsp.CurrentItem
+            If TypeOf item Is Outlook.ContactItem Then
+                ' olContact = OutlookApp.ActiveInspector.CurrentItem
+                olContact = item
                 If olContact.MessageClass = "IPM.Contact.InstantFileContact" Then
-                    MsgBox("This already is an InstantFile Contact." & vbNewLine & "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
-                            "Either" & vbNewLine & "1. [Attach] it to another matter or" & vbNewLine & vbNewLine & _
+                    MsgBox("This already is an InstantFile Contact." & vbNewLine & _
+                           "It doesn't make sense to copy it." & vbNewLine & vbNewLine & _
+                            "Either" & vbNewLine & "1. [Attach] it to another matter, or" & vbNewLine & vbNewLine & _
                             "2. choose [Actions], [New Contact from Same Company]" & vbNewLine & "to make a similar Contact.", vbExclamation, strTitle)
                     Return
                 End If
-                olContact.Save()  ' otherwise changes won't get written to the new contact
             Else
                 MsgBox("Please display the Contact you wish to copy first," & vbNewLine & "then try this again.", vbExclamation, strTitle)
                 Return
             End If
+            olContact.Save()  ' otherwise changes won't get written to the new contact
 
             ' For Each olPublicFolder In olNameSpace.Folders
             olNameSpace = OutlookApp.GetNamespace("MAPI")
@@ -542,6 +546,7 @@ CopyContact:
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
             If olContact IsNot Nothing Then Marshal.ReleaseComObject(olContact) : olContact = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
     End Sub
