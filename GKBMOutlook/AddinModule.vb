@@ -982,9 +982,6 @@ Link2Contacts_Exit:
                 myFolder = myFolders(x)
                 s = myFolder.Name
                 If Left(s, 14) = strPublicFolders Then
-                    Marshal.ReleaseComObject(myFolder)
-                    Marshal.ReleaseComObject(myFolders)
-                    Marshal.ReleaseComObject(myNameSpace)
                     GoTo HavePublic
                 End If
                 Marshal.ReleaseComObject(myFolder)
@@ -993,6 +990,9 @@ Link2Contacts_Exit:
             Exit Sub
 HavePublic:
             myAllPublic = myFolder.Folders(strAllPublicFolders)
+            Marshal.ReleaseComObject(myFolder)
+            Marshal.ReleaseComObject(myFolders)
+            Marshal.ReleaseComObject(myNameSpace)
 
             '11/13/2015 could not get this to work without leaving an unreleased object
             ''With myTask
@@ -1016,7 +1016,8 @@ HavePublic:
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
-            myAppt.Display()
+            ' 11/14/2015 don't display until everything else is done & released
+            ' myAppt.Display()
             myAppt.Subject = myTask.Subject
             'If myUserPropL.Value = "Wanda" _
             '    Or myUserPropL.Value = "219" _
@@ -1045,10 +1046,7 @@ HavePublic:
             ' myAttachments.Add(myNote, 1)
             myAttachments.Add("C:\tmp\NewCallTracking.msg")
             Marshal.ReleaseComObject(myAttachments)
-            myAppt.Save()
-            Marshal.ReleaseComObject(myAppt)
-            Marshal.ReleaseComObject(myAllPublic)
-
+            ' myAppt.Save()
             ' add the Note with the EntryID of the Appointment to the NewCallTracking item
             'If Len(myTask.Body) > 0 Then myTask.Body = myTask.Body & Chr(13) & Chr(10)
             'myNote = OutlookApp.CreateItem(5)
@@ -1064,7 +1062,9 @@ HavePublic:
 
             myTask.Close(Outlook.OlInspectorClose.olSave)
             Marshal.ReleaseComObject(myTask)
-
+            myAppt.Display()
+            Marshal.ReleaseComObject(myAppt)
+            Marshal.ReleaseComObject(myAllPublic)
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
