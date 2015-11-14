@@ -680,12 +680,16 @@ LinkContacts:
         Dim item As Object = Nothing
         Dim olTask As Outlook.TaskItem = Nothing
         Dim olNew As Outlook.TaskItem = Nothing
-        Dim strSubject As String = Nothing
-        Dim myProps As Outlook.UserProperties
+        Dim myProps As Outlook.UserProperties = Nothing
         Dim myPropOld As Outlook.UserProperty = Nothing
         Dim myPropNew As Outlook.UserProperty = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolder As Outlook.Folder = Nothing
+        Dim myItems As Outlook.Items = Nothing
+        Dim obj As Object = Nothing
+        Dim olDraft As Outlook.MailItem = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim strSubject As String = Nothing
 
         Try
             myInsp = OutlookApp.ActiveInspector
@@ -718,25 +722,26 @@ LinkContacts:
                 Next
                 Marshal.ReleaseComObject(myProps)
 
+                mySession = OutlookApp.Session
+                myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
                 Try
                     ' most users don't have permissions to MOVE it (deletes from NewCallTracking)
                     ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-                    mySession = OutlookApp.Session
-                    myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
                     .Move(myFolder)
-                    Marshal.ReleaseComObject(myFolder)
-                    Marshal.ReleaseComObject(mySession)
                 Catch ex As Exception
-                    MsgBox(ex.Message, vbExclamation, strTitle)
-                    Return
+                    ' if it didn't move (due to permissions), make these changes and then save it
+                    '.UserProperties("Locked").Value = vbNullString
+                    '.UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
+                    '' purge these nightly when update NewCallTracking program runs for OLAP/Analysis
+                    '.UserProperties("CallDate").Value = #8/8/1988#
+                    myProps = .UserProperties
+                    myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
+                    myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
+                    myPropNew = myProps("Locked") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
+                    Marshal.ReleaseComObject(myProps)
+                    .Save()
                 End Try
-
-                ' if it didn't move (due to permissions), make these changes and then save it
-                .UserProperties("Locked").Value = vbNullString
-                .UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
-                ' purge these nightly when update NewCallTracking program runs for OLAP/Analysis
-                .UserProperties("CallDate").Value = #8/8/1988#
-                .Save()
+                Marshal.ReleaseComObject(myFolder)
             End With
 
             ' 11/5/2015 put this here to minimize chance of editing conflicts
@@ -747,17 +752,18 @@ LinkContacts:
             'End If
 
             ' display the new item for the user
-            Dim olFolder As Outlook.Folder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
-            Dim obj As Object
-            For Each obj In olFolder.Items
+            ' Dim olFolder As Outlook.Folder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            myItems = myFolder.Items
+            ' For Each obj In myFolder.Items
+            For x = 1 To myItems.Count
+                obj = myItems(x)
                 If TypeOf obj Is Outlook.MailItem Then
-                    Dim olDraft As Outlook.MailItem = obj
+                    olDraft = obj
                     With olDraft
-                        ' Debug.Print(".Subject = " & .Subject)
                         If .Subject = strSubject Then
                             .BCC = "NewCallTracking@gkbm.com"
                             ' delete the NCT item that's attached (as a result of the Move command)
-                            Dim myAttach As Outlook.Attachment
                             For Each myAttach In olDraft.Attachments
                                 myAttach.Delete()
                             Next
@@ -765,14 +771,20 @@ LinkContacts:
                             Exit For
                         End If
                     End With
+                    Marshal.ReleaseComObject(olDraft)
                 End If
+                Marshal.ReleaseComObject(obj)
             Next
-
-            Cursor.Current = Cursors.Default
+            Marshal.ReleaseComObject(myItems)
+            Marshal.ReleaseComObject(myFolder)
 
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If olDraft IsNot Nothing Then Marshal.ReleaseComObject(olDraft) : olDraft = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myPropNew IsNot Nothing Then Marshal.ReleaseComObject(myPropNew) : myPropNew = Nothing
@@ -782,6 +794,7 @@ LinkContacts:
             If olTask IsNot Nothing Then Marshal.ReleaseComObject(olTask) : olTask = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            Cursor.Current = Cursors.Default
         End Try
     End Sub
 
