@@ -103,95 +103,88 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Private Sub ReplyOrReplyAll(Response As Object, strEventName As String)
-        ' skipped
         ' adds Outlook attachments from original message to Reply or ReplyAll
         If TypeOf Response Is Outlook.MailItem Then
         Else
             Return
         End If
 
+        Dim myResponse As Outlook.MailItem = Nothing
         Dim myOriginal As Outlook.MailItem = Nothing
-        Dim myResponse As Outlook.MailItem = Response
-        Dim myInsps As Outlook.Inspectors = OutlookApp.Inspectors
-        If myInsps.Count = 0 Then
-            ' the user hit Reply from the Explorer window -- there's not an item open in an Inspector window
-            ' 11/11/2015 changed myOriginal = OutlookApp.ActiveExplorer.Selection.Item(1)
-            Dim myExpl As Outlook.Explorer = OutlookApp.ActiveExplorer
-            Dim mySel As Outlook.Selection = myExpl.Selection
-            myOriginal = mySel.Item(1)
-            Marshal.ReleaseComObject(mySel)
-            mySel = Nothing
-            Marshal.ReleaseComObject(myExpl)
-            myExpl = Nothing
-        Else
-            ' For Each myInsp In OutlookApp.Inspectors
-            Dim myInsp As Outlook.Inspector = myInsps(1)
-            myOriginal = myInsp.CurrentItem
-            If TypeOf myOriginal Is Outlook.MailItem Then
-            Else
-                Marshal.ReleaseComObject(myInsp)
-                myInsp = Nothing
-                Marshal.ReleaseComObject(myOriginal)
-                myOriginal = Nothing
-                Marshal.ReleaseComObject(myInsps)
-                myInsps = Nothing
-                Marshal.ReleaseComObject(myResponse)
-                myResponse = Nothing
-                MsgBox("The item in the first Outlook Inspector window is not a MailItem.", vbOKOnly + vbExclamation, "ReplyOrReplyAll()")
-                Return
-            End If
-            Marshal.ReleaseComObject(myInsp)
-            myInsp = Nothing
-        End If
-        Marshal.ReleaseComObject(myInsps)
-        myInsps = Nothing
+        Dim myInsps As Outlook.Inspectors = Nothing
+        Dim myExpl As Outlook.Explorer = Nothing
+        Dim mySel As Outlook.Selection = Nothing
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim myProperties As Outlook.UserProperties = Nothing
+        Dim myProp As Outlook.UserProperty = Nothing
 
-        ' 11/4/2015 Replying to an email that was Forwarded to you won't work without this
-        Dim str1 As String = RemoveREFW(myOriginal.Subject)
-        Dim str2 As String = RemoveREFW(myResponse.Subject)
-
-        ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
-        If InStr(str1, str2) > 0 Then
-            ' For Each myAttachment In myOriginal.Attachments
-            Dim myAttachs As Outlook.Attachments = myOriginal.Attachments
-            Dim x As Int16, myAttachment As Outlook.Attachment
-            For x = 1 To myAttachs.Count
-                myAttachment = myAttachs(x)
-                If Right(LCase(myAttachment.FileName), 4) = ".msg" Then
-                    Dim strFileName As String = "C:\tmp\" & myAttachment.FileName
-                    myAttachment.SaveAsFile(strFileName)
-                    Dim myRAs As Outlook.Attachments = myResponse.Attachments
-                    myRAs.Add(strFileName)
-                    Marshal.ReleaseComObject(myRAs)
-                    myRAs = Nothing
-                    Try
-                        My.Computer.FileSystem.DeleteFile(strFileName)
-                    Catch
-                    End Try
-                End If
-                Marshal.ReleaseComObject(myAttachment)
-            Next
-            ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
-            Dim myProps As Outlook.UserProperties = myResponse.UserProperties
-            Dim myUserProp As Outlook.UserProperty
-            myUserProp = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
-            myUserProp.Value = strEventName
-            Try
-            Catch ex As Exception
-            Finally
-                Marshal.ReleaseComObject(myUserProp)
-                myUserProp = Nothing
-                Marshal.ReleaseComObject(myProps)
-                myProps = Nothing
-            End Try
-        End If
+        Dim str1 As String
+        Dim str2 As String
         Try
+            myResponse = Response
+            myInsps = OutlookApp.Inspectors
+            If myInsps.Count = 0 Then
+                ' the user hit Reply from the Explorer window -- there's not an item open in an Inspector window
+                ' 11/11/2015 changed myOriginal = OutlookApp.ActiveExplorer.Selection.Item(1)
+                myExpl = OutlookApp.ActiveExplorer
+                mySel = myExpl.Selection
+                myOriginal = mySel.Item(1)
+                Marshal.ReleaseComObject(mySel)
+                Marshal.ReleaseComObject(myExpl)
+            Else
+                ' For Each myInsp In OutlookApp.Inspectors
+                myInsp = myInsps(1)
+                myOriginal = myInsp.CurrentItem
+                If TypeOf myOriginal Is Outlook.MailItem Then
+                Else
+                    MsgBox("The item in the first Outlook Inspector window is not a MailItem.", vbOKOnly + vbExclamation, "ReplyOrReplyAll()")
+                    Return
+                End If
+                Marshal.ReleaseComObject(myInsp)
+            End If
+            Marshal.ReleaseComObject(myInsps)
+
+            ' 11/4/2015 Replying to an email that was Forwarded to you won't work without this
+            str1 = RemoveREFW(myOriginal.Subject)
+            str2 = RemoveREFW(myResponse.Subject)
+
+            ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
+            If InStr(str1, str2) > 0 Then
+                ' For Each myAttachment In myOriginal.Attachments
+                Dim myAttachs As Outlook.Attachments = myOriginal.Attachments
+                Dim x As Int16, myAttachment As Outlook.Attachment
+                For x = 1 To myAttachs.Count
+                    myAttachment = myAttachs(x)
+                    If Right(LCase(myAttachment.FileName), 4) = ".msg" Then
+                        Dim strFileName As String = "C:\tmp\" & myAttachment.FileName
+                        myAttachment.SaveAsFile(strFileName)
+                        Dim myRAs As Outlook.Attachments = myResponse.Attachments
+                        myRAs.Add(strFileName)
+                        Marshal.ReleaseComObject(myRAs)
+                        myRAs = Nothing
+                        Try
+                            My.Computer.FileSystem.DeleteFile(strFileName)
+                        Catch
+                        End Try
+                    End If
+                    Marshal.ReleaseComObject(myAttachment)
+                Next
+                ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
+                myProperties = myResponse.UserProperties
+                myProp = myProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
+                myProp.Value = strEventName
+            End If
         Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "ReplyOrReplyAll()")
         Finally
-            Marshal.ReleaseComObject(myOriginal)
-            myOriginal = Nothing
-            Marshal.ReleaseComObject(myResponse)
-            myResponse = Nothing
+            If myProp IsNot Nothing Then Marshal.ReleaseComObject(myProp) : myProp = Nothing
+            If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If mySel IsNot Nothing Then Marshal.ReleaseComObject(mySel) : mySel = Nothing
+            If myExpl IsNot Nothing Then Marshal.ReleaseComObject(myExpl) : myExpl = Nothing
+            If myInsps IsNot Nothing Then Marshal.ReleaseComObject(myInsps) : myInsps = Nothing
+            If myOriginal IsNot Nothing Then Marshal.ReleaseComObject(myOriginal) : myOriginal = Nothing
+            If myResponse IsNot Nothing Then Marshal.ReleaseComObject(myResponse) : myResponse = Nothing
         End Try
     End Sub
 
@@ -271,17 +264,6 @@ Public Class OutlookItemEventsClass1
             ' myAttachment refers to object that was passed into procedure, so don't release it
         End Try
     End Sub
-
-    'Private Sub NAR(ByVal o As Object)
-    '    ' copied from https://support.microsoft.com/en-us/kb/317109
-    '    Try
-    '        While (Marshal.ReleaseComObject(o) > 0)
-    '        End While
-    '    Catch
-    '    Finally
-    '        o = Nothing
-    '    End Try
-    'End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentWriteToTempFile(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
         'Debug.Print("ProcessBeforeAttachmentPreview fired.")
