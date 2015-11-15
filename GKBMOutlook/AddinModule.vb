@@ -704,58 +704,65 @@ LinkContacts:
                 MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
                 Return
             End If
-            olTask.Save()
-            strSubject = olTask.Subject
-            olNew = olTask.Copy()
-            With olNew
-                ' For Each myProp In olTask.UserProperties
-                Dim x As Short, strName As String
-                myProps = olTask.UserProperties
-                For x = 1 To myProps.Count
-                    myPropOld = myProps(x)
-                    If myPropOld.Name = "Notes" Then
-                    Else
-                        strName = myPropOld.Name
-                        ' .UserProperties(myProp.Name).Value = myProp.Value
-                        myPropNew = .UserProperties(strName)
-                        myPropNew.Value = myPropOld.Value
-                        Marshal.ReleaseComObject(myPropNew)
-                    End If
-                    Marshal.ReleaseComObject(myPropOld)
-                Next
-                Marshal.ReleaseComObject(myProps)
+            Dim strFileName As String = "C:\tmp\Move.msg"
+            With olTask
                 .Save()
-                olTask.Close(Outlook.OlInspectorClose.olSave)
-                Marshal.ReleaseComObject(olTask)
+                strSubject = .Subject
 
-                mySession = OutlookApp.Session
-                myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
-                Try
-                    ' most users don't have permissions to MOVE it (requires delete permission for NewCallTracking folder)
-                    ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-                    .Move(myFolder)
-                Catch ex As Exception
-                    'if it didn't move (due to permissions), make these changes and then save it
-                    'If ex.HResult = -2147221223 Then
-                    Dim strFileName As String = "C:\tmp\Move.msg"
-                    .SaveAs(strFileName)
-                    'myProps = .UserProperties
-                    'myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
-                    'myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
-                    'myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
-                    'Marshal.ReleaseComObject(myProps)
-                    '.Close(Outlook.OlInspectorClose.olSave)
-                    .Close(Outlook.OlInspectorClose.olDiscard)
-                    olTask = OutlookApp.CreateItemFromTemplate(strFileName)
-                    olTask.Move(myFolder)
-                    olTask.Close(Outlook.OlInspectorClose.olSave)
+                'olNew = olTask.Copy()
+                'With olNew
+                '    ' For Each myProp In olTask.UserProperties
+                '    Dim x As Short, strName As String
+                '    myProps = olTask.UserProperties
+                '    For x = 1 To myProps.Count
+                '        myPropOld = myProps(x)
+                '        If myPropOld.Name = "Notes" Then
+                '        Else
+                '            strName = myPropOld.Name
+                '            ' .UserProperties(myProp.Name).Value = myProp.Value
+                '            myPropNew = .UserProperties(strName)
+                '            myPropNew.Value = myPropOld.Value
+                '            Marshal.ReleaseComObject(myPropNew)
+                '        End If
+                '        Marshal.ReleaseComObject(myPropOld)
+                '    Next
+                '    Marshal.ReleaseComObject(myProps)
+                '    .Save()
+                '    olTask.Close(Outlook.OlInspectorClose.olSave)
+                '    Marshal.ReleaseComObject(olTask)
 
-                    ' without this if the .Move fires an exception, the Catch block runs and then the procedure quits
-                    Exit Try
-                Finally
-                    If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder)
-                End Try
+                '    mySession = OutlookApp.Session
+                '    myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+                '    Try
+                '        ' most users don't have permissions to MOVE it (requires delete permission for NewCallTracking folder)
+                '        ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
+                '        .Move(myFolder)
+                '    Catch ex As Exception
+                '        'if it didn't move (due to permissions), make these changes and then save it
+                '        'If ex.HResult = -2147221223 Then
+                '        .SaveAs(strFileName)
+                '        'myProps = .UserProperties
+                '        'myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
+                '        'myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
+                '        'myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
+                '        'Marshal.ReleaseComObject(myProps)
+                '        '.Close(Outlook.OlInspectorClose.olSave)
+                '        .Close(Outlook.OlInspectorClose.olDiscard)
+                .SaveAs(strFileName)
             End With
+            olTask = OutlookApp.CreateItemFromTemplate(strFileName)
+            With olTask
+                .Move(myFolder)
+                .Close(Outlook.OlInspectorClose.olSave)
+            End With
+
+            'End With
+            ' without this if the .Move fires an exception, the Catch block runs and then the procedure quits
+            '    Exit Try
+            'Finally
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder)
+            'End Try
+            '    End With
 
             ' 11/5/2015 put this here to minimize chance of editing conflicts
             'If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
