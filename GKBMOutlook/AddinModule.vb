@@ -377,7 +377,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-15 13:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-15 17:35.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -681,16 +681,15 @@ LinkContacts:
         Const strTitle As String = "E-mail Copy of This Item"
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
-        Dim olTask As Outlook.TaskItem = Nothing
-        Dim olNew As Outlook.TaskItem = Nothing
-        Dim myProps As Outlook.UserProperties = Nothing
-        Dim myPropOld As Outlook.UserProperty = Nothing
-        Dim myPropNew As Outlook.UserProperty = Nothing
+        Dim myTask As Outlook.TaskItem = Nothing
+        Dim myProperties As Outlook.UserProperties = Nothing
+        Dim myUserProp As Outlook.UserProperty = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolder As Outlook.Folder = Nothing
         Dim myItems As Outlook.Items = Nothing
         Dim obj As Object = Nothing
-        Dim olDraft As Outlook.MailItem = Nothing
+        Dim myDraft As Outlook.MailItem = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
         Dim strSubject As String = Nothing
 
@@ -699,100 +698,66 @@ LinkContacts:
             item = myInsp.CurrentItem
             If TypeOf item Is Outlook.TaskItem Then
                 Cursor.Current = Cursors.WaitCursor
-                olTask = item
+                myTask = item
             Else
                 MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
                 Return
             End If
             Dim strFileName As String = "C:\tmp\Move.msg"
-            With olTask
+            With myTask
                 .Save()
-                strSubject = .Subject
-
-                'olNew = olTask.Copy()
-                'With olNew
-                '    ' For Each myProp In olTask.UserProperties
-                '    Dim x As Short, strName As String
-                '    myProps = olTask.UserProperties
-                '    For x = 1 To myProps.Count
-                '        myPropOld = myProps(x)
-                '        If myPropOld.Name = "Notes" Then
-                '        Else
-                '            strName = myPropOld.Name
-                '            ' .UserProperties(myProp.Name).Value = myProp.Value
-                '            myPropNew = .UserProperties(strName)
-                '            myPropNew.Value = myPropOld.Value
-                '            Marshal.ReleaseComObject(myPropNew)
-                '        End If
-                '        Marshal.ReleaseComObject(myPropOld)
-                '    Next
-                '    Marshal.ReleaseComObject(myProps)
-                '    .Save()
-                '    olTask.Close(Outlook.OlInspectorClose.olSave)
-                '    Marshal.ReleaseComObject(olTask)
-
-                '    mySession = OutlookApp.Session
-                '    myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
-                '    Try
-                '        ' most users don't have permissions to MOVE it (requires delete permission for NewCallTracking folder)
-                '        ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
-                '        .Move(myFolder)
-                '    Catch ex As Exception
-                '        'if it didn't move (due to permissions), make these changes and then save it
-                '        'If ex.HResult = -2147221223 Then
-                '        .SaveAs(strFileName)
-                '        'myProps = .UserProperties
-                '        'myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
-                '        'myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
-                '        'myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
-                '        'Marshal.ReleaseComObject(myProps)
-                '        '.Close(Outlook.OlInspectorClose.olSave)
-                '        .Close(Outlook.OlInspectorClose.olDiscard)
+                myProperties = .UserProperties
+                myUserProp = myProperties("CallerName")
+                If Len(myUserProp.Value) > 0 Then
+                    strSubject = myUserProp.Value
+                Else
+                    strSubject = .Subject
+                End If
+                Marshal.ReleaseComObject(myUserProp)
+                Marshal.ReleaseComObject(myProperties)
                 .SaveAs(strFileName)
-            End With
-            olTask = OutlookApp.CreateItemFromTemplate(strFileName)
-            With olTask
-                .Move(myFolder)
+                ' close the item that was originally opened
                 .Close(Outlook.OlInspectorClose.olSave)
             End With
 
-            'End With
-            ' without this if the .Move fires an exception, the Catch block runs and then the procedure quits
-            '    Exit Try
-            'Finally
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder)
-            'End Try
-            '    End With
-
-            ' 11/5/2015 put this here to minimize chance of editing conflicts
-            'If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
-            '          "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
-            '    olTask.Close(Outlook.OlInspectorClose.olSave)
-            'End If
+            ' open the copy of the item from the file in the user's Tasks folder (from where it can be moved)
+            myTask = OutlookApp.CreateItemFromTemplate(strFileName)
+            mySession = OutlookApp.Session
+            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            With myTask
+                .Move(myFolder)
+                .Close(Outlook.OlInspectorClose.olSave)
+            End With
+            Marshal.ReleaseComObject(myFolder)
+            Marshal.ReleaseComObject(myTask)
 
             ' display the new item for the user
-            ' Dim olFolder As Outlook.Folder = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             myItems = myFolder.Items
-            ' For Each obj In myFolder.Items
             For x = 1 To myItems.Count
                 obj = myItems(x)
                 If TypeOf obj Is Outlook.MailItem Then
-                    olDraft = obj
-                    With olDraft
+                    myDraft = obj
+                    With myDraft
                         If .Subject = strSubject Then
                             .BCC = "NewCallTracking@gkbm.com"
                             ' delete the NCT item that's attached (as a result of the Move command)
-                            For Each myAttach In olDraft.Attachments
+                            myAttachments = myDraft.Attachments
+                            Dim y As Short
+                            For y = 1 To myAttachments.Count
+                                myAttach = myAttachments(y)
                                 myAttach.Delete()
+                                Marshal.ReleaseComObject(myAttach)
                             Next
+                            Marshal.ReleaseComObject(myAttachments)
                             .Display()
                             Exit For
                         End If
                     End With
-                    Marshal.ReleaseComObject(olDraft)
+                    Marshal.ReleaseComObject(myDraft)
                 End If
                 Marshal.ReleaseComObject(obj)
+                MsgBox("Could not find the item in your Drafts folder.", vbExclamation, strTitle)
             Next
             Marshal.ReleaseComObject(myItems)
             Marshal.ReleaseComObject(myFolder)
@@ -801,16 +766,15 @@ LinkContacts:
             MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If olDraft IsNot Nothing Then Marshal.ReleaseComObject(olDraft) : olDraft = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft) : myDraft = Nothing
             If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
             If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
-            If myPropNew IsNot Nothing Then Marshal.ReleaseComObject(myPropNew) : myPropNew = Nothing
-            If myPropOld IsNot Nothing Then Marshal.ReleaseComObject(myPropOld) : myPropOld = Nothing
-            If myProps IsNot Nothing Then Marshal.ReleaseComObject(myProps) : myProps = Nothing
-            If olNew IsNot Nothing Then Marshal.ReleaseComObject(olNew) : olNew = Nothing
-            If olTask IsNot Nothing Then Marshal.ReleaseComObject(olTask) : olTask = Nothing
+            If myUserProp IsNot Nothing Then Marshal.ReleaseComObject(myUserProp) : myUserProp = Nothing
+            If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
+            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
             Cursor.Current = Cursors.Default
