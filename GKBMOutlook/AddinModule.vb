@@ -164,7 +164,6 @@ Public Class AddinModule
         'this seems to fire only when the first Inspector window is activated, 
         'not when a second or third item is opened in another Inspector window
         'so it doesn't work for closing Notes from NewCallTracking
-        ' 11/13/2015 fix this
         Dim myInsp As Outlook.Inspector = Nothing ' inspector
         Dim item As Object = Nothing ' myInsp.CurrentItem
         Dim myMailItem As Outlook.MailItem = Nothing
@@ -202,13 +201,11 @@ Public Class AddinModule
             'And remember that item and mailitem both point to the same COM object.
             'If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-
             'don't release myInsp -- it will release the inspector object that was passed into the procedure
         End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
-        Dim x As Short
         'delete any leftover notes from InstantFile attachments
         'myNotes = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes).Items
         Dim mySession As Outlook.NameSpace = Nothing
@@ -218,6 +215,8 @@ Public Class AddinModule
         Dim myFolders As Outlook.Folders = Nothing
         Dim myPublicFolder As Outlook.MAPIFolder = Nothing
         Dim myExplorer As Outlook.Explorer = Nothing
+
+        Dim x As Short
 
         Try
             mySession = OutlookApp.GetNamespace("MAPI")
@@ -230,7 +229,10 @@ Public Class AddinModule
                     Left(myNote.Body, 8) = "NewCall " Then
                     myNote.Delete()
                 End If
+                Marshal.ReleaseComObject(myNote)
             Next
+            Marshal.ReleaseComObject(myNotes)
+            Marshal.ReleaseComObject(myFolder)
 
             '' myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
             'Marshal.ReleaseComObject(myFolder)
@@ -375,7 +377,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-14 11:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-15 11:25.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
