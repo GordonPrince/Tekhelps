@@ -581,8 +581,8 @@ CopyContact:
         Dim myInsp As Outlook.Inspector = Nothing
         Dim myCont1 As Outlook.ContactItem = Nothing
         Dim myCont2 As Outlook.ContactItem = Nothing
-        Dim strCompanyDept As String
         Dim myLinks As Outlook.Links = Nothing
+        Dim strCompanyDept As String
 
         ' make sure there are exactly two Contacts open
         Try
@@ -721,6 +721,7 @@ LinkContacts:
                     Marshal.ReleaseComObject(myPropOld)
                 Next
                 Marshal.ReleaseComObject(myProps)
+                .Save()
 
                 mySession = OutlookApp.Session
                 myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
@@ -729,17 +730,15 @@ LinkContacts:
                     ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
                     .Move(myFolder)
                 Catch ex As Exception
-                    ' if it didn't move (due to permissions), make these changes and then save it
-                    '.UserProperties("Locked").Value = vbNullString
-                    '.UserProperties("CallerName").Value = "DELETE ME I'M A DUPLICATE"
-                    '' purge these nightly when update NewCallTracking program runs for OLAP/Analysis
-                    '.UserProperties("CallDate").Value = #8/8/1988#
+                    'if it didn't move (due to permissions), make these changes and then save it
+                    'If ex.HResult = -2147221223 Then
                     myProps = .UserProperties
                     myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
                     myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
-                    myPropNew = myProps("Locked") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
+                    myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
                     Marshal.ReleaseComObject(myProps)
                     .Save()
+                    'End If
                 End Try
                 Marshal.ReleaseComObject(myFolder)
             End With
@@ -1054,14 +1053,15 @@ LinkContacts:
         Dim myTask As Outlook.TaskItem = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAtt As Outlook.Attachment = Nothing
-        Dim myUserPropT As Outlook.UserProperty = Nothing
-        'Dim myUserPropS As Outlook.UserProperty = Nothing
+        Dim myProps As Outlook.UserProperties = Nothing
+        Dim myPropT As Outlook.UserProperty = Nothing
+        Dim myPropX As Outlook.UserProperty = Nothing
         Dim myNameSpace As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
         Dim myAllPublic As Outlook.Folder = Nothing
         Dim myApptCal As Outlook.Folder = Nothing
-        'Dim myUserPropL As Outlook.UserProperty = Nothing
+        Dim myPropL As Outlook.UserProperty = Nothing
         Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myItems As Outlook.Items = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
@@ -1105,21 +1105,22 @@ LinkContacts:
             End If
             Marshal.ReleaseComObject(myAttachments)
 
-            'myUserPropT = myTask.UserProperties("TypeOfCase")
-            'If Right(myTask.Subject, 1) = "/" Then
-            'Else
-            '    myUserPropS = myTask.UserProperties("Screener")
-            '    If Left(myUserPropT.Value, 2) = "SS" Then
-            '        myTask.Subject = myTask.Subject & "; SS; " & Left(myUserPropS.Value, 3) & "/"
-            '    ElseIf Left(myUserPropT.Value, 1) = "A" Then
-            '        myTask.Subject = myTask.Subject & "; A; " & Left(myUserPropS.Value, 3) & "/"
-            '    Else
-            '        myTask.Subject = myTask.Subject & "; " & Left(myUserPropT.Value, 2) & "; " & Left(myUserPropS.Value, 3) & "/"
-            '    End If
-            '    myTask.Save()
-            '    Marshal.ReleaseComObject(myUserPropS)
-            'End If
-            'Marshal.ReleaseComObject(myUserPropT)
+            myProps = myTask.UserProperties
+            myPropT = myProps("TypeOfCase")
+            If Right(myTask.Subject, 1) = "/" Then
+            Else
+                myPropX = myProps("Screener")
+                If Left(myPropT.Value, 2) = "SS" Then
+                    myTask.Subject = myTask.Subject & "; SS; " & Left(myPropX.Value, 3) & "/"
+                ElseIf Left(myPropT.Value, 1) = "A" Then
+                    myTask.Subject = myTask.Subject & "; A; " & Left(myPropX.Value, 3) & "/"
+                Else
+                    myTask.Subject = myTask.Subject & "; " & Left(myPropT.Value, 2) & "; " & Left(myPropX.Value, 3) & "/"
+                End If
+                myTask.Save()
+                Marshal.ReleaseComObject(myPropX)
+            End If
+            Marshal.ReleaseComObject(myPropT)
 
             myNameSpace = OutlookApp.GetNamespace("MAPI")
             myFolders = myNameSpace.Folders
@@ -1141,31 +1142,30 @@ HavePublic:
             Marshal.ReleaseComObject(myNameSpace)
 
             '11/14/2015 could not get this to work without leaving an unreleased object
-            'myUserPropL = myTask.UserProperties("ApptLocation")
-            'If Len(myUserPropL.Value) = 0 Then
-            '    s = myUserPropT.Value
-            '    If Left(s, 2) = "SS" Then
-            '        myUserPropL.Value = "SSI"
-            '    Else
-            '        myUserPropL.Value = "Wanda"
-            '    End If
-            'End If
-            'If myUserPropL.Value = "SSI" Then
-            '    myApptCal = myAllPublic.Folders("Appointment SSI")
-            'Else
-            myApptCal = myAllPublic.Folders("Appointment Calendar")
-            'End If
+            myPropL = myProps("ApptLocation")
+            If Len(myPropL.Value) = 0 Then
+                If Left(myPropL.Value, 2) = "SS" Then
+                    myPropL.Value = "SSI"
+                Else
+                    myPropL.Value = "Wanda"
+                End If
+            End If
+            If myPropL.Value = "SSI" Then
+                myApptCal = myAllPublic.Folders("Appointment SSI")
+            Else
+                myApptCal = myAllPublic.Folders("Appointment Calendar")
+            End If
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
             myAppt.Display()
             myAppt.Subject = myTask.Subject
-            'If myUserPropL.Value = "Wanda" _
-            '    Or myUserPropL.Value = "219" _
-            '    Or myUserPropL.Value = "SSI" Then
-            '    myAppt.Location = myUserPropL.Value
-            'End If
-            ' If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL)
+            If myPropL.Value = "Wanda" _
+                Or myPropL.Value = "219" _
+                Or myPropL.Value = "SSI" Then
+                myAppt.Location = myPropL.Value
+            End If
+            Marshal.ReleaseComObject(myPropL)
 
             ' add the Note with the EntryID of NewCallTracking item to the Appointment
             ' from https://www.add-in-express.com/creating-addins-blog/2012/07/16/create-outlook-task-appointment-note-email/
@@ -1188,11 +1188,12 @@ HavePublic:
             Marshal.ReleaseComObject(myNote)
             Marshal.ReleaseComObject(myAttachments)
 
-            'can't use this -- double dot issue -- myTask.UserProperties("ApptMade").Value = "Y"
-            'If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
-            'myUserPropT = myTask.UserProperties("ApptMade")
-            'myUserPropT.Value = "Y"
-            'Marshal.ReleaseComObject(myUserPropT)
+            'can't use this -- double dot issue  : myTask.UserProperties("ApptMade").Value = "Y"
+            'also this didn't release COM objects: myPropT = myTask.UserProperties("ApptMade")
+            myPropT = myProps("ApptMade")
+            myPropT.Value = "Y"
+            Marshal.ReleaseComObject(myPropT)
+            Marshal.ReleaseComObject(myProps)
 
             myTask.Close(Outlook.OlInspectorClose.olSave)
             Marshal.ReleaseComObject(myTask)
@@ -1206,14 +1207,15 @@ HavePublic:
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            'If myUserPropL IsNot Nothing Then Marshal.ReleaseComObject(myUserPropL) : myUserPropL = Nothing
+            If myPropL IsNot Nothing Then Marshal.ReleaseComObject(myPropL) : myPropL = Nothing
             If myApptCal IsNot Nothing Then Marshal.ReleaseComObject(myApptCal) : myApptCal = Nothing
             If myAllPublic IsNot Nothing Then Marshal.ReleaseComObject(myAllPublic) : myAllPublic = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If myNameSpace IsNot Nothing Then Marshal.ReleaseComObject(myNameSpace) : myNameSpace = Nothing
-            'If myUserPropS IsNot Nothing Then Marshal.ReleaseComObject(myUserPropS) : myUserPropS = Nothing
-            If myUserPropT IsNot Nothing Then Marshal.ReleaseComObject(myUserPropT) : myUserPropT = Nothing
+            If myPropX IsNot Nothing Then Marshal.ReleaseComObject(myPropX) : myPropX = Nothing
+            If myPropT IsNot Nothing Then Marshal.ReleaseComObject(myPropT) : myPropT = Nothing
+            If myProps IsNot Nothing Then Marshal.ReleaseComObject(myProps) : myProps = Nothing
             If myAtt IsNot Nothing Then Marshal.ReleaseComObject(myAtt) : myAtt = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
