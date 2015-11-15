@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+  <Product Id="*" Name="GKBM Outlook Add-in" Language="1033" Version="2.15.1" Manufacturer="Tekhelps, Inc." UpgradeCode="{21518F5D-B14E-4B68-AE6E-7D15E0B93675}" Codepage="1252">
+    <Package AdminImage="no" Comments="GKBM Outlook Add-in" Compressed="yes" Description="Outlook customizations for GKBM" InstallerVersion="200" InstallScope="perUser" Languages="1033" Manufacturer="Tekhelps, Inc." Platform="x86" ReadOnly="no" ShortNames="no" SummaryCodepage="1252" />
+    <Media Id="1" Cabinet="GKBMOutlook.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
+    <Property Id="DiskPrompt" Value="GKBM Outlook Add-in Installation [1]" />
+    <Property Id="ARPCOMMENTS" Value="GKBM Outlook Add-in" />
+    <Property Id="ARPCONTACT" Value="Tekhelps, Inc." />
+    <!-- The ".NET Framework" launch condition. -->
+    <PropertyRef Id="NETFRAMEWORK45"/>
+    <Condition Message="This setup requires the .NET Framework 4.5.  Please install the .NET Framework and run this setup again."><![CDATA[Installed OR NETFRAMEWORK45]]></Condition>
+    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+    <Binary Id="adxregistrator_exe" SourceFile="$(var.ADX_PATH)\Redistributables\adxregistrator.exe" />
+    <!-- The "adxregistrator.exe" custom action. -->
+    <CustomAction Id="_BFF21D2E_E947_44C7_A653_499A3DADD04A" BinaryKey="adxregistrator_exe" Execute="deferred" ExeCommand="/install=&quot;[TARGETDIR]$(var.GKBMOutlook.TargetFileName)&quot; /privileges=user" Impersonate="yes" />
+    <!-- The "adxregistrator.exe" custom action. -->
+    <CustomAction Id="_E537042D_AE1E_41D7_AB04_70D9566B13BC" BinaryKey="adxregistrator_exe" Execute="rollback" ExeCommand="/uninstall=&quot;[TARGETDIR]$(var.GKBMOutlook.TargetFileName)&quot; /privileges=user" Impersonate="yes" />
+    <!-- The "adxregistrator.exe" custom action. -->
+    <CustomAction Id="_F6F61CE5_67B0_4647_8B57_AB8909F4EECC" BinaryKey="adxregistrator_exe" Execute="deferred" ExeCommand="/uninstall=&quot;[TARGETDIR]$(var.GKBMOutlook.TargetFileName)&quot; /privileges=user" Impersonate="yes" />
+    <!-- Initialize the "TARGETDIR" directory property. -->
+    <CustomAction Id="DIRCA_TARGETDIR" Property="TARGETDIR" Value="[LocalAppDataFolder][Manufacturer]\[ProductName]" Execute="firstSequence" />
+    <Property Id="PREVIOUSINSTALLFOLDER">
+      <RegistrySearch Id="_F1E71DDB_4652_45AC_9BFC_669553EA7C6E" Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="Installed" Type="raw" />
+    </Property>
+    <CustomAction Id="DIRCA_TARGETDIR_UNINSTALL" Property="TARGETDIR" Value="[PREVIOUSINSTALLFOLDER]" Execute="firstSequence" />
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <Property Id="WIXUI_INSTALLDIR" Value="TARGETDIR" />
+    <!-- The directory tree of the installation package. -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <!-- The "GKBMOutlook" project output. -->
+      <Directory Id="GKBMOutlook.Binaries" />
+      <!-- The "GKBMOutlook" project output. -->
+      <Directory Id="GKBMOutlook.Satellites" />
+      <Component Id="comp_186955CC_B7A6_4D5C_AE68_D9334C5785C3" Guid="EC456EAB-F8BB-4083-A7DC-C1288155D1A3" Permanent="no" SharedDllRefCount="no" Transitive="no">
+        <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]">
+          <RegistryValue Type="string" Name="Installed" Value="[TARGETDIR]" KeyPath="yes" />
+        </RegistryKey>
+        <File Id="_C270B578_5771_430E_A5F0_D36EA12D49C1" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="adxloader64.dll" Source="$(var.GKBMOutlook.ProjectDir)Loader\adxloader64.dll" />
+        <File Id="_54E7CD3B_A93F_4229_A67B_DF896FB66915" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="adxloader.dll.manifest" Source="$(var.GKBMOutlook.ProjectDir)Loader\adxloader.dll.manifest" />
+        <File Id="_55D0EF27_0F7D_4348_88CE_F0BB02908928" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="adxloader.dll" Source="$(var.GKBMOutlook.ProjectDir)Loader\adxloader.dll" />
+        <File Id="_C219CCC9_96A8_4051_B964_6300823D81C5" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="AddinExpress.MSO.2005.dll" Source="C:\Program Files (x86)\Add-in Express\Add-in Express for .NET\Bin\AddinExpress.MSO.2005.dll" />
+				<File Id="_B4A18951_4896_4C62_9643_973922C8C418" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Office.Interop.Outlook.dll" Source="$(var.GKBMOutlook.TargetDir)Microsoft.Office.Interop.Outlook.dll" />
+				<File Id="_B8501211_439D_4C7F_B208_E7126E8DF35B" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Microsoft.Vbe.Interop.dll" Source="$(var.GKBMOutlook.TargetDir)Microsoft.Vbe.Interop.dll" />
+				<File Id="_6D4B31AE_ACF0_4A01_B48A_D700184D3A5E" DiskId="1" Hidden="no" ReadOnly="no" System="no" Vital="yes" Compressed="yes" Name="Office.dll" Source="$(var.GKBMOutlook.TargetDir)Office.dll" />   
+      </Component>
+    </Directory>
+    <!-- The FileSystem group of the installation package. -->
+    <ComponentGroup Id="FileSystemGroup">
+      <ComponentGroupRef Id="GKBMOutlook.Binaries" />
+      <ComponentGroupRef Id="GKBMOutlook.Satellites" />
+      <ComponentRef Id="comp_186955CC_B7A6_4D5C_AE68_D9334C5785C3" />
+    </ComponentGroup>
+    <!-- The composite feature of the installation package. -->
+    <Feature Id="CompleteInstall" Title="All Files" Level="1" ConfigurableDirectory="TARGETDIR">
+      <ComponentGroupRef Id="FileSystemGroup" />
+    </Feature>
+    <Upgrade Id="{21518F5D-B14E-4B68-AE6E-7D15E0B93675}">
+      <UpgradeVersion Minimum="2.15.1" Property="NEWPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="no" Language="1033" />
+      <UpgradeVersion Maximum="2.15.1" Property="OLDPRODUCTFOUND" OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="no" Language="1033" />
+    </Upgrade>
+    <InstallExecuteSequence>
+      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR=""]]></Custom>
+      <Custom Action="DIRCA_TARGETDIR_UNINSTALL" After="AppSearch"><![CDATA[PREVIOUSINSTALLFOLDER]]></Custom>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
+      <Custom Action="_BFF21D2E_E947_44C7_A653_499A3DADD04A" After="StartServices"><![CDATA[$comp_186955CC_B7A6_4D5C_AE68_D9334C5785C3>2]]></Custom>
+      <Custom Action="_E537042D_AE1E_41D7_AB04_70D9566B13BC" After="_BFF21D2E_E947_44C7_A653_499A3DADD04A"><![CDATA[$comp_186955CC_B7A6_4D5C_AE68_D9334C5785C3>2]]></Custom>
+      <Custom Action="_F6F61CE5_67B0_4647_8B57_AB8909F4EECC" After="MsiUnpublishAssemblies"><![CDATA[$comp_186955CC_B7A6_4D5C_AE68_D9334C5785C3=2]]></Custom>
+      <RemoveExistingProducts Before="InstallInitialize" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <FindRelatedProducts Sequence="200" />
+      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR=""]]></Custom>
+      <Custom Action="DIRCA_TARGETDIR_UNINSTALL" After="AppSearch"><![CDATA[PREVIOUSINSTALLFOLDER]]></Custom>
+      <Custom Action="PreventDowngrading" After="FindRelatedProducts"><![CDATA[NEWPRODUCTFOUND]]></Custom>
+    </InstallUISequence>
+    <AdminUISequence>
+      <Custom Action="DIRCA_TARGETDIR" Before="CostInitialize"><![CDATA[TARGETDIR=""]]></Custom>
+    </AdminUISequence>
+  </Product>
+</Wix>

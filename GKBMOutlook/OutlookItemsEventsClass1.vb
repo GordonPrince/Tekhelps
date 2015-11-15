@@ -162,7 +162,7 @@ Public Class OutlookItemsEventsClass1
 
 InstantFileEmail:
             Const strFolderName As String = "InstantFile Mail"
-            If GetPublicFolder(strFolderName, myFolder) Then
+            If GetPublicFolder(strFolderName) Then
                 If myPublicFolder Is Nothing Then
                     MsgBox("myPublicFolder Is Nothing", vbExclamation, strTitle)
                     Return

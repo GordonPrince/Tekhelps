@@ -49,7 +49,8 @@ Module Globals
         End If
     End Function
 
-    Public Function GetPublicFolder(ByVal strFolderName As String, ByVal olFolder As Outlook.Folder) As Boolean
+    Public Function GetPublicFolder(ByVal strFolderName As String) As Boolean
+        ' Public Function GetPublicFolder(ByVal strFolderName As String, ByVal olFolder As Outlook.Folder) As Boolean
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
@@ -71,20 +72,20 @@ Module Globals
                         For y = 1 To myFolders.Count
                             myFolder = myFolders(y)
                             If myFolder.Name = strAllPublicFolders Then
-                                Marshal.ReleaseComObject(myFolders)
+                                'Marshal.ReleaseComObject(myFolders)
                                 myFolders = myFolder.Folders
                                 Marshal.ReleaseComObject(myFolder)
-                                Dim z As Short
-                                For z = 1 To myFolders.Count
-                                    myFolder = myFolders(z)
-                                    myFolder = myFolders.GetNext
+                                myFolder = myFolders.GetFirst
+                                Do While Not myFolder Is Nothing
                                     If myFolder.Name = strFolderName Then
-                                        ' olFolder = myFolder
                                         If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder)
                                         myPublicFolder = myFolder
                                         Return True
+                                    Else
+                                        myFolder = myFolders.GetNext
                                     End If
-                                Next ' All Public Folders
+                                Loop
+                                Return False
                             End If
                         Next ' Public Folders
                     End If
@@ -93,7 +94,8 @@ Module Globals
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, "GetPublicFolder()")
         Finally
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            ' don't release myFolder -- it's the same object as myPublicFolder
+            ' If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
         End Try

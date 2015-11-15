@@ -1219,58 +1219,20 @@ HavePublic:
     End Sub
 
     Public Sub ActivateExplorer(strFolderName As String)
-        Dim mySession As Outlook.NameSpace = Nothing
-        Dim myFolders As Outlook.Folders = Nothing
-        Dim myPublicFolder As Outlook.Folder = Nothing
-        Dim myFolder As Outlook.Folder = Nothing
-        Dim myTarget As Outlook.Folder = Nothing
         Dim myExplorer As Outlook.Explorer = Nothing
-
-        Dim x As Short
         Try
-            ' For Each olPublicFolder In OutlookApp.Session.Folders
-            mySession = OutlookApp.Session
-            myFolders = mySession.Folders
-            For x = 1 To myFolders.Count
-                myPublicFolder = myFolders(x)
-                If Left(myPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                    Dim y As Short
-                    ' For Each myFolder In myPublicFolder.Folders
-                    Marshal.ReleaseComObject(myFolders)
-                    myFolders = myPublicFolder.Folders
-                    For y = 1 To myFolders.Count
-                        myFolder = myFolders(y)
-                        If myFolder.Name = strAllPublicFolders Then
-                            Marshal.ReleaseComObject(myFolders)
-                            myFolders = myFolder.Folders
-                            Dim z As Short
-                            ' For Each myTarget In olFolder.Folders
-                            For z = 1 To myFolders.Count
-                                myTarget = myFolders(z)
-                                If myTarget.Name = strFolderName Then
-                                    myExplorer = OutlookApp.ActiveExplorer
-                                    myExplorer.CurrentFolder = myTarget
-                                    Return
-                                End If
-                                Marshal.ReleaseComObject(myTarget)
-                                MsgBox("Could not find the folder '" & strFolderName & "'.", vbExclamation)
-                            Next
-                        End If
-                        Marshal.ReleaseComObject(myFolder)
-                    Next
-                End If
-                Marshal.ReleaseComObject(myPublicFolder)
-            Next
-            MsgBox("Could not find " & strPublicFolders, vbExclamation, "ActivateExplorer")
+            If GetPublicFolder(strFolderName) Then
+                myExplorer = OutlookApp.ActiveExplorer
+                myExplorer.CurrentFolder = myPublicFolder
+                Return
+            Else
+                MsgBox("Could not find the folder '" & strFolderName & "'", vbExclamation)
+            End If
         Catch ex As Exception
-            MsgBox("Could not find " & strPublicFolders & vbNewLine & vbNewLine & ex.Message, vbExclamation, "ActivateExplorer")
+            MsgBox("Could not find " & strFolderName & vbNewLine & vbNewLine & ex.Message, vbExclamation, "ActivateExplorer")
         Finally
             If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
-            If myTarget IsNot Nothing Then Marshal.ReleaseComObject(myTarget) : myTarget = Nothing
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
-            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
-            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
         End Try
     End Sub
 End Class
