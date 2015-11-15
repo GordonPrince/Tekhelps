@@ -801,7 +801,7 @@ LinkContacts:
         ' skipped
         Const strTitle As String = "Copy Attachments from Another MailItem"
         Const strMsg As String = ".msg"
-        Dim myAttachment As Outlook.Attachment, strFileName As String
+        Dim myAttach As Outlook.Attachment, strFileName As String
         Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
         Dim intY As Int16, intZ As Int16
 
@@ -833,15 +833,15 @@ LinkContacts:
                             If RetVal = vbCancel Then Exit Sub
                             If RetVal = vbYes Then
                                 intZ = 0
-                                For Each myAttachment In myOther.Attachments
-                                    If Right(LCase(myAttachment.FileName), 4) = strMsg Then
-                                        strFileName = "C:\tmp\" & myAttachment.FileName
-                                        myAttachment.SaveAsFile(strFileName)
+                                For Each myAttach In myOther.Attachments
+                                    If Right(LCase(myAttach.FileName), 4) = strMsg Then
+                                        strFileName = "C:\tmp\" & myAttach.FileName
+                                        myAttach.SaveAsFile(strFileName)
                                         myNew.Attachments.Add(strFileName)
                                         My.Computer.FileSystem.DeleteFile(strFileName)
                                         intZ = intZ + 1
                                     End If
-                                Next myAttachment
+                                Next myAttach
                                 MsgBox(IIf(intZ = 1, "One attachment was", intZ & " attachments were") & " added to your new item.", vbInformation, strTitle)
                                 Exit Sub
                             End If
@@ -887,30 +887,12 @@ LinkContacts:
     End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
+        Const strTitle As String = "OpenItemFromID()"
         If strPublicStoreID Is Nothing Then
             Debug.Print("strPublicStoreID Is Nothing")
             Stop
-            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, "OpenItemFromID()")
-            'Dim olPublicFolder As Outlook.Folder
-            'For Each olPublicFolder In OutlookApp.Session.Folders
-            '    If Left(olPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-            '        ' Dim strPublicStoreID As String = olPublicFolder.StoreID
-            '        For Each olFolder In olPublicFolder.Folders
-            '            If olFolder.Name = strAllPublicFolders Then
-            '                Dim olNameSpace As Outlook.NameSpace = OutlookApp.GetNamespace("MAPI")
-            '                Try
-            '                    Dim item As Object = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            '                    item.Display()
-            '                    Return True
-            '                Catch
-            '                    MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
-            '                    Return False
-            '                End Try
-            '            End If
-            '        Next
-            '    End If
-            'Next
-            'Return False        
+            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, strtitle)
+            Return False
         End If
         Dim olNameSpace As Outlook.NameSpace = Nothing
         Dim item As Object = Nothing
@@ -920,11 +902,11 @@ LinkContacts:
             item.Display()
             Return True
         Catch
-            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, "OpenItemFromID()")
+            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, strTitle)
             Return False
         Finally
-            Marshal.ReleaseComObject(item) : item = Nothing
-            Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
         End Try
     End Function
 

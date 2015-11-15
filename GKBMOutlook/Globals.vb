@@ -1,4 +1,6 @@
 ﻿Imports System.Data  ' includes SqlClient
+Imports Microsoft.Office.Interop
+Imports System.Runtime.InteropServices
 
 Module Globals
     Public Const strDocScanned As String = "Document scanned + imported:"
@@ -18,6 +20,8 @@ Module Globals
     Public strPublicStoreID As String
     Public RetVal As VariantType
     Public lngX As Long
+
+    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
 
     Public Function RunSQLcommand(ByVal queryString As String) As Boolean
         Dim strConnectionString As String = SQLConnectionString()
@@ -41,6 +45,53 @@ Module Globals
         Else
             SQLConnectionString = ("Initial Catalog=InstantFile;Data Source=SQLserver;Integrated Security=SSPI;")
         End If
+    End Function
+
+    Public Function GetPublicFolder(ByVal strFolderName As String, ByRef olFolder As Outlook.Folder) As Boolean
+        Dim mySession As Outlook.NameSpace = Nothing
+        Dim myFolders As Outlook.Folders = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
+
+        Try
+            mySession = OutlookApp.Session
+            myFolders = mySession.Folders
+            If myFolders.Count > 0 Then
+                Dim x As Short
+                For x = 1 To myFolders.Count
+                    myFolder = myFolders(x)
+                    If Left(myFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                        Marshal.ReleaseComObject(myFolders)
+                        myFolders = myFolder.Folders
+                        Marshal.ReleaseComObject(myFolder)
+                        Dim y As Short
+                        For y = 1 To myFolders.Count
+                            myFolder = myFolders(y)
+                            If myFolder.Name = strAllPublicFolders Then
+                                Marshal.ReleaseComObject(myFolders)
+                                myFolders = myFolder.Folders
+                                Marshal.ReleaseComObject(myFolder)
+                                Dim z As Short
+                                For z = 1 To myFolders.Count
+                                    myFolder = myFolders(z)
+                                    If myFolder.Name = strFolderName Then
+                                        olFolder = myFolder
+                                        Return True
+                                    End If
+                                Next ' All Public Folders
+                            End If
+                        Next ' Public Folders
+                    End If
+                Next ' Session folders
+            End If
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "GetPublicFolder()")
+        Finally
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
+        End Try
+
+        Return False
     End Function
 
 End Module
