@@ -21,6 +21,8 @@ Module Globals
     Public RetVal As VariantType
     Public lngX As Long
 
+    Public myPublicFolder As Outlook.Folder = Nothing
+
     Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
 
     Public Function RunSQLcommand(ByVal queryString As String) As Boolean
@@ -47,11 +49,13 @@ Module Globals
         End If
     End Function
 
-    Public Function GetPublicFolder(ByVal strFolderName As String, ByRef olFolder As Outlook.Folder) As Boolean
+    Public Function GetPublicFolder(ByVal strFolderName As String, ByVal olFolder As Outlook.Folder) As Boolean
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
 
+        ' also try myFolder = myFolders.GetNext 
+        ' https://msdn.microsoft.com/en-us/library/office/ff865587.aspx?f=255&MSPPError=-2147217396
         Try
             mySession = OutlookApp.Session
             myFolders = mySession.Folders
@@ -73,8 +77,11 @@ Module Globals
                                 Dim z As Short
                                 For z = 1 To myFolders.Count
                                     myFolder = myFolders(z)
+                                    myFolder = myFolders.GetNext
                                     If myFolder.Name = strFolderName Then
-                                        olFolder = myFolder
+                                        ' olFolder = myFolder
+                                        If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder)
+                                        myPublicFolder = myFolder
                                         Return True
                                     End If
                                 Next ' All Public Folders
@@ -90,7 +97,6 @@ Module Globals
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
         End Try
-
         Return False
     End Function
 

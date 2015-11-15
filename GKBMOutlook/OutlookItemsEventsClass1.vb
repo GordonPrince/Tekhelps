@@ -23,6 +23,8 @@ Public Class OutlookItemsEventsClass1
 
         Dim myFolder As Outlook.MAPIFolder = Nothing
         Dim myMailItem As Outlook.MailItem = Nothing
+        Dim mySession As Outlook.NameSpace = Nothing
+        Dim myUser As Outlook.Recipient = Nothing
         Dim myCopy As Outlook.MailItem = Nothing
         Dim myMove As Outlook.MailItem = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
@@ -159,25 +161,43 @@ Public Class OutlookItemsEventsClass1
             Return
 
 InstantFileEmail:
-            ' don't know why this wouldn't work
-            ' For Each pFolder In OutlookApp.Session.Folders   
             Const strFolderName As String = "InstantFile Mail"
-            If Not GetPublicFolder(strFolderName, myFolder) Then
+            If GetPublicFolder(strFolderName, myFolder) Then
+                If myPublicFolder Is Nothing Then
+                    MsgBox("myPublicFolder Is Nothing", vbExclamation, strTitle)
+                    Return
+                End If
+            Else
                 MsgBox("Could not find the Public Folder '" & strFolderName & "'", vbExclamation, strTitle)
                 Return
             End If
 
             myCopy = myMailItem.Copy
-            myMove = myCopy.Move(myFolder)  ' the myMove object has the new EntryID
+            ' myMove = myCopy.Move(myFolder)  ' the myMove object has the new EntryID
+            myMove = myCopy.Move(myPublicFolder)
+            Marshal.ReleaseComObject(myPublicFolder)
 
+            'Try
+            '    If OutlookApp Is Nothing Then
+            '        mySession = OutlookApp.Session
+            '    End If
+            'Catch ex As Exception
+            '    mySession = OutlookApp.GetNamespace("MAPI")
+
+            'End Try
+
+            myUser = mySession.CurrentUser
+            Dim strCmd As String
+            strCmd = "select staff_id from staff where staff_name = '" & Replace(myUser.Name, "'", "''") & "'"
+            Marshal.ReleaseComObject(myUser)
+            Marshal.ReleaseComObject(mySession)
             Dim con As SqlClient.SqlConnection, myCmd As SqlClient.SqlCommand, myReader As SqlClient.SqlDataReader
-            Dim strInitials As String = Nothing
             con = New SqlClient.SqlConnection(SQLConnectionString)
             myCmd = con.CreateCommand
-            strScratch = "select staff_id from staff where staff_name = '" & Replace(mySession.CurrentUser.Name, "'", "''") & "'"
-            myCmd.CommandText = strScratch
+            myCmd.CommandText = strCmd
             con.Open()
             myReader = myCmd.ExecuteReader()
+            Dim strInitials As String = Nothing
             Do While myReader.Read
                 strInitials = myReader.GetString(0)
             Loop
@@ -290,6 +310,8 @@ AddRecipientsAndBody:
         Catch ex As Exception
             MsgBox(Err.Description, vbExclamation, strTitle)
         Finally
+            If myUser IsNot Nothing Then Marshal.ReleaseComObject(myUser) : myUser = Nothing
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myRecipient IsNot Nothing Then Marshal.ReleaseComObject(myRecipient) : myRecipient = Nothing
             If myRecipients IsNot Nothing Then Marshal.ReleaseComObject(myRecipients) : myRecipients = Nothing
             If myProp IsNot Nothing Then Marshal.ReleaseComObject(myProp) : myProp = Nothing

@@ -352,6 +352,7 @@ HaveNewCallTracking:
             If myNotes IsNot Nothing Then Marshal.ReleaseComObject(myNotes) : myNotes = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
+            ' Debug.Print("mySession was not released from Startup")
         End Try
     End Sub
 
