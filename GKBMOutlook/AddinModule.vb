@@ -377,7 +377,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-15 11:25.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-15 13:10.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -725,29 +725,39 @@ LinkContacts:
                 Next
                 Marshal.ReleaseComObject(myProps)
                 .Save()
+                olTask.Close(Outlook.OlInspectorClose.olSave)
+                Marshal.ReleaseComObject(olTask)
 
                 mySession = OutlookApp.Session
                 myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
                 Try
-                    ' most users don't have permissions to MOVE it (deletes from NewCallTracking)
+                    ' most users don't have permissions to MOVE it (requires delete permission for NewCallTracking folder)
                     ' .Move(OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts))
                     .Move(myFolder)
                 Catch ex As Exception
                     'if it didn't move (due to permissions), make these changes and then save it
                     'If ex.HResult = -2147221223 Then
-                    myProps = .UserProperties
-                    myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
-                    myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
-                    myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
-                    Marshal.ReleaseComObject(myProps)
-                    .Save()
-                    'End If
+                    Dim strFileName As String = "C:\tmp\Move.msg"
+                    .SaveAs(strFileName)
+                    'myProps = .UserProperties
+                    'myPropNew = myProps("Locked") : myPropNew.Value = vbNullString : Marshal.ReleaseComObject(myPropNew)
+                    'myPropNew = myProps("CallerName") : myPropNew.Value = "DELETE ME I'M A DUPLICATE" : Marshal.ReleaseComObject(myPropNew)
+                    'myPropNew = myProps("CallDate") : myPropNew.Value = #8/8/1988# : Marshal.ReleaseComObject(myPropNew)
+                    'Marshal.ReleaseComObject(myProps)
+                    '.Close(Outlook.OlInspectorClose.olSave)
+                    .Close(Outlook.OlInspectorClose.olDiscard)
+                    olTask = OutlookApp.CreateItemFromTemplate(strFileName)
+                    olTask.Move(myFolder)
+                    olTask.Close(Outlook.OlInspectorClose.olSave)
+
+                    ' without this if the .Move fires an exception, the Catch block runs and then the procedure quits
+                    Exit Try
+                Finally
+                    If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder)
                 End Try
-                Marshal.ReleaseComObject(myFolder)
             End With
 
             ' 11/5/2015 put this here to minimize chance of editing conflicts
-            olTask.Close(Outlook.OlInspectorClose.olSave)
             'If MsgBox("The item was copied to your Drafts folder." & vbNewLine & vbNewLine & _
             '          "Close the original item?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = vbYes Then
             '    olTask.Close(Outlook.OlInspectorClose.olSave)
