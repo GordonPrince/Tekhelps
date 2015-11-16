@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "GKBMOutlook", "GKBMOutlook\GKBMOutlook.vbproj", "{21518F5D-B14E-4B68-AE6E-7D15E0B93674}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "GKBMOutlookSetup(2.16.1)", "GKBMOutlook\GKBMOutlookSetup\2.16.1\GKBMOutlookSetup(2.16.1).wixproj", "{E3FD4C87-1007-4321-8792-961A496C74DE}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "GKBMOutlookSetup(2.16.2)", "GKBMOutlook\GKBMOutlookSetup\2.16.2\GKBMOutlookSetup(2.16.2).wixproj", "{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,16 +27,16 @@ Global
 		{21518F5D-B14E-4B68-AE6E-7D15E0B93674}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{21518F5D-B14E-4B68-AE6E-7D15E0B93674}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{21518F5D-B14E-4B68-AE6E-7D15E0B93674}.Release|x86.ActiveCfg = Release|Any CPU
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Debug|x86.ActiveCfg = Debug|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Debug|x86.Build.0 = Debug|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Release|Any CPU.ActiveCfg = Release|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Release|Mixed Platforms.Build.0 = Release|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Release|x86.ActiveCfg = Release|x86
-		{E3FD4C87-1007-4321-8792-961A496C74DE}.Release|x86.Build.0 = Release|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Debug|x86.ActiveCfg = Debug|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Debug|x86.Build.0 = Debug|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Release|Any CPU.ActiveCfg = Release|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Release|x86.ActiveCfg = Release|x86
+		{B3D3BDB6-8FB4-4357-94F8-A7AC01A5A52F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

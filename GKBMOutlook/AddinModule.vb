@@ -377,7 +377,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-16  4:40.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-16 6:00.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -726,7 +726,8 @@ LinkContacts:
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             With myTask
                 .Move(myFolder)
-                .Close(Outlook.OlInspectorClose.olSave)
+                ' don't leave a copy of the item in the user's personal Tasks folder
+                .Close(Outlook.OlInspectorClose.olDiscard)
             End With
             Marshal.ReleaseComObject(myFolder)
             Marshal.ReleaseComObject(myTask)
@@ -740,6 +741,7 @@ LinkContacts:
                 If TypeOf obj Is Outlook.MailItem Then
                     myDraft = obj
                     With myDraft
+                        ' Debug.Print(".Subject=" & .Subject & ", strSubject=" & strSubject)
                         If .Subject = strSubject Then
                             .BCC = "NewCallTracking@gkbm.com"
                             ' delete the NCT item that's attached (as a result of the Move command)
@@ -760,9 +762,12 @@ LinkContacts:
                 End If
                 Marshal.ReleaseComObject(obj)
             Next
+            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft)
             Marshal.ReleaseComObject(myItems)
             Marshal.ReleaseComObject(myFolder)
-            If Not bHaveDraft Then MsgBox("Could not find the new E-mail in your Drafts folder.", vbExclamation, strTitle)
+            If Not bHaveDraft Then MsgBox("Could not find the new E-mail" & vbNewLine & _
+                                          "Subject: " & strSubject & vbNewLine & _
+                                          "in your Drafts folder.", vbExclamation, strTitle)
 
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
