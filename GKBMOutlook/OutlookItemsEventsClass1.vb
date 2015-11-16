@@ -23,6 +23,7 @@ Public Class OutlookItemsEventsClass1
 
         Dim myFolder As Outlook.MAPIFolder = Nothing
         Dim myMailItem As Outlook.MailItem = Nothing
+        Dim myApplication As Outlook.Application = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myUser As Outlook.Recipient = Nothing
         Dim myCopy As Outlook.MailItem = Nothing
@@ -78,10 +79,13 @@ Public Class OutlookItemsEventsClass1
                 If Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Or Left(myMailItem.Subject, Len(strLastScanned)) = strLastScanned Then
                     bScanned = True
                     GoTo InstantFileEmail
+                Else '11/16/2015 added this in case there's something in the Subject but it's not one of the above strings.
+                    GoTo TryFromAttachments
                 End If
             Else
                 ' if this is an InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
                 'For Each myAttach In myMailItem.Attachments
+TryFromAttachments:
                 Dim x As Short
                 myAttachments = myMailItem.Attachments
                 For x = 1 To myAttachments.Count
@@ -177,14 +181,14 @@ InstantFileEmail:
             myMove = myCopy.Move(myPublicFolder)
             Marshal.ReleaseComObject(myPublicFolder)
 
-            'Try
-            '    If OutlookApp Is Nothing Then
-            '        mySession = OutlookApp.Session
-            '    End If
-            'Catch ex As Exception
-            '    mySession = OutlookApp.GetNamespace("MAPI")
-
-            'End Try
+            ' 11/16/2015 this is a band-aid and needs a better fix
+            If OutlookApp IsNot Nothing Then
+                mySession = OutlookApp.Session
+            ElseIf myMailItem IsNot Nothing Then
+                myApplication = myMailItem.Application
+                mySession = myApplication.Session
+                ' Marshal.ReleaseComObject(myApplication)
+            End If
 
             myUser = mySession.CurrentUser
             Dim strCmd As String
@@ -246,9 +250,6 @@ InstantFileEmail:
                             MsgBox("The InstantFile Document was not updated properly with the E-mail's EntryID.", vbExclamation, strTitle)
                         End If
                     End If
-                    ' Debug.WriteLine("The E-mail's EntryID was updated in InstantFile.")
-                    ' without the MsgBox here I get an error
-                    ' MsgBox("The E-mail's EntryID was updated in InstantFile.", vbInformation + vbOKOnly, "GKBM Outlook Add-in")
                     Exit Sub
                 ElseIf Left(myMailItem.Subject, Len(strDocScanned)) = strDocScanned Then
                     intA = InStr(1, Mid(.Subject, Len(strDocScanned) + 2), Space(1))
@@ -311,6 +312,7 @@ AddRecipientsAndBody:
             MsgBox(Err.Description, vbExclamation, strTitle)
         Finally
             If myUser IsNot Nothing Then Marshal.ReleaseComObject(myUser) : myUser = Nothing
+            'If myApplication IsNot Nothing Then Marshal.ReleaseComObject(myApplication) : myApplication = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myRecipient IsNot Nothing Then Marshal.ReleaseComObject(myRecipient) : myRecipient = Nothing
             If myRecipients IsNot Nothing Then Marshal.ReleaseComObject(myRecipients) : myRecipients = Nothing

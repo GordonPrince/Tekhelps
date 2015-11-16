@@ -4,13 +4,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.5</ProductVersion>
-    <ProjectGuid>{e3fd4c87-1007-4321-8792-961a496c74de}</ProjectGuid>
+    <ProjectGuid>{6a32f223-5dab-42fd-b44f-b2ad37b3d0d7}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>GKBMOutlookSetup(2.16.1)</OutputName>
+    <OutputName>GKBMOutlookSetup(2.16.5)</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <Name>GKBMOutlookSetup(2.16.1)</Name>
+    <Name>GKBMOutlookSetup(2.16.5)</Name>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">

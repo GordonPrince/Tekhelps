@@ -66,12 +66,15 @@ Public Class OutlookItemEventsClass1
                         myProps = myMailItem.UserProperties
                         myUserProp = myProps.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                         myUserProp.Value = "Forward"
-                        ' add some exception handling there; otherwise, you wouldn't know that the userproperty isn't added   
-                        Exit For
+                        Marshal.ReleaseComObject(myUserProp)
+                        Marshal.ReleaseComObject(myProps)
+                        Return
                     End If
                 End If
                 Marshal.ReleaseComObject(myAttachment)
             Next
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "Update forwarded E-mail with InstantFile tags")
 
         Finally
             If myUserProp IsNot Nothing Then Marshal.ReleaseComObject(myUserProp) : myUserProp = Nothing
@@ -224,6 +227,9 @@ Public Class OutlookItemEventsClass1
                                  "Open InstantFile, then try this again."
         Dim myAttachment As Outlook.Attachment = Nothing
         Dim appAccess As Access.Application = Nothing
+        Dim myNote As Outlook.NoteItem = Nothing
+        Dim olNameSpace As Outlook.NameSpace = Nothing
+        Dim olItem As Object = Nothing
         Try
             myAttachment = attachment
             If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
@@ -258,8 +264,32 @@ Public Class OutlookItemEventsClass1
                     e.Cancel = True
                     Return
                 End If
+            ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015
+                Dim strFileName As String
+                With myAttachment
+                    strFileName = "C:\tmp\" & .FileName
+                    .SaveAsFile(strFileName)
+                End With
+                myNote = OutlookApp.CreateItemFromTemplate(strFileName)
+                Dim strID As String, x As Short
+                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+                x = InStr(1, strID, vbNewLine)
+                strID = Left(strID, x - 1)
+                myNote.Close(Outlook.OlInspectorClose.olDiscard)
+                Marshal.ReleaseComObject(myNote)
+                Try
+                    olNameSpace = OutlookApp.GetNamespace("MAPI")
+                    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+                    olItem.Display()
+                Catch ex As Exception
+                    MsgBox("The InstantFile Request could not be displayed.", vbExclamation, "Display InstantFile Note")
+                End Try
+                e.Cancel = True
             End If
         Finally
+            If olItem IsNot Nothing Then Marshal.ReleaseComObject(olItem) : olItem = Nothing
+            If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
             ' myAttachment refers to object that was passed into procedure, so don't release it
         End Try
@@ -286,23 +316,24 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
-        On Error GoTo EmailMatNo_Error
+        ' updated this 11/16/2015
         Dim strDisplayName As String
         Dim intX As Integer
-        If Left(myAttach.DisplayName, 18) = strIFmatNo Then
-            strDisplayName = Mid(myAttach.DisplayName, 19)
-            intX = InStr(1, strDisplayName, Space(1))
-            If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
-            EmailMatNo = strDisplayName
-        ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
-            EmailMatNo = MatNoFromSubject(strSubject)
-        Else
-            EmailMatNo = False
-        End If
-        Exit Function
-
-EmailMatNo_Error:
-        MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
+        Try
+            If Left(myAttach.DisplayName, 18) = strIFmatNo Then
+                strDisplayName = Mid(myAttach.DisplayName, 19)
+                intX = InStr(1, strDisplayName, Space(1))
+                If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
+                Return CDbl(strDisplayName)
+            ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
+                Return CDbl(MatNoFromSubject(strSubject))
+            Else
+                Return False
+            End If
+        Catch ex As Exception
+            MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
+            Return False
+        End Try
     End Function
 
     Private Function MatNoFromSubject(ByVal strSubject) As Double

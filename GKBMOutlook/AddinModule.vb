@@ -234,20 +234,6 @@ Public Class AddinModule
             Marshal.ReleaseComObject(myNotes)
             Marshal.ReleaseComObject(myFolder)
 
-            '' myInboxItems = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox).Items
-            'Marshal.ReleaseComObject(myFolder)
-            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderInbox)
-            'myInboxItems = myFolder.Items
-            '' mySentItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail).Items
-            'Marshal.ReleaseComObject(myFolder)
-            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderSentMail)
-            'mySentItems = myFolder.Items
-            '' myTaskItems = OutlookApp.Session.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks).Items
-            'Marshal.ReleaseComObject(myFolder)
-            'myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderTasks)
-            'myTaskItems = myFolder.Items
-            'Marshal.ReleaseComObject(myFolder)
-
             ' this won't work if the user is working offline
             ' If OutlookApp.Session.Offline Then
             If mySession.Offline Then
@@ -377,7 +363,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-16 6:00.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-16 14:00.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
