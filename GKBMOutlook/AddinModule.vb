@@ -377,7 +377,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-15 17:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-16  4:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -734,6 +734,7 @@ LinkContacts:
             ' display the new item for the user
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
             myItems = myFolder.Items
+            Dim bHaveDraft As Boolean = False
             For x = 1 To myItems.Count
                 obj = myItems(x)
                 If TypeOf obj Is Outlook.MailItem Then
@@ -751,16 +752,17 @@ LinkContacts:
                             Next
                             Marshal.ReleaseComObject(myAttachments)
                             .Display()
+                            bHaveDraft = True
                             Exit For
                         End If
                     End With
                     Marshal.ReleaseComObject(myDraft)
                 End If
                 Marshal.ReleaseComObject(obj)
-                MsgBox("Could not find the item in your Drafts folder.", vbExclamation, strTitle)
             Next
             Marshal.ReleaseComObject(myItems)
             Marshal.ReleaseComObject(myFolder)
+            If Not bHaveDraft Then MsgBox("Could not find the new E-mail in your Drafts folder.", vbExclamation, strTitle)
 
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
