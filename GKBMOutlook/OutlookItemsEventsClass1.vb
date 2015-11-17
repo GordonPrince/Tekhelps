@@ -10,7 +10,8 @@ Imports System.Data
 Public Class OutlookItemsEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemsEvents
  
-    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    ' Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    ' Dim OutlookApp As Outlook.Application = Nothing
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
@@ -25,7 +26,6 @@ Public Class OutlookItemsEventsClass1
 
         Dim myFolder As Outlook.MAPIFolder = Nothing
         Dim myMailItem As Outlook.MailItem = Nothing
-        ' Dim myApplication As Outlook.Application = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myUser As Outlook.Recipient = Nothing
         Dim myCopy As Outlook.MailItem = Nothing

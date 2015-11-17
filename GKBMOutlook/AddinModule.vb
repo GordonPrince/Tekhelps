@@ -1209,5 +1209,6 @@ HavePublic:
             If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
         End Try
     End Sub
+
 End Class
 

@@ -23,7 +23,8 @@ Module Globals
 
     Public myPublicFolder As Outlook.Folder = Nothing
 
-    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    ' Private OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    Public OutlookApp As Outlook.Application = Nothing
 
     Public Function RunSQLcommand(ByVal queryString As String) As Boolean
         Dim strConnectionString As String = SQLConnectionString()
@@ -49,8 +50,7 @@ Module Globals
         End If
     End Function
 
-    Public Function GetPublicFolder(ByVal strFolderName As String) As Boolean
-        ' Public Function GetPublicFolder(ByVal strFolderName As String, ByVal olFolder As Outlook.Folder) As Boolean
+    Public Function GetPublicFolder(ByVal strFolderName As String) As Boolean ' 11/17/2015
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
@@ -101,5 +101,4 @@ Module Globals
         End Try
         Return False
     End Function
-
 End Module

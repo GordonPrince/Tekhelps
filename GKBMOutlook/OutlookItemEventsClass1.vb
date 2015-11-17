@@ -9,7 +9,8 @@ Imports Microsoft.Office.Interop
 Public Class OutlookItemEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemEvents
 
-    Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    ' Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
+    ' Dim OutlookApp As Outlook.Application = Nothing
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
