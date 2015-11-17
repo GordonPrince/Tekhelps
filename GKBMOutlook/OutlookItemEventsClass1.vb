@@ -225,6 +225,7 @@ Public Class OutlookItemEventsClass1
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
                                  "Open InstantFile, then try this again."
+        Const strTitle As String = "ProcessBeforeAttachmentRead() for "
         Dim myAttachment As Outlook.Attachment = Nothing
         Dim appAccess As Access.Application = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
@@ -236,7 +237,7 @@ Public Class OutlookItemEventsClass1
                 Const strDoc As String = "Open InstantFile Document"
                 Dim lngDocNo As Long = Mid(myAttachment.DisplayName, 19)
                 If IsDBNull(lngDocNo) Or lngDocNo = 0 Then
-                    MsgBox("The item does not have a DocNo.", vbExclamation, strDoc)
+                    MsgBox("The item does not have a DocNo.", vbExclamation, strTitle & strDoc)
                 Else
                     Try
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
@@ -244,7 +245,7 @@ Public Class OutlookItemEventsClass1
                         appAccess.Run("DisplayDocument", lngDocNo)
                         Marshal.ReleaseComObject(appAccess)
                     Catch
-                        MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
+                        MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strDoc)
                     End Try
                     e.Cancel = True
                     Return
@@ -253,7 +254,7 @@ Public Class OutlookItemEventsClass1
                 Const strMat As String = "Show Matter in InstantFile"
                 Dim dblMatNo As Double = Mid(myAttachment.DisplayName, 19)
                 If IsDBNull(dblMatNo) Or dblMatNo = 0 Then
-                    MsgBox("The item does not have a MatterNo.", vbExclamation, strMat)
+                    MsgBox("The item does not have a MatterNo.", vbExclamation, strTitle & strMat)
                 Else
                     Try
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
@@ -261,7 +262,7 @@ Public Class OutlookItemEventsClass1
                         appAccess.Run("DisplayMatter", dblMatNo)
                         Marshal.ReleaseComObject(appAccess)
                     Catch
-                        MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
+                        MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strMat)
                     End Try
                     e.Cancel = True
                     Return
@@ -284,7 +285,7 @@ Public Class OutlookItemEventsClass1
                     olItem = olNameSpace.GetItemFromID(strID)
                     olItem.Display()
                 Catch ex As Exception
-                    MsgBox("The InstantFile Request could not be displayed.", vbExclamation, "Display InstantFile Note")
+                    MsgBox("The InstantFile Request could not be displayed.", vbExclamation, strTitle & strIFtaskTag)
                 End Try
                 e.Cancel = True
             ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then  ' added 11/17/2015
@@ -305,7 +306,28 @@ Public Class OutlookItemEventsClass1
                     olItem = olNameSpace.GetItemFromID(strID)
                     olItem.Display()
                 Catch ex As Exception
-                    MsgBox("The " & strNewCallTrackingTag & " could not be displayed.", vbExclamation, "Display InstantFile Note")
+                    MsgBox("The " & strNewCallTrackingTag & " could not be displayed.", vbExclamation, strTitle & strNewCallTrackingTag)
+                End Try
+                e.Cancel = True
+            ElseIf Left(myAttachment.DisplayName, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then  ' added 11/17/2015
+                Dim strFileName As String
+                With myAttachment
+                    strFileName = "C:\tmp\" & .FileName
+                    .SaveAsFile(strFileName)
+                End With
+                myNote = OutlookApp.CreateItemFromTemplate(strFileName)
+                Dim strID As String, x As Short
+                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 1) ' strip out the tag
+                x = InStr(1, strID, vbNewLine)
+                If x > 0 Then strID = Mid(strID, x + 2) ' strip out the leading vbNewLine, which should leave only the EntryID
+                myNote.Close(Outlook.OlInspectorClose.olDiscard)
+                Marshal.ReleaseComObject(myNote)
+                Try
+                    olNameSpace = OutlookApp.GetNamespace("MAPI")
+                    olItem = olNameSpace.GetItemFromID(strID)
+                    olItem.Display()
+                Catch ex As Exception
+                    MsgBox("The " & strNewCallAppointmentTag & " could not be displayed.", vbExclamation, strTitle & strNewCallAppointmentTag)
                 End Try
                 e.Cancel = True
             End If

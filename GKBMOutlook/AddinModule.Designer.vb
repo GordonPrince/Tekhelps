@@ -204,7 +204,9 @@ Partial Public Class AddinModule
         Me.OpenItemFromNote.Id = "adxRibbonButton_bfed892dbd4c4d9f9871b3b1f05325ff"
         Me.OpenItemFromNote.ImageMso = "ShowNotesPage"
         Me.OpenItemFromNote.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.OpenItemFromNote.Ribbons = CType((AddinExpress.MSO.ADXRibbons.msrOutlookAppointment Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
+        Me.OpenItemFromNote.Ribbons = CType((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask), AddinExpress.MSO.ADXRibbons)
         Me.OpenItemFromNote.ScreenTip = "Open a NewCall Tracking or Appointment item from the Note that is attached to the" & _
     " currently displayed item."
         Me.OpenItemFromNote.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
