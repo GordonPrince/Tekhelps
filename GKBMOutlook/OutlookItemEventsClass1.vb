@@ -242,6 +242,7 @@ Public Class OutlookItemEventsClass1
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayDocument", lngDocNo)
+                        Marshal.ReleaseComObject(appAccess)
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strDoc)
                     End Try
@@ -258,6 +259,7 @@ Public Class OutlookItemEventsClass1
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayMatter", dblMatNo)
+                        Marshal.ReleaseComObject(appAccess)
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strMat)
                     End Try
@@ -279,10 +281,31 @@ Public Class OutlookItemEventsClass1
                 Marshal.ReleaseComObject(myNote)
                 Try
                     olNameSpace = OutlookApp.GetNamespace("MAPI")
-                    olItem = olNameSpace.GetItemFromID(strID)  ' couldn't get this to work with the StoreID, but it works without the 2nd argument
+                    olItem = olNameSpace.GetItemFromID(strID)
                     olItem.Display()
                 Catch ex As Exception
                     MsgBox("The InstantFile Request could not be displayed.", vbExclamation, "Display InstantFile Note")
+                End Try
+                e.Cancel = True
+            ElseIf Left(myAttachment.DisplayName, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then  ' added 11/17/2015
+                Dim strFileName As String
+                With myAttachment
+                    strFileName = "C:\tmp\" & .FileName
+                    .SaveAsFile(strFileName)
+                End With
+                myNote = OutlookApp.CreateItemFromTemplate(strFileName)
+                Dim strID As String, x As Short
+                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 1) ' strip out the tag
+                x = InStr(1, strID, vbNewLine)
+                If x > 0 Then strID = Mid(strID, x + 2) ' strip out the leading vbNewLine, which should leave only the EntryID
+                myNote.Close(Outlook.OlInspectorClose.olDiscard)
+                Marshal.ReleaseComObject(myNote)
+                Try
+                    olNameSpace = OutlookApp.GetNamespace("MAPI")
+                    olItem = olNameSpace.GetItemFromID(strID)
+                    olItem.Display()
+                Catch ex As Exception
+                    MsgBox("The " & strNewCallTrackingTag & " could not be displayed.", vbExclamation, "Display InstantFile Note")
                 End Try
                 e.Cancel = True
             End If

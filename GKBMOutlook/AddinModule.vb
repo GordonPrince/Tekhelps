@@ -167,31 +167,32 @@ Public Class AddinModule
         Dim myInsp As Outlook.Inspector = Nothing ' inspector
         Dim item As Object = Nothing ' myInsp.CurrentItem
         Dim myMailItem As Outlook.MailItem = Nothing
-        'Dim mySendUsing As Object = Nothing
+        Dim myAppt As Outlook.AppointmentItem = Nothing
+        Dim myTask As Outlook.TaskItem = Nothing
+
         Try
             myInsp = inspector
             item = myInsp.CurrentItem
             If TypeOf item Is Outlook.MailItem Then
-                myMailItem = myInsp.CurrentItem
-            Else
-                Return
-            End If
-            'If myMailItem.SendUsingAccount Is Nothing Then
-            'Else
-            '    mySendUsing = myMailItem.SendUsingAccount
-            '    If mySendUsing.DisplayName = "Microsoft Exchange" Then
-            '    Else
-            '        ' don't try working with CallPilot items
-            '        ' MsgBox("myMailItem.SendUsingAccount.DisplayName = " & myMailItem.SendUsingAccount.DisplayName)
-            '        itemEvents.RemoveConnection()
-            '        Return
-            '    End If
-            'End If
-            If myMailItem.Sent Then
+                myMailItem = item
+                'If myMailItem.Sent Then
                 ' disconnect from the currently connected item 
                 itemEvents.RemoveConnection()
                 ' connect to events of myMailItem 
                 itemEvents.ConnectTo(myMailItem, True)
+                ' End If
+            ElseIf TypeOf item Is Outlook.AppointmentItem Then  ' 11/17/2015
+                myAppt = item
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of item 
+                itemEvents.ConnectTo(myAppt, True)
+            ElseIf TypeOf item Is Outlook.TaskItem Then  ' 11/17/2015
+                myTask = item
+                ' disconnect from the currently connected item 
+                itemEvents.RemoveConnection()
+                ' connect to events of item 
+                itemEvents.ConnectTo(myTask, True)
             End If
         Catch
         Finally
@@ -834,7 +835,7 @@ LinkContacts:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        ' 11/13/2015
+        ' 11/17/2015
         Dim item As Object = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Try
