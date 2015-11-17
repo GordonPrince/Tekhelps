@@ -730,6 +730,21 @@ LinkContacts:
                     With myDraft
                         ' Debug.Print(".Subject=" & .Subject & ", strSubject=" & strSubject)
                         If .Subject = strSubject Then
+
+                            ' added 11/17/2015 to strip out the Task information that isn't needed -- from Status => AnsBy:
+                            Dim s As Short, strBody As String
+                            strBody = .Body
+                            s = InStr(strBody, "Status:")
+                            If s > 0 Then
+                                Dim a As Short
+                                a = InStr(strBody, "AnsBy:")
+                                If a > s Then
+                                    strBody = Left(strBody, s - 1) & Mid(strBody, a)
+                                    Debug.Print(strBody)
+                                    .Body = strBody
+                                End If
+                            End If
+
                             .BCC = "NewCallTracking@gkbm.com"
                             ' delete the NCT item that's attached (as a result of the Move command)
                             myAttachments = myDraft.Attachments
