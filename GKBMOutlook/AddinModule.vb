@@ -835,7 +835,7 @@ LinkContacts:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        ' 11/17/2015
+        ' 11/17/2015 this doesn't fire if the Note is opened from a the file by not Displayed
         Dim item As Object = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Try
@@ -939,7 +939,6 @@ LinkContacts:
                 Return
             End If
 
-            ' For Each myAttach In myAttachments
             Dim x As Int16
             For x = 1 To myAttachments.Count
                 myAttach = myAttachments(x)

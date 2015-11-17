@@ -13,6 +13,8 @@ Public Class OutlookItemEventsClass1
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
+        ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
+        OutlookApp = CType(ADXModule, AddinModule).OutlookApp
     End Sub
 
     Public Overrides Sub ProcessAttachmentAdd(ByVal Attachment As Object)
@@ -267,7 +269,7 @@ Public Class OutlookItemEventsClass1
                     e.Cancel = True
                     Return
                 End If
-            ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015
+            ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015, updated 11/17/2015
                 Dim strFileName As String
                 With myAttachment
                     strFileName = "C:\tmp\" & .FileName
@@ -278,6 +280,10 @@ Public Class OutlookItemEventsClass1
                 strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
                 x = InStr(1, strID, vbNewLine)
                 strID = Left(strID, x - 1)
+                'strID = Mid(myNote.Body, Len(strIFtaskTag) + 1) ' strip out the tag
+                'x = InStr(1, strID, vbNewLine)
+                'If x > 0 Then strID = Mid(strID, x + 2) ' strip out the leading vbNewLine, which should leave only the EntryID
+
                 myNote.Close(Outlook.OlInspectorClose.olDiscard)
                 Marshal.ReleaseComObject(myNote)
                 Try

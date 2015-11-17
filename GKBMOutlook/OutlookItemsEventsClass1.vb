@@ -14,6 +14,8 @@ Public Class OutlookItemsEventsClass1
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
+        ' from https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
+        OutlookApp = CType(ADXModule, AddinModule).OutlookApp
     End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
@@ -23,7 +25,7 @@ Public Class OutlookItemsEventsClass1
 
         Dim myFolder As Outlook.MAPIFolder = Nothing
         Dim myMailItem As Outlook.MailItem = Nothing
-        Dim myApplication As Outlook.Application = Nothing
+        ' Dim myApplication As Outlook.Application = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myUser As Outlook.Recipient = Nothing
         Dim myCopy As Outlook.MailItem = Nothing
@@ -182,13 +184,14 @@ InstantFileEmail:
             Marshal.ReleaseComObject(myPublicFolder)
 
             ' 11/16/2015 this is a band-aid and needs a better fix
-            If OutlookApp IsNot Nothing Then
-                mySession = OutlookApp.Session
-            ElseIf myMailItem IsNot Nothing Then
-                myApplication = myMailItem.Application
-                mySession = myApplication.Session
-                ' Marshal.ReleaseComObject(myApplication)
-            End If
+            ' 11/17/2015 changed Constructor
+            ' If OutlookApp IsNot Nothing Then
+            mySession = OutlookApp.Session
+            'ElseIf myMailItem IsNot Nothing Then
+            '    myApplication = myMailItem.Application
+            '    mySession = myApplication.Session
+            '    ' Marshal.ReleaseComObject(myApplication)
+            'End If
 
             myUser = mySession.CurrentUser
             Dim strCmd As String
