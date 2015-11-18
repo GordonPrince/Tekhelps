@@ -346,17 +346,17 @@ HaveNewCallTracking:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
-        'Dim appAccess As Access.Application = Nothing
-        'Try
-        '    appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-        '    'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-        '    MsgBox("You should close InstantFile before closing Outlook." & vbNewLine & vbNewLine & _
-        '            "InstantFile will now close, then Outlook will close.", vbCritical + vbOKOnly, "GKBM Outlook Add-in")
-        '    appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
-        '    'End If
-        'Finally
-        '    If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
-        'End Try
+        Dim appAccess As Access.Application = Nothing
+        Try
+            appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
+            'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
+            MsgBox("You should close InstantFile before closing Outlook." & vbNewLine & vbNewLine & _
+                    "InstantFile will now be closed, then Outlook will close.", vbExclamation)
+            appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+            If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
+            'End If
+        Catch ex As Exception
+        End Try
     End Sub
 
     Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
