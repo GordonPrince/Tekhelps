@@ -368,7 +368,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-18  7:55.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-18  8:40.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -795,62 +795,94 @@ LinkContacts:
     End Sub
 
     Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
-        ' skipped
         Const strTitle As String = "Copy Attachments from Another MailItem"
-        Const strMsg As String = ".msg"
-        Dim myAttach As Outlook.Attachment, strFileName As String
-        Dim intX As Int16, obj As Object, myNew As Outlook.MailItem, myOther As Outlook.MailItem
-        Dim intY As Int16, intZ As Int16
+        Dim myInspectors As Outlook.Inspectors = Nothing
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim obj As Object = Nothing
+        Dim myNew As Outlook.MailItem = Nothing
+        Dim myNewAttachments As Outlook.Attachments = Nothing
+        Dim myOther As Outlook.MailItem = Nothing
+        Dim x As Short
+        Dim strFileName As String
 
-        intX = OutlookApp.Inspectors.Count
-        If intX > 1 Then
-            obj = OutlookApp.ActiveInspector.CurrentItem
-            If TypeOf obj Is Outlook.MailItem Then
-                myNew = obj
-                If myNew.Sent Then
-                    MsgBox("This item has already been sent." & vbNewLine & vbNewLine & _
-                           "Display the new E-mail and try again when it has the focus.", vbExclamation, strTitle)
-                    Exit Sub
-                End If
-            Else
-                MsgBox("This only works if the active item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
-                Exit Sub
-            End If
-            ' step through the other open items, looking for MailItems with Attachments
-            For intY = intX To 1 Step -1
-                obj = OutlookApp.Inspectors(intY).CurrentItem
+        Try
+            myInspectors = OutlookApp.Inspectors
+            x = myInspectors.Count
+            If x > 1 Then
+                myInsp = OutlookApp.ActiveInspector
+                obj = myInsp.CurrentItem
                 If TypeOf obj Is Outlook.MailItem Then
-                    myOther = obj
-                    If myOther.EntryID = myNew.EntryID Then
-                    Else
-                        intZ = myOther.Attachments.Count
-                        If intZ Then
-                            RetVal = MsgBox("Copy the Attachments from the MailItem" & vbNewLine & _
-                                            "'" & myOther.Subject & "'?", vbQuestion + vbYesNoCancel, strTitle)
-                            If RetVal = vbCancel Then Exit Sub
-                            If RetVal = vbYes Then
-                                intZ = 0
-                                For Each myAttach In myOther.Attachments
-                                    If Right(LCase(myAttach.FileName), 4) = strMsg Then
+                    myNew = obj
+                    If myNew.Sent Then
+                        MsgBox("This item has already been sent." & vbNewLine & vbNewLine & _
+                               "Display the new E-mail and try again when it has the focus.", vbExclamation, strTitle)
+                        Return
+                    End If
+                Else
+                    MsgBox("This only works if the active item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
+                    Return
+                End If
+                ' step through the other open items, looking for MailItems with Attachments
+                Dim y As Short
+                Marshal.ReleaseComObject(myInsp)
+                For y = x To 1 Step -1
+                    myInsp = myInspectors(y)
+                    obj = myInsp.CurrentItem
+                    If TypeOf obj Is Outlook.MailItem Then
+                        myOther = obj
+                        If myOther.EntryID = myNew.EntryID Then
+                        Else
+                            Dim z As Short
+                            myAttachments = myOther.Attachments
+                            z = myAttachments.Count
+                            If z > 0 Then
+                                RetVal = MsgBox("Copy the Attachments from the MailItem" & vbNewLine & _
+                                                "'" & myOther.Subject & "'?", vbQuestion + vbYesNoCancel, strTitle)
+                                If RetVal = vbCancel Then Exit Sub
+                                If RetVal = vbYes Then
+                                    z = 0
+                                    myNewAttachments = myNew.Attachments
+                                    Dim i As Short
+                                    ' For Each myAttach In myOther.Attachments
+                                    For i = 1 To myAttachments.Count
+                                        myAttach = myAttachments(i)
                                         strFileName = "C:\tmp\" & myAttach.FileName
                                         myAttach.SaveAsFile(strFileName)
-                                        myNew.Attachments.Add(strFileName)
+                                        myNewAttachments.Add(strFileName)
                                         My.Computer.FileSystem.DeleteFile(strFileName)
-                                        intZ = intZ + 1
-                                    End If
-                                Next myAttach
-                                MsgBox(IIf(intZ = 1, "One attachment was", intZ & " attachments were") & " added to your new item.", vbInformation, strTitle)
-                                Exit Sub
+                                        z = z + 1
+                                        Marshal.ReleaseComObject(myAttach)
+                                    Next ' myAttach
+                                    Marshal.ReleaseComObject(myNewAttachments)
+                                    MsgBox(IIf(z = 1, "One attachment was", z & " attachments were") & " added to your new item.", vbInformation, strTitle)
+                                    Return
+                                End If
                             End If
                         End If
+                        Marshal.ReleaseComObject(myOther)
                     End If
-                End If
-            Next
-            MsgBox("No other MailItems with Attachments were found.", vbExclamation, strTitle)
-        Else
-            MsgBox("Display the MailItem that has the Attachments on it," & vbNewLine & "then click on this button from the new E-mail.", vbInformation, strTitle)
-            Exit Sub
-        End If
+                    Marshal.ReleaseComObject(obj)
+                    Marshal.ReleaseComObject(myInsp)
+                Next
+                MsgBox("No other MailItems with Attachments were found.", vbExclamation, strTitle)
+            Else
+                MsgBox("Display the MailItem that has the Attachments on it," & vbNewLine & _
+                       "then click on this button from the new E-mail.", vbInformation, strTitle)
+                Exit Sub
+            End If
+        Catch ex As Exception
+        Finally
+            If myOther IsNot Nothing Then Marshal.ReleaseComObject(myOther) : myOther = Nothing
+            If myNewAttachments IsNot Nothing Then Marshal.ReleaseComObject(myNewAttachments) : myNewAttachments = Nothing
+            If myNew IsNot Nothing Then Marshal.ReleaseComObject(myNew) : myNew = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
+        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
@@ -888,7 +920,7 @@ LinkContacts:
         If strPublicStoreID Is Nothing Then
             Debug.Print("strPublicStoreID Is Nothing")
             Stop
-            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, strtitle)
+            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, strTitle)
             Return False
         End If
         Dim olNameSpace As Outlook.NameSpace = Nothing
