@@ -347,15 +347,19 @@ HaveNewCallTracking:
 
     Private Sub AdxOutlookAppEvents1_Quit(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Quit
         Dim appAccess As Access.Application = Nothing
+        Dim myProject As Access.CurrentProject = Nothing
         Try
             appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
-            'If Left(appAccess.CurrentProject.Name, 11) = strInstantFile Then
-            MsgBox("You should close InstantFile before closing Outlook." & vbNewLine & vbNewLine & _
-                    "InstantFile will now be closed, then Outlook will close.", vbExclamation)
-            appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
-            If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
-            'End If
+            myProject = appAccess.CurrentProject
+            If Left(myProject.Name, 11) = strInstantFile Then
+                MsgBox("You should close InstantFile before closing Outlook." & vbNewLine & vbNewLine & _
+                        "InstantFile will now be closed, then Outlook will close.", vbExclamation)
+                appAccess.Quit(Access.AcQuitOption.acQuitSaveAll)
+            End If
         Catch ex As Exception
+        Finally
+            If myProject IsNot Nothing Then Marshal.ReleaseComObject(myProject) : myProject = Nothing
+            If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
         End Try
     End Sub
 
@@ -364,7 +368,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-17  8:45.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-18  7:55.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
