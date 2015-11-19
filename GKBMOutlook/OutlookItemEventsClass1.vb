@@ -121,6 +121,9 @@ Public Class OutlookItemEventsClass1
         Dim myExpl As Outlook.Explorer = Nothing
         Dim mySel As Outlook.Selection = Nothing
         Dim myInsp As Outlook.Inspector = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim myRAs As Outlook.Attachments = Nothing
         Dim myProperties As Outlook.UserProperties = Nothing
         Dim myProp As Outlook.UserProperty = Nothing
 
@@ -156,35 +159,39 @@ Public Class OutlookItemEventsClass1
 
             ' the first Reply puts "RE: " at the beginning of the new Subject, second Reply doesn't
             If InStr(str1, str2) > 0 Then
-                ' For Each myAttachment In myOriginal.Attachments
-                Dim myAttachs As Outlook.Attachments = myOriginal.Attachments
-                Dim x As Int16, myAttachment As Outlook.Attachment
-                For x = 1 To myAttachs.Count
-                    myAttachment = myAttachs(x)
-                    If Right(LCase(myAttachment.FileName), 4) = ".msg" Then
-                        Dim strFileName As String = "C:\tmp\" & myAttachment.FileName
-                        myAttachment.SaveAsFile(strFileName)
-                        Dim myRAs As Outlook.Attachments = myResponse.Attachments
+                ' For Each myAttach In myOriginal.Attachments
+                myAttachments = myOriginal.Attachments
+                Dim x As Short
+                For x = 1 To myAttachments.Count
+                    myAttach = myAttachments(x)
+                    If Right(LCase(myAttach.FileName), 4) = ".msg" Then
+                        Dim strFileName As String = "C:\tmp\" & myAttach.FileName
+                        myAttach.SaveAsFile(strFileName)
+                        myRAs = myResponse.Attachments
                         myRAs.Add(strFileName)
                         Marshal.ReleaseComObject(myRAs)
-                        myRAs = Nothing
                         Try
                             My.Computer.FileSystem.DeleteFile(strFileName)
                         Catch
                         End Try
                     End If
-                    Marshal.ReleaseComObject(myAttachment)
+                    Marshal.ReleaseComObject(myAttach)
                 Next
                 ' this is not in the Access code -- it's used to keep track of whether or not the email originated in InstantFile or Outlook
                 myProperties = myResponse.UserProperties
                 myProp = myProperties.Add("CameFromOutlook", Outlook.OlUserPropertyType.olText)
                 myProp.Value = strEventName
+                Marshal.ReleaseComObject(myProp)
+                Marshal.ReleaseComObject(myProperties)
             End If
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, "ReplyOrReplyAll()")
         Finally
             If myProp IsNot Nothing Then Marshal.ReleaseComObject(myProp) : myProp = Nothing
             If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
+            If myRAs IsNot Nothing Then Marshal.ReleaseComObject(myRAs) : myRAs = Nothing
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
             If mySel IsNot Nothing Then Marshal.ReleaseComObject(mySel) : mySel = Nothing
             If myExpl IsNot Nothing Then Marshal.ReleaseComObject(myExpl) : myExpl = Nothing

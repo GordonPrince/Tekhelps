@@ -236,7 +236,7 @@ Partial Public Class AddinModule
         Me.CopyAttachments.Ribbons = CType((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
-        Me.CopyAttachments.ScreenTip = "Copy the attachments from another E-mail to this E-mail."
+        Me.CopyAttachments.ScreenTip = "Copy the attachments from other open E-mail(s) to this E-mail."
         Me.CopyAttachments.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'About
