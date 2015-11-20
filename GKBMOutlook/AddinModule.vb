@@ -354,7 +354,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-19  18:25.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-20  4:35.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -1240,5 +1240,8 @@ HavePublic:
         End Try
     End Sub
 
+    Private Sub SSIcalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles SSIcalendar.OnClick
+        ActivateExplorer("Appointment SSI")
+    End Sub
 End Class
 

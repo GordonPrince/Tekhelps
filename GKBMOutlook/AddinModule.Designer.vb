@@ -55,6 +55,10 @@ Partial Public Class AddinModule
         Me.About = New AddinExpress.MSO.ADXRibbonGroup(Me.components)
         Me.AdxRibbonButton4 = New AddinExpress.MSO.ADXRibbonButton(Me.components)
         Me.AdxOutlookAppEvents1 = New AddinExpress.MSO.ADXOutlookAppEvents(Me.components)
+        Me.SSIcalendar = New AddinExpress.MSO.ADXRibbonButton(Me.components)
+        Me.AdxRibbonSeparator2 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
+        Me.AdxRibbonSeparator3 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
+        Me.AdxRibbonSeparator6 = New AddinExpress.MSO.ADXRibbonSeparator(Me.components)
         '
         'AdxRibbonTab1
         '
@@ -74,7 +78,11 @@ Partial Public Class AddinModule
         '
         Me.AdxRibbonGroup2.Caption = "Items"
         Me.AdxRibbonGroup2.Controls.Add(Me.SaveClose)
+        Me.AdxRibbonGroup2.Controls.Add(Me.AdxRibbonSeparator6)
         Me.AdxRibbonGroup2.Controls.Add(Me.AppointmentCalendar)
+        Me.AdxRibbonGroup2.Controls.Add(Me.AdxRibbonSeparator2)
+        Me.AdxRibbonGroup2.Controls.Add(Me.SSIcalendar)
+        Me.AdxRibbonGroup2.Controls.Add(Me.AdxRibbonSeparator3)
         Me.AdxRibbonGroup2.Controls.Add(Me.NewCallTracking)
         Me.AdxRibbonGroup2.Id = "adxRibbonGroup_9810b0e61d06422397f5d3ddba5337a1"
         Me.AdxRibbonGroup2.ImageTransparentColor = System.Drawing.Color.Transparent
@@ -102,14 +110,14 @@ Partial Public Class AddinModule
         '
         Me.AppointmentCalendar.Caption = "Appointment Calendar"
         Me.AppointmentCalendar.Id = "adxRibbonButton_0bba54f1190c4c62b8f84191be4195a2"
-        Me.AppointmentCalendar.ImageMso = "AccessTableEvents"
+        Me.AppointmentCalendar.ImageMso = "ShowAppointmentPage"
         Me.AppointmentCalendar.ImageTransparentColor = System.Drawing.Color.Transparent
         Me.AppointmentCalendar.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
-        Me.AppointmentCalendar.ScreenTip = "Display the Appointment Calendar folder."
+        Me.AppointmentCalendar.ScreenTip = "Display the Appointment Calendar."
         Me.AppointmentCalendar.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'NewCallTracking
@@ -280,6 +288,48 @@ Partial Public Class AddinModule
         'AdxOutlookAppEvents1
         '
         '
+        'SSIcalendar
+        '
+        Me.SSIcalendar.Caption = "SSI Calendar"
+        Me.SSIcalendar.Id = "adxRibbonButton_d19abb57f9e14dd09b8abf7391a9134d"
+        Me.SSIcalendar.ImageMso = "MeetingsWorkspace"
+        Me.SSIcalendar.ImageTransparentColor = System.Drawing.Color.Transparent
+        Me.SSIcalendar.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        Me.SSIcalendar.ScreenTip = "Display the Social Security Appointment Calendar."
+        Me.SSIcalendar.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
+        '
+        'AdxRibbonSeparator2
+        '
+        Me.AdxRibbonSeparator2.Id = "adxRibbonSeparator_9f533fe0de0d4a9e9f968cf4bfbb8ee6"
+        Me.AdxRibbonSeparator2.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        '
+        'AdxRibbonSeparator3
+        '
+        Me.AdxRibbonSeparator3.Id = "adxRibbonSeparator_c517d1560742417d97db622349f06e0b"
+        Me.AdxRibbonSeparator3.Ribbons = CType((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookExplorer), AddinExpress.MSO.ADXRibbons)
+        '
+        'AdxRibbonSeparator6
+        '
+        Me.AdxRibbonSeparator6.Id = "adxRibbonSeparator_b6799511e297445ba5bac1a95c3d48bd"
+        Me.AdxRibbonSeparator6.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+        '
         'AddinModule
         '
         Me.AddinName = "GKBMOutlook"
@@ -305,6 +355,10 @@ End Sub
     Friend WithEvents AdxRibbonGroup2 As AddinExpress.MSO.ADXRibbonGroup
     Friend WithEvents About As AddinExpress.MSO.ADXRibbonGroup
     Friend WithEvents AdxRibbonSeparator1 As AddinExpress.MSO.ADXRibbonSeparator
+    Friend WithEvents SSIcalendar As AddinExpress.MSO.ADXRibbonButton
+    Friend WithEvents AdxRibbonSeparator6 As AddinExpress.MSO.ADXRibbonSeparator
+    Friend WithEvents AdxRibbonSeparator2 As AddinExpress.MSO.ADXRibbonSeparator
+    Friend WithEvents AdxRibbonSeparator3 As AddinExpress.MSO.ADXRibbonSeparator
 
 End Class
 
