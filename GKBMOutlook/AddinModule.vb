@@ -68,64 +68,17 @@ Public Class AddinModule
 #End Region
 
     Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
-        ' 11/13/2015
+        ' 11/20/2015
         If selection IsNot Nothing Then
             If selection.Count = 1 Then
                 Dim item As Object = selection.Item(1)
-                If TypeOf item Is Outlook.MailItem Then
-                    If itemEvents.IsConnected Then
-                        itemEvents.RemoveConnection()
-                    End If
-                    itemEvents.ConnectTo(item, True)
-                End If
+                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+                itemEvents.ConnectTo(item, True)
                 Marshal.ReleaseComObject(item) : item = Nothing
+                ' Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
             End If
         End If
     End Sub
-
-    'Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-    '    'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
-    '    'In the same fashion you handle the ExplorerActivate event. 
-    '    'That is, InspectorActivate and ExplorerActivate let you handle this scenario: 
-    '    'the user presses Alt+Tab to switch between Outlook windows. 
-    '    'Whenever an Outlook window becomes active, 
-    '    'your code disconnects from events of the currently connected item 
-    '    'and connects to events of the item which is opened (InspectorActivate) or selected (ExplorerActivate). 
-    '    'The ExplorerSelectionChange allows you to follow the user selecting another item. 
-
-    '    ' 11/10/2015 added this for CallPilot errors
-    '    Dim myExplorer As Outlook.Explorer = Nothing
-    '    Dim sel As Outlook.Selection = Nothing
-    '    Dim outlookItem As Object = Nothing
-    '    Dim myMailItem As Outlook.MailItem = Nothing
-    '    Try
-    '        myExplorer = CType(explorer, Outlook.Explorer)
-    '        If myExplorer Is Nothing Then Return
-    '        Try
-    '            sel = myExplorer.Selection
-    '        Catch ex As Exception
-    '            'skip the exception which occurs when in certain folders such as RSS Feeds   
-    '        End Try
-    '        If sel Is Nothing Then Return
-    '        If sel.Count = 1 Then
-    '            outlookItem = sel.Item(1)
-    '            If TypeOf outlookItem Is Outlook.MailItem Then
-    '                myMailItem = CType(outlookItem, Outlook.MailItem)
-    '                If myMailItem.Sent Then
-    '                    ' disconnect from the currently connected item 
-    '                    itemEvents.RemoveConnection()
-    '                    ' connect to events of myMailItem  
-    '                    itemEvents.ConnectTo(myMailItem, True)
-    '                End If
-    '            End If
-    '        End If
-    '    Finally
-    '        If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-    '        If outlookItem IsNot Nothing Then Marshal.ReleaseComObject(outlookItem) : outlookItem = Nothing
-    '        If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
-    '        ' Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
-    '    End Try
-    'End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
         Dim theExplorer As Outlook.Explorer = Nothing
@@ -140,6 +93,7 @@ Public Class AddinModule
                 End Try
                 If selection IsNot Nothing Then
                     ConnectToSelectedItem(selection)
+                    Debug.Print("AdxOutlookAppEvents1_ExplorerActivate called ConnectToSelectedItem(selection)")
                 End If
             End If
         Finally
@@ -148,47 +102,47 @@ Public Class AddinModule
         End Try
     End Sub
 
+    Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
+        'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
+        Dim myExplorer As Outlook.Explorer = Nothing
+        Dim sel As Outlook.Selection = Nothing
+        Dim item As Object = Nothing
+        Try
+            myExplorer = CType(explorer, Outlook.Explorer)
+            If myExplorer Is Nothing Then Return
+            Try
+                sel = myExplorer.Selection
+            Catch ex As Exception
+            End Try
+            If sel Is Nothing Then Return
+            If sel.Count = 1 Then
+                item = sel.Item(1)
+                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+                itemEvents.ConnectTo(item, True)
+                Marshal.ReleaseComObject(item)
+                Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange itemEvents.ConnectTo(item, True) fired")
+            End If
+        Finally
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
+            ' don't release myExplorer
+        End Try
+    End Sub
+
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        'this seems to fire only when the first Inspector window is activated, 
-        'not when a second or third item is opened in another Inspector window
-        'so it doesn't work for closing Notes from NewCallTracking
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
-        Dim myMailItem As Outlook.MailItem = Nothing
-        Dim myAppt As Outlook.AppointmentItem = Nothing
-        Dim myTask As Outlook.TaskItem = Nothing
-
         Try
             myInsp = inspector
             item = myInsp.CurrentItem
-            If TypeOf item Is Outlook.MailItem Then
-                myMailItem = item
-                ' disconnect from the currently connected item 
-                itemEvents.RemoveConnection()
-                ' connect to events of myMailItem 
-                itemEvents.ConnectTo(myMailItem, True)
-                Marshal.ReleaseComObject(myMailItem)
-            ElseIf TypeOf item Is Outlook.AppointmentItem Then  ' 11/17/2015
-                myAppt = item
-                itemEvents.RemoveConnection()
-                itemEvents.ConnectTo(myAppt, True)
-                Marshal.ReleaseComObject(myAppt)
-            ElseIf TypeOf item Is Outlook.TaskItem Then  ' 11/17/2015
-                myTask = item
-                itemEvents.RemoveConnection()
-                itemEvents.ConnectTo(myTask, True)
-                Marshal.ReleaseComObject(myTask)
-            End If
+            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+            itemEvents.ConnectTo(item, True)
             Marshal.ReleaseComObject(item)
+            Debug.Print("AdxOutlookAppEvents1_InspectorActivate itemEvents.ConnectTo(item, True) fired")
         Catch
         Finally
-            '11/15/2015 from Andrei: Don’t release mailItem if you’ve connected to its events. 
-            'And remember that item and mailitem both point to the same COM object.
-            'If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            'If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            'If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            'don't release myInsp -- it will release the inspector object that was passed into the procedure
+            ' don't release myInsp
         End Try
     End Sub
 
@@ -354,7 +308,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-20  4:35.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-20  9:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick

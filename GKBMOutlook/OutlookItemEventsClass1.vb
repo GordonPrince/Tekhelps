@@ -254,10 +254,10 @@ Public Class OutlookItemEventsClass1
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayDocument", lngDocNo)
                         Marshal.ReleaseComObject(appAccess)
+                        e.Cancel = True
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strDoc)
                     End Try
-                    e.Cancel = True
                     Return
                 End If
             ElseIf Left(myAttachment.DisplayName, Len(strIFmatNo)) = strIFmatNo Then
@@ -271,10 +271,10 @@ Public Class OutlookItemEventsClass1
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayMatter", dblMatNo)
                         Marshal.ReleaseComObject(appAccess)
+                        e.Cancel = True
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strMat)
                     End Try
-                    e.Cancel = True
                     Return
                 End If
             ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015, updated 11/17/2015
