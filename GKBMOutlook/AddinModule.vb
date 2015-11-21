@@ -67,18 +67,18 @@ Public Class AddinModule
 
 #End Region
 
-    Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
-        ' 11/20/2015
-        If selection IsNot Nothing Then
-            If selection.Count = 1 Then
-                Dim item As Object = selection.Item(1)
-                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
-                itemEvents.ConnectTo(item, True)
-                ' Marshal.ReleaseComObject(item) : item = Nothing
-                Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
-            End If
-        End If
-    End Sub
+    'Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
+    '    ' 11/20/2015
+    '    If selection IsNot Nothing Then
+    '        If selection.Count = 1 Then
+    '            Dim item As Object = selection.Item(1)
+    '            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+    '            itemEvents.ConnectTo(item, True)
+    '            ' Marshal.ReleaseComObject(item) : item = Nothing
+    '            Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
+    '        End If
+    '    End If
+    'End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
         Dim myInsp As Outlook.Inspector = Nothing
@@ -318,7 +318,7 @@ HaveNewCallTracking:
     End Sub
 
     Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        ' 11/17/2015 this doesn't fire if the Note is opened from a the file but not Displayed
+        '11/21/2015
         Dim myInsp As Outlook.Inspector = inspector
         Dim item As Object = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
@@ -342,11 +342,11 @@ HaveNewCallTracking:
                 End If
                 Marshal.ReleaseComObject(myNote)
             End If
-            ' Marshal.ReleaseComObject(item)
+            Marshal.ReleaseComObject(item)
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
         End Try
     End Sub
 
@@ -605,8 +605,6 @@ LinkContacts:
         Const strTitle As String = "Save Attachments"
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
-        'Dim mySelection As Outlook.Selection = Nothing
-        'Dim mySelectedItem As Object = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
         Dim DateStamp As String, MyFile As String
@@ -671,7 +669,6 @@ LinkContacts:
         Finally
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            'If mySelection IsNot Nothing Then Marshal.ReleaseComObject(mySelection) : mySelection = Nothing
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
         End Try
@@ -852,6 +849,8 @@ HavePublic:
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             ' 11/14/2015 If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            '11/21/2015 uncommented this after not releasing item in InspectorActivate
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
             Cursor.Current = Cursors.Default
         End Try
@@ -1186,7 +1185,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-20 12:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-21 12:45.", vbInformation, "About this Add-in")
     End Sub
 
     Public Function OpenItemFromID(strID As String) As Boolean
