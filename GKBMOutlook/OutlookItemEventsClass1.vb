@@ -229,10 +229,11 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' Debug.Print("ProcessBeforeAttachmentPreview")
+        ' Debug.Print("ProcessBeforeAttachmentPreview fired")
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
+        Debug.Print("Entered ProcessBeforeAttachmentRead")
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
                                  "Open InstantFile, then try this again."
         Const strTitle As String = "ProcessBeforeAttachmentRead() for "
@@ -253,6 +254,7 @@ Public Class OutlookItemEventsClass1
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayDocument", lngDocNo)
+                        Debug.Print("ProcessBeforeAttachmentRead: DisplayDocument")
                         Marshal.ReleaseComObject(appAccess)
                         e.Cancel = True
                     Catch
@@ -275,6 +277,7 @@ Public Class OutlookItemEventsClass1
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strMat)
                     End Try
+                    Debug.Print("ProcessBeforeAttachmentRead: DisplayMatter")
                     Return
                 End If
             ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015, updated 11/17/2015

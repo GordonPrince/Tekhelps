@@ -75,35 +75,32 @@ Public Class AddinModule
                 If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
                 Marshal.ReleaseComObject(item) : item = Nothing
-                ' Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
+                Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
             End If
         End If
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        Dim theExplorer As Outlook.Explorer = Nothing
-        Dim selection As Outlook.Selection = Nothing
-        Try
-            theExplorer = TryCast(explorer, Outlook.Explorer)
-            If theExplorer IsNot Nothing Then
-                ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=2200
-                Try
-                    selection = theExplorer.Selection
-                Catch
-                End Try
-                If selection IsNot Nothing Then
-                    ConnectToSelectedItem(selection)
-                    Debug.Print("AdxOutlookAppEvents1_ExplorerActivate called ConnectToSelectedItem(selection)")
-                End If
-            End If
-        Finally
-            If selection IsNot Nothing Then Marshal.ReleaseComObject(selection) : selection = Nothing
-            ' If theExplorer IsNot Nothing Then Marshal.ReleaseComObject(theExplorer) : theExplorer = Nothing
-        End Try
-    End Sub
+        'Dim theExplorer As Outlook.Explorer = Nothing
+        'Dim selection As Outlook.Selection = Nothing
+        'Try
+        '    theExplorer = TryCast(explorer, Outlook.Explorer)
+        '    If theExplorer IsNot Nothing Then
+        '        ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=2200
+        '        Try
+        '            selection = theExplorer.Selection
+        '        Catch
+        '        End Try
+        '        If selection IsNot Nothing Then
+        '            ConnectToSelectedItem(selection)
+        '            Debug.Print("AdxOutlookAppEvents1_ExplorerActivate called ConnectToSelectedItem(selection)")
+        '        End If
+        '    End If
+        'Finally
+        '    If selection IsNot Nothing Then Marshal.ReleaseComObject(selection) : selection = Nothing
+        '    ' don't release theExplorer
+        'End Try
 
-    Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-        'Add-in Express forum https://www.add-in-express.com/forum/read.php?PAGEN_1=3&FID=5&TID=13430
         Dim myExplorer As Outlook.Explorer = Nothing
         Dim sel As Outlook.Selection = Nothing
         Dim item As Object = Nothing
@@ -120,7 +117,7 @@ Public Class AddinModule
                 If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
                 Marshal.ReleaseComObject(item)
-                Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange itemEvents.ConnectTo(item, True) fired")
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
             End If
         Finally
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
@@ -138,11 +135,37 @@ Public Class AddinModule
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             itemEvents.ConnectTo(item, True)
             Marshal.ReleaseComObject(item)
-            Debug.Print("AdxOutlookAppEvents1_InspectorActivate itemEvents.ConnectTo(item, True) fired")
+            Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
         Catch
         Finally
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             ' don't release myInsp
+        End Try
+    End Sub
+
+    Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
+        Dim myExplorer As Outlook.Explorer = Nothing
+        Dim sel As Outlook.Selection = Nothing
+        Dim item As Object = Nothing
+        Try
+            myExplorer = CType(explorer, Outlook.Explorer)
+            If myExplorer Is Nothing Then Return
+            Try
+                sel = myExplorer.Selection
+            Catch ex As Exception
+            End Try
+            If sel Is Nothing Then Return
+            If sel.Count = 1 Then
+                item = sel.Item(1)
+                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+                itemEvents.ConnectTo(item, True)
+                Marshal.ReleaseComObject(item)
+                Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange fired")
+            End If
+        Finally
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
+            ' don't release myExplorer
         End Try
     End Sub
 
@@ -308,7 +331,7 @@ HaveNewCallTracking:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-20  9:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-20 12:50.", vbInformation, "About this Add-in")
     End Sub
 
     Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
@@ -855,11 +878,11 @@ LinkContacts:
                 End If
                 Marshal.ReleaseComObject(myNote)
             End If
-            Marshal.ReleaseComObject(item)
+            ' Marshal.ReleaseComObject(item)
         Catch ex As Exception
         Finally
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
         End Try
     End Sub
 
@@ -1098,10 +1121,12 @@ HavePublic:
             Else
                 myApptCal = myAllPublic.Folders("Appointment Calendar")
             End If
+            Marshal.ReleaseComObject(myAllPublic)
 
             myItems = myApptCal.Items
             myAppt = myItems.Add
-            myAppt.Display()
+            ' 11/21/2015 don't display it until the end, since displaying fires the InspectorActivate event which releases myAppt
+            ' myAppt.Display()  
             myAppt.Subject = myTask.Subject
             If myPropL.Value = "Wanda" _
                 Or myPropL.Value = "219" _
@@ -1140,8 +1165,8 @@ HavePublic:
 
             myTask.Close(Outlook.OlInspectorClose.olSave)
             Marshal.ReleaseComObject(myTask)
+            myAppt.Display()
             Marshal.ReleaseComObject(myAppt)
-            Marshal.ReleaseComObject(myAllPublic)
         Catch ex As Exception
             MsgBox("An error has occured." & vbNewLine & vbNewLine & ex.Message, vbExclamation, strTitle)
         Finally
