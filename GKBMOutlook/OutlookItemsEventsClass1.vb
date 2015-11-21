@@ -331,54 +331,6 @@ AddRecipientsAndBody:
 
     End Sub
 
-    Function EmailMatNo(myAttach As Outlook.Attachment, strSubject As String) As Double
-        On Error GoTo EmailMatNo_Error
-        Dim strDisplayName As String
-        Dim intX As Integer
-        If Left(myAttach.DisplayName, 18) = strIFmatNo Then
-            strDisplayName = Mid(myAttach.DisplayName, 19)
-            intX = InStr(1, strDisplayName, Space(1))
-            If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
-            EmailMatNo = strDisplayName
-        ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
-            EmailMatNo = MatNoFromSubject(strSubject)
-        Else
-            EmailMatNo = 0
-        End If
-        Exit Function
-
-EmailMatNo_Error:
-        MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
-    End Function
-
-    Function MatNoFromSubject(ByVal strSubject) As Double
-        ' try to parse the MatterNo from the Subject line, not the attachment
-        Dim intA As Integer, intB As Integer
-        Dim strSearchFor As String = vbNullString
-
-        ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
-        intA = InStr(1, strSubject, strDocScanned)
-        If intA > 0 Then
-            strSearchFor = strDocScanned
-        Else
-            intA = InStr(1, strSubject, strLastScanned)
-            If intA > 0 Then strSearchFor = strLastScanned
-        End If
-        If intA > 0 Then
-            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
-            intB = InStr(1, strSubject, Space(1))
-            If intB > 0 Then
-                On Error Resume Next
-                MatNoFromSubject = Left(strSubject, intB)
-                If Err.Number <> 0 Then
-                    Err.Clear()
-                    MatNoFromSubject = 0
-                    On Error GoTo 0
-                End If
-            End If
-        End If
-    End Function
-
     Public Overrides Sub ItemChange(ByVal Item As Object, ByVal SourceFolder As Object)
         ' Debug.Print("ItemChange() fired")
     End Sub

@@ -101,4 +101,55 @@ Module Globals
         End Try
         Return False
     End Function
+
+    Function EmailMatNo(myAttach As Outlook.Attachment, strSubject As String) As Double
+
+        Dim strDisplayName As String
+        Dim intX As Integer
+        Try
+            If Left(myAttach.DisplayName, 18) = strIFmatNo Then
+                strDisplayName = Mid(myAttach.DisplayName, 19)
+                intX = InStr(1, strDisplayName, Space(1))
+                If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
+                Return CDbl(strDisplayName)
+            ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
+                Return CDbl(MatNoFromSubject(strSubject))
+            Else
+                Return 0
+            End If
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "Parse MatterNo from Attachment")
+            Return 0
+        End Try
+    End Function
+
+    Function MatNoFromSubject(ByVal strSubject) As Double
+        ' try to parse the MatterNo from the Subject line, not the attachment
+        Dim intA As Integer, intB As Integer
+        Dim strSearchFor As String = vbNullString
+
+        ' check for either string in the Subject. Use whichever one is found
+        intA = InStr(1, strSubject, strDocScanned)
+        If intA > 0 Then
+            strSearchFor = strDocScanned
+        Else
+            intA = InStr(1, strSubject, strLastScanned)
+            If intA > 0 Then strSearchFor = strLastScanned
+        End If
+        If intA > 0 Then
+            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
+            intB = InStr(1, strSubject, Space(1))
+            If intB > 0 Then
+                Try
+                    Return CDbl(Left(strSubject, intB))
+                Catch ex As Exception
+                    Return 0
+                End Try
+            Else
+                Return 0
+            End If
+        Else
+            Return 0
+        End If
+    End Function
 End Module
