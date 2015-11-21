@@ -81,36 +81,13 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        'Dim theExplorer As Outlook.Explorer = Nothing
-        'Dim selection As Outlook.Selection = Nothing
-        'Try
-        '    theExplorer = TryCast(explorer, Outlook.Explorer)
-        '    If theExplorer IsNot Nothing Then
-        '        ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=2200
-        '        Try
-        '            selection = theExplorer.Selection
-        '        Catch
-        '        End Try
-        '        If selection IsNot Nothing Then
-        '            ConnectToSelectedItem(selection)
-        '            Debug.Print("AdxOutlookAppEvents1_ExplorerActivate called ConnectToSelectedItem(selection)")
-        '        End If
-        '    End If
-        'Finally
-        '    If selection IsNot Nothing Then Marshal.ReleaseComObject(selection) : selection = Nothing
-        '    ' don't release theExplorer
-        'End Try
-
         Dim myExplorer As Outlook.Explorer = Nothing
         Dim sel As Outlook.Selection = Nothing
         Dim item As Object = Nothing
         Try
-            myExplorer = CType(explorer, Outlook.Explorer)
+            myExplorer = TryCast(explorer, Outlook.Explorer)
             If myExplorer Is Nothing Then Return
-            Try
-                sel = myExplorer.Selection
-            Catch ex As Exception
-            End Try
+            sel = TryCast(myExplorer.Selection, Outlook.Selection)
             If sel Is Nothing Then Return
             If sel.Count = 1 Then
                 item = sel.Item(1)
@@ -326,90 +303,66 @@ HaveNewCallTracking:
         End Try
     End Sub
 
-    Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
-        MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
-               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
-               "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
-               "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-20 12:50.", vbInformation, "About this Add-in")
+    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+        ' 11/17/2015 this doesn't fire if the Note is opened from a the file but not Displayed
+        Dim myInsp As Outlook.Inspector = inspector
+        Dim item As Object = Nothing
+        Dim myNote As Outlook.NoteItem = Nothing
+        Try
+            item = myInsp.CurrentItem
+            If TypeOf item Is Outlook.NoteItem Then
+                myNote = item
+                Dim strID As String = Nothing
+                If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+                    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+                ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+                    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+                ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+                    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+                End If
+                If Len(strID) > 0 Then
+                    If OpenItemFromID(strID) Then
+                    Else
+                        MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
+                    End If
+                End If
+                Marshal.ReleaseComObject(myNote)
+            End If
+            ' Marshal.ReleaseComObject(item)
+        Catch ex As Exception
+        Finally
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+        End Try
     End Sub
 
-    Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
-        'TO-DO make sure it works with either an Inspector or an Explorer        
+    Private Sub AppointmentCalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AppointmentCalendar.OnClick
+        ActivateExplorer("Appointment Calendar")
+    End Sub
 
-        ' copied from http://www.howto-outlook.com/howto/saveembeddedpictures.htm
-        Const strTitle As String = "Save Attachments"
-        Dim myInsp As Outlook.Inspector = Nothing
-        Dim item As Object = Nothing
-        'Dim mySelection As Outlook.Selection = Nothing
-        'Dim mySelectedItem As Object = Nothing
-        Dim myAttachments As Outlook.Attachments = Nothing
-        Dim myAttach As Outlook.Attachment = Nothing
-        Dim DateStamp As String, MyFile As String
-        Dim intCounter As Integer
+    Private Sub SSIcalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles SSIcalendar.OnClick
+        ActivateExplorer("Appointment SSI")
+    End Sub
 
+    Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
+        ActivateExplorer("New Call Tracking")
+    End Sub
+
+    Public Sub ActivateExplorer(strFolderName As String)
+        Dim myExplorer As Outlook.Explorer = Nothing
         Try
-            myInsp = OutlookApp.ActiveInspector
-            item = myInsp.CurrentItem
-            'Get all selected items
-            ' mySelection = OutlookApp.ActiveExplorer.Selection
-            ' mySelection = item.Selection
-            ''Make sure at least one item is selected
-            'If mySelection.Count = 0 Then
-            '    RetVal = MsgBox("Please select an item first.", vbExclamation, strTitle)
-            '    Exit Sub
-            'End If
-
-            ''Make sure only one item is selected
-            'If mySelection.Count > 1 Then
-            '    RetVal = MsgBox("Please select only one item.", vbExclamation, strTitle)
-            '    Exit Sub
-            'End If
-
-            'Retrieve the selected item
-            ' mySelectedItem = mySelection.Item(1)
-
-            'Retrieve all attachments from the selected item
-            ' myAttachments = mySelectedItem.Attachments
-            myAttachments = item.Attachments
-
-            'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
-            ' For Each myAttach In myAttachments
-            Dim x As Short
-            For x = 1 To myAttachments.Count
-                myAttach = myAttachments(x)
-                If myAttach.Size > 7000 Then  ' don't save attached Outlook items -- especially Notes
-                    MyFile = myAttach.FileName
-                    DateStamp = Space(1) & Format(item.CreationTime, "yyyyMMddhhmmss")
-                    Dim intPos As Integer
-                    intPos = InStrRev(MyFile, ".")
-                    If intPos > 0 Then
-                        MyFile = Left(MyFile, intPos - 1) & DateStamp & Mid(MyFile, intPos)
-                    Else
-                        MyFile = MyFile & DateStamp
-                    End If
-                    MyFile = "C:\Scans\" & MyFile
-                    myAttach.SaveAsFile(MyFile)
-                    intCounter = intCounter + 1
-                End If
-                Marshal.ReleaseComObject(myAttach)
-            Next
-            If intCounter = 0 Then
-                MsgBox("There are no attachments on this item larger than 7k.", vbInformation, strTitle)
+            If GetPublicFolder(strFolderName) Then
+                myExplorer = OutlookApp.ActiveExplorer
+                myExplorer.CurrentFolder = myPublicFolder
+                Return
             Else
-                MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & _
-                       "C:\Scans.", vbInformation, strTitle)
+                MsgBox("Could not find the folder '" & strFolderName & "'", vbExclamation)
             End If
-
         Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, strTitle)
-
+            MsgBox("Could not find " & strFolderName & vbNewLine & vbNewLine & ex.Message, vbExclamation, "ActivateExplorer")
         Finally
-            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            'If mySelection IsNot Nothing Then Marshal.ReleaseComObject(mySelection) : mySelection = Nothing
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
+            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
         End Try
     End Sub
 
@@ -631,385 +584,82 @@ LinkContacts:
         End Try
     End Sub
 
-    Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
-        Const strTitle As String = "E-mail Copy of This Item"
+    Private Sub SaveAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButtonSaveAttachments.OnClick
+        'TO-DO make sure it works with either an Inspector or an Explorer        
+
+        ' copied from http://www.howto-outlook.com/howto/saveembeddedpictures.htm
+        Const strTitle As String = "Save Attachments"
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
-        Dim myTask As Outlook.TaskItem = Nothing
-        Dim myProperties As Outlook.UserProperties = Nothing
-        Dim myUserProp As Outlook.UserProperty = Nothing
-        Dim mySession As Outlook.NameSpace = Nothing
-        Dim myFolder As Outlook.Folder = Nothing
-        Dim myItems As Outlook.Items = Nothing
-        Dim obj As Object = Nothing
-        Dim myDraft As Outlook.MailItem = Nothing
+        'Dim mySelection As Outlook.Selection = Nothing
+        'Dim mySelectedItem As Object = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
-        Dim strSubject As String = Nothing
+        Dim DateStamp As String, MyFile As String
+        Dim intCounter As Integer
 
         Try
             myInsp = OutlookApp.ActiveInspector
             item = myInsp.CurrentItem
-            If TypeOf item Is Outlook.TaskItem Then
-                Cursor.Current = Cursors.WaitCursor
-                myTask = item
-            Else
-                MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
-                Return
-            End If
-            Dim strFileName As String = "C:\tmp\Move.msg"
-            With myTask
-                .Save()
-                myProperties = .UserProperties
-                myUserProp = myProperties("CallerName")
-                If Len(myUserProp.Value) > 0 Then
-                    strSubject = myUserProp.Value
-                Else
-                    strSubject = .Subject
-                End If
-                Marshal.ReleaseComObject(myUserProp)
-                Marshal.ReleaseComObject(myProperties)
-                .SaveAs(strFileName)
-                ' close the item that was originally opened
-                .Close(Outlook.OlInspectorClose.olSave)
-            End With
+            'Get all selected items
+            ' mySelection = OutlookApp.ActiveExplorer.Selection
+            ' mySelection = item.Selection
+            ''Make sure at least one item is selected
+            'If mySelection.Count = 0 Then
+            '    RetVal = MsgBox("Please select an item first.", vbExclamation, strTitle)
+            '    Exit Sub
+            'End If
 
-            ' open the copy of the item from the file in the user's Tasks folder (from where it can be moved)
-            myTask = OutlookApp.CreateItemFromTemplate(strFileName)
-            mySession = OutlookApp.Session
-            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
-            With myTask
-                .Move(myFolder)
-                ' don't leave a copy of the item in the user's personal Tasks folder
-                .Close(Outlook.OlInspectorClose.olDiscard)
-            End With
-            Marshal.ReleaseComObject(myFolder)
-            Marshal.ReleaseComObject(myTask)
+            ''Make sure only one item is selected
+            'If mySelection.Count > 1 Then
+            '    RetVal = MsgBox("Please select only one item.", vbExclamation, strTitle)
+            '    Exit Sub
+            'End If
 
-            ' display the new item for the user
-            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
-            myItems = myFolder.Items
-            Dim bHaveDraft As Boolean = False
-            For x = 1 To myItems.Count
-                obj = myItems(x)
-                If TypeOf obj Is Outlook.MailItem Then
-                    myDraft = obj
-                    With myDraft
-                        ' Debug.Print(".Subject=" & .Subject & ", strSubject=" & strSubject)
-                        If .Subject = strSubject Then
+            'Retrieve the selected item
+            ' mySelectedItem = mySelection.Item(1)
 
-                            ' added 11/17/2015 to strip out the Task information that isn't needed -- from Status => AnsBy:
-                            Dim s As Short, strBody As String
-                            strBody = .Body
-                            s = InStr(strBody, "Status:")
-                            If s > 0 Then
-                                Dim a As Short
-                                a = InStr(strBody, "AnsBy:")
-                                If a > s Then
-                                    strBody = Left(strBody, s - 1) & Mid(strBody, a)
-                                    Debug.Print(strBody)
-                                    .Body = strBody
-                                End If
-                            End If
+            'Retrieve all attachments from the selected item
+            ' myAttachments = mySelectedItem.Attachments
+            myAttachments = item.Attachments
 
-                            .BCC = "NewCallTracking@gkbm.com"
-                            ' delete the NCT item that's attached (as a result of the Move command)
-                            myAttachments = myDraft.Attachments
-                            Dim y As Short
-                            For y = 1 To myAttachments.Count
-                                myAttach = myAttachments(y)
-                                myAttach.Delete()
-                                Marshal.ReleaseComObject(myAttach)
-                            Next
-                            Marshal.ReleaseComObject(myAttachments)
-                            .Display()
-                            bHaveDraft = True
-                            Exit For
-                        End If
-                    End With
-                    Marshal.ReleaseComObject(myDraft)
-                End If
-                Marshal.ReleaseComObject(obj)
-            Next
-            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft)
-            Marshal.ReleaseComObject(myItems)
-            Marshal.ReleaseComObject(myFolder)
-            If Not bHaveDraft Then MsgBox("Could not find the new E-mail" & vbNewLine & _
-                                          "Subject: " & strSubject & vbNewLine & _
-                                          "in your Drafts folder.", vbExclamation, strTitle)
-
-        Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, strTitle)
-        Finally
-            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft) : myDraft = Nothing
-            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
-            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
-            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
-            If myUserProp IsNot Nothing Then Marshal.ReleaseComObject(myUserProp) : myUserProp = Nothing
-            If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
-            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
-            Cursor.Current = Cursors.Default
-        End Try
-    End Sub
-
-    Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
-        Const strTitle As String = "Copy Attachments from Other Mail Items"
-        Dim myInspectors As Outlook.Inspectors = Nothing
-        Dim myInsp As Outlook.Inspector = Nothing
-        Dim myAttachments As Outlook.Attachments = Nothing
-        Dim myAttach As Outlook.Attachment = Nothing
-        Dim obj As Object = Nothing
-        Dim myNew As Outlook.MailItem = Nothing
-        Dim myNewAttachments As Outlook.Attachments = Nothing
-        Dim myOther As Outlook.MailItem = Nothing
-        Dim x As Short
-        Dim strFileName As String
-
-        Try
-            myInspectors = OutlookApp.Inspectors
-            x = myInspectors.Count
-            If x = 0 Then
-                MsgBox("Display the MailItem that has the Attachments on it," & vbNewLine & _
-                        "then click on this button from the new E-mail.", vbInformation, strTitle)
-                Return
-            End If
-            myInsp = OutlookApp.ActiveInspector
-            obj = myInsp.CurrentItem
-            Marshal.ReleaseComObject(myInsp)
-            If TypeOf obj Is Outlook.MailItem Then
-                myNew = obj
-                If myNew.Sent Then
-                    MsgBox("This item has already been sent." & vbNewLine & vbNewLine & _
-                           "Display the new E-mail and try again when it has the focus.", vbExclamation, strTitle)
-                    Return
-                End If
-            Else
-                MsgBox("This only works if the active item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
-                Return
-            End If
-            myNewAttachments = myNew.Attachments
-
-            ' step through the other open items, looking for MailItems with Attachments
-            Dim y As Short, intAdded As Short
-            For y = x To 1 Step -1
-                myInsp = myInspectors(y)
-                obj = myInsp.CurrentItem
-                If TypeOf obj Is Outlook.MailItem Then
-                    myOther = obj
-                    ' only get attachments from items that have already been sent -- including the new email will be excluded
-                    If myOther.Sent Then
-                        Dim z As Short
-                        myAttachments = myOther.Attachments
-                        z = myAttachments.Count
-                        If z > 0 Then
-                            ' after this question is asked the event fires that releases the COM object -- so the rest won't work
-                            'RetVal = MsgBox("Copy the Attachments from the MailItem" & vbNewLine & _
-                            '                "'" & myOther.Subject & "'?", vbQuestion + vbYesNoCancel, strTitle)
-                            'If RetVal = vbCancel Then Return
-                            'If RetVal = vbYes Then
-                            z = 0
-                            Dim i As Short
-                            For i = 1 To myAttachments.Count
-                                myAttach = myAttachments(i)
-                                strFileName = "C:\tmp\" & myAttach.FileName
-                                myAttach.SaveAsFile(strFileName)
-                                myNewAttachments.Add(strFileName)
-                                My.Computer.FileSystem.DeleteFile(strFileName)
-                                z = z + 1
-                                intAdded = intAdded + 1
-                                Marshal.ReleaseComObject(myAttach)
-                            Next ' myAttach
-                            ' End If
-                        End If
-                        Marshal.ReleaseComObject(myAttachments)
-                    End If
-                    Marshal.ReleaseComObject(myOther)
-                End If
-                Marshal.ReleaseComObject(obj)
-                Marshal.ReleaseComObject(myInsp)
-            Next
-            Marshal.ReleaseComObject(myNewAttachments)
-            If intAdded > 0 Then
-                MsgBox(IIf(intAdded = 1, "One attachment was", intAdded & " attachments were") & " added to your new item.", vbInformation, strTitle)
-            Else
-                MsgBox("No other MailItems with Attachments were found.", vbExclamation, strTitle)
-            End If
-        Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, strTitle)
-        Finally
-            If myOther IsNot Nothing Then Marshal.ReleaseComObject(myOther) : myOther = Nothing
-            If myNewAttachments IsNot Nothing Then Marshal.ReleaseComObject(myNewAttachments) : myNewAttachments = Nothing
-            If myNew IsNot Nothing Then Marshal.ReleaseComObject(myNew) : myNew = Nothing
-            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
-            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
-            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
-        End Try
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        ' 11/17/2015 this doesn't fire if the Note is opened from a the file but not Displayed
-        Dim myInsp As Outlook.Inspector = inspector
-        Dim item As Object = Nothing
-        Dim myNote As Outlook.NoteItem = Nothing
-        Try
-            item = myInsp.CurrentItem
-            If TypeOf item Is Outlook.NoteItem Then
-                myNote = item
-                Dim strID As String = Nothing
-                If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-                    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-                ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-                    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-                ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-                    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-                End If
-                If Len(strID) > 0 Then
-                    If OpenItemFromID(strID) Then
-                    Else
-                        MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
-                    End If
-                End If
-                Marshal.ReleaseComObject(myNote)
-            End If
-            ' Marshal.ReleaseComObject(item)
-        Catch ex As Exception
-        Finally
-            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-        End Try
-    End Sub
-
-    Public Function OpenItemFromID(strID As String) As Boolean
-        Const strTitle As String = "OpenItemFromID()"
-        If strPublicStoreID Is Nothing Then
-            Debug.Print("strPublicStoreID Is Nothing")
-            Stop
-            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, strTitle)
-            Return False
-        End If
-        Dim olNameSpace As Outlook.NameSpace = Nothing
-        Dim item As Object = Nothing
-        Try
-            olNameSpace = OutlookApp.Session
-            item = olNameSpace.GetItemFromID(strID, strPublicStoreID)
-            item.Display()
-            Return True
-        Catch
-            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, strTitle)
-            Return False
-        Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
-        End Try
-    End Function
-
-    Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
-        ' look for Note attachments with the right Display property 
-        ' read the EntryID from the Note & open the item using the EntryID
-        Const strTitle As String = "Open Item from Attached Note"
-        Dim myInsp As Outlook.Inspector = Nothing
-        Dim myInspectors As Outlook.Inspectors = Nothing
-        Dim myAttachments As Outlook.Attachments = Nothing
-        Dim myTask As Outlook.TaskItem = Nothing
-        Dim myAppt As Outlook.AppointmentItem = Nothing
-        Dim myAttach As Outlook.Attachment = Nothing
-        Dim myNote As Outlook.NoteItem = Nothing
-        Dim item As Object = Nothing
-        Dim strOriginalType As String
-        Dim datAppt As Date
-
-        Try
-            myInsp = OutlookApp.ActiveInspector
-            If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                myTask = myInsp.CurrentItem
-                strOriginalType = TypeName(myTask)
-                myAttachments = myTask.Attachments
-            ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
-                myAppt = myInsp.CurrentItem
-                strOriginalType = TypeName(myAppt)
-                datAppt = myAppt.Start
-                myAttachments = myAppt.Attachments
-            Else
-                MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation, strTitle)
-                Return
-            End If
-            Marshal.ReleaseComObject(myInsp)
-            If myAttachments.Count = 0 Then
-                MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
-                Return
-            End If
-
-            Dim x As Int16
+            'Save all attachments to the selected location with a date and time stamp of message to generate a unique name
+            ' For Each myAttach In myAttachments
+            Dim x As Short
             For x = 1 To myAttachments.Count
                 myAttach = myAttachments(x)
-                With myAttach
-                    If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
-                        Dim strFileName As String = "C:\tmp\" & .FileName
-                        .SaveAsFile(strFileName)
-                        myNote = OutlookApp.CreateItemFromTemplate(strFileName)
-                        myNote.Display()
-                        Marshal.ReleaseComObject(myNote)
-                        ' For Each myInsp In OutlookApp.Inspectors
-                        ' stepping through these backward worked, the For Each loop didn't
-                        Dim y As Int16
-                        myInspectors = OutlookApp.Inspectors
-                        For y = myInspectors.Count To 1 Step -1
-                            myInsp = myInspectors(y)
-                            ' don't close emails and other types of items -- only Appointments and Tasks and Notes
-                            item = myInsp.CurrentItem
-                            If TypeOf item Is Outlook.NoteItem Then
-                                Try
-                                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                                Catch
-                                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
-                                End Try
-                            ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
-                                If TypeName(item) = strOriginalType Then
-                                    myInsp.Close(Outlook.OlInspectorClose.olSave)
-                                    '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
-                                    'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                                    '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-                                    '    Const strField As String = "ApptDateTime"
-                                    '    Try
-                                    '        If myTask.UserProperties(strField).Value = datAppt Then
-                                    '        Else
-                                    '            myTask.UserProperties(strField).Value = datAppt
-                                    '            myTask.Save()
-                                    '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
-                                    '        End If
-                                    '    Catch ex As Exception
-                                    '    End Try
-                                End If
-                            End If
-                            Marshal.ReleaseComObject(item)
-                            Marshal.ReleaseComObject(myInsp)
-                        Next
-                        Marshal.ReleaseComObject(myInspectors)
-                        Return
+                If myAttach.Size > 7000 Then  ' don't save attached Outlook items -- especially Notes
+                    MyFile = myAttach.FileName
+                    DateStamp = Space(1) & Format(item.CreationTime, "yyyyMMddhhmmss")
+                    Dim intPos As Integer
+                    intPos = InStrRev(MyFile, ".")
+                    If intPos > 0 Then
+                        MyFile = Left(MyFile, intPos - 1) & DateStamp & Mid(MyFile, intPos)
+                    Else
+                        MyFile = MyFile & DateStamp
                     End If
-                End With
+                    MyFile = "C:\Scans\" & MyFile
+                    myAttach.SaveAsFile(MyFile)
+                    intCounter = intCounter + 1
+                End If
                 Marshal.ReleaseComObject(myAttach)
             Next
-            Marshal.ReleaseComObject(myAttachments)
-            MsgBox("Nothing was opened.", vbInformation, strTitle)
+            If intCounter = 0 Then
+                MsgBox("There are no attachments on this item larger than 7k.", vbInformation, strTitle)
+            Else
+                MsgBox("Saved " & intCounter & " attachment" & IIf(intCounter = 1, vbNullString, "s") & " to folder" & vbNewLine & _
+                       "C:\Scans.", vbInformation, strTitle)
+            End If
+
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
+
         Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            'If mySelection IsNot Nothing Then Marshal.ReleaseComObject(mySelection) : mySelection = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
-            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
         End Try
     End Sub
 
@@ -1193,34 +843,361 @@ HavePublic:
         End Try
     End Sub
 
-    Private Sub NewCallTracking_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles NewCallTracking.OnClick
-        ActivateExplorer("New Call Tracking")
-    End Sub
+    Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
+        ' look for Note attachments with the right Display property 
+        ' read the EntryID from the Note & open the item using the EntryID
+        Const strTitle As String = "Open Item from Attached Note"
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim myInspectors As Outlook.Inspectors = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myTask As Outlook.TaskItem = Nothing
+        Dim myAppt As Outlook.AppointmentItem = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim myNote As Outlook.NoteItem = Nothing
+        Dim item As Object = Nothing
+        Dim strOriginalType As String
+        Dim datAppt As Date
 
-    Private Sub AppointmentCalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AppointmentCalendar.OnClick
-        ActivateExplorer("Appointment Calendar")
-    End Sub
-
-    Public Sub ActivateExplorer(strFolderName As String)
-        Dim myExplorer As Outlook.Explorer = Nothing
         Try
-            If GetPublicFolder(strFolderName) Then
-                myExplorer = OutlookApp.ActiveExplorer
-                myExplorer.CurrentFolder = myPublicFolder
-                Return
+            myInsp = OutlookApp.ActiveInspector
+            If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                myTask = myInsp.CurrentItem
+                strOriginalType = TypeName(myTask)
+                myAttachments = myTask.Attachments
+            ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
+                myAppt = myInsp.CurrentItem
+                strOriginalType = TypeName(myAppt)
+                datAppt = myAppt.Start
+                myAttachments = myAppt.Attachments
             Else
-                MsgBox("Could not find the folder '" & strFolderName & "'", vbExclamation)
+                MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation, strTitle)
+                Return
             End If
+            Marshal.ReleaseComObject(myInsp)
+            If myAttachments.Count = 0 Then
+                MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
+                Return
+            End If
+
+            Dim x As Int16
+            For x = 1 To myAttachments.Count
+                myAttach = myAttachments(x)
+                With myAttach
+                    If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
+                        Dim strFileName As String = "C:\tmp\" & .FileName
+                        .SaveAsFile(strFileName)
+                        myNote = OutlookApp.CreateItemFromTemplate(strFileName)
+                        myNote.Display()
+                        Marshal.ReleaseComObject(myNote)
+                        ' For Each myInsp In OutlookApp.Inspectors
+                        ' stepping through these backward worked, the For Each loop didn't
+                        Dim y As Int16
+                        myInspectors = OutlookApp.Inspectors
+                        For y = myInspectors.Count To 1 Step -1
+                            myInsp = myInspectors(y)
+                            ' don't close emails and other types of items -- only Appointments and Tasks and Notes
+                            item = myInsp.CurrentItem
+                            If TypeOf item Is Outlook.NoteItem Then
+                                Try
+                                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                                Catch
+                                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
+                                End Try
+                            ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
+                                If TypeName(item) = strOriginalType Then
+                                    myInsp.Close(Outlook.OlInspectorClose.olSave)
+                                    '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
+                                    'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+                                    '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+                                    '    Const strField As String = "ApptDateTime"
+                                    '    Try
+                                    '        If myTask.UserProperties(strField).Value = datAppt Then
+                                    '        Else
+                                    '            myTask.UserProperties(strField).Value = datAppt
+                                    '            myTask.Save()
+                                    '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
+                                    '        End If
+                                    '    Catch ex As Exception
+                                    '    End Try
+                                End If
+                            End If
+                            Marshal.ReleaseComObject(item)
+                            Marshal.ReleaseComObject(myInsp)
+                        Next
+                        Marshal.ReleaseComObject(myInspectors)
+                        Return
+                    End If
+                End With
+                Marshal.ReleaseComObject(myAttach)
+            Next
+            Marshal.ReleaseComObject(myAttachments)
+            MsgBox("Nothing was opened.", vbInformation, strTitle)
         Catch ex As Exception
-            MsgBox("Could not find " & strFolderName & vbNewLine & vbNewLine & ex.Message, vbExclamation, "ActivateExplorer")
+            MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
-            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
-            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
+            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
         End Try
     End Sub
 
-    Private Sub SSIcalendar_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles SSIcalendar.OnClick
-        ActivateExplorer("Appointment SSI")
+    Private Sub CopyItem2DraftsFolder_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton1.OnClick
+        Const strTitle As String = "E-mail Copy of This Item"
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim item As Object = Nothing
+        Dim myTask As Outlook.TaskItem = Nothing
+        Dim myProperties As Outlook.UserProperties = Nothing
+        Dim myUserProp As Outlook.UserProperty = Nothing
+        Dim mySession As Outlook.NameSpace = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
+        Dim myItems As Outlook.Items = Nothing
+        Dim obj As Object = Nothing
+        Dim myDraft As Outlook.MailItem = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim strSubject As String = Nothing
+
+        Try
+            myInsp = OutlookApp.ActiveInspector
+            item = myInsp.CurrentItem
+            If TypeOf item Is Outlook.TaskItem Then
+                Cursor.Current = Cursors.WaitCursor
+                myTask = item
+            Else
+                MsgBox("This only works with NewCallTracking or other Task type items.", vbInformation, strTitle)
+                Return
+            End If
+            Dim strFileName As String = "C:\tmp\Move.msg"
+            With myTask
+                .Save()
+                myProperties = .UserProperties
+                myUserProp = myProperties("CallerName")
+                If Len(myUserProp.Value) > 0 Then
+                    strSubject = myUserProp.Value
+                Else
+                    strSubject = .Subject
+                End If
+                Marshal.ReleaseComObject(myUserProp)
+                Marshal.ReleaseComObject(myProperties)
+                .SaveAs(strFileName)
+                ' close the item that was originally opened
+                .Close(Outlook.OlInspectorClose.olSave)
+            End With
+
+            ' open the copy of the item from the file in the user's Tasks folder (from where it can be moved)
+            myTask = OutlookApp.CreateItemFromTemplate(strFileName)
+            mySession = OutlookApp.Session
+            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            With myTask
+                .Move(myFolder)
+                ' don't leave a copy of the item in the user's personal Tasks folder
+                .Close(Outlook.OlInspectorClose.olDiscard)
+            End With
+            Marshal.ReleaseComObject(myFolder)
+            Marshal.ReleaseComObject(myTask)
+
+            ' display the new item for the user
+            myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderDrafts)
+            myItems = myFolder.Items
+            Dim bHaveDraft As Boolean = False
+            For x = 1 To myItems.Count
+                obj = myItems(x)
+                If TypeOf obj Is Outlook.MailItem Then
+                    myDraft = obj
+                    With myDraft
+                        ' Debug.Print(".Subject=" & .Subject & ", strSubject=" & strSubject)
+                        If .Subject = strSubject Then
+
+                            ' added 11/17/2015 to strip out the Task information that isn't needed -- from Status => AnsBy:
+                            Dim s As Short, strBody As String
+                            strBody = .Body
+                            s = InStr(strBody, "Status:")
+                            If s > 0 Then
+                                Dim a As Short
+                                a = InStr(strBody, "AnsBy:")
+                                If a > s Then
+                                    strBody = Left(strBody, s - 1) & Mid(strBody, a)
+                                    Debug.Print(strBody)
+                                    .Body = strBody
+                                End If
+                            End If
+
+                            .BCC = "NewCallTracking@gkbm.com"
+                            ' delete the NCT item that's attached (as a result of the Move command)
+                            myAttachments = myDraft.Attachments
+                            Dim y As Short
+                            For y = 1 To myAttachments.Count
+                                myAttach = myAttachments(y)
+                                myAttach.Delete()
+                                Marshal.ReleaseComObject(myAttach)
+                            Next
+                            Marshal.ReleaseComObject(myAttachments)
+                            .Display()
+                            bHaveDraft = True
+                            Exit For
+                        End If
+                    End With
+                    Marshal.ReleaseComObject(myDraft)
+                End If
+                Marshal.ReleaseComObject(obj)
+            Next
+            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft)
+            Marshal.ReleaseComObject(myItems)
+            Marshal.ReleaseComObject(myFolder)
+            If Not bHaveDraft Then MsgBox("Could not find the new E-mail" & vbNewLine & _
+                                          "Subject: " & strSubject & vbNewLine & _
+                                          "in your Drafts folder.", vbExclamation, strTitle)
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+        Finally
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myDraft IsNot Nothing Then Marshal.ReleaseComObject(myDraft) : myDraft = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
+            If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
+            If myUserProp IsNot Nothing Then Marshal.ReleaseComObject(myUserProp) : myUserProp = Nothing
+            If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
+            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            Cursor.Current = Cursors.Default
+        End Try
     End Sub
+
+    Private Sub CopyAttachments_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles CopyAttachments.OnClick
+        Const strTitle As String = "Copy Attachments from Other Mail Items"
+        Dim myInspectors As Outlook.Inspectors = Nothing
+        Dim myInsp As Outlook.Inspector = Nothing
+        Dim myAttachments As Outlook.Attachments = Nothing
+        Dim myAttach As Outlook.Attachment = Nothing
+        Dim obj As Object = Nothing
+        Dim myNew As Outlook.MailItem = Nothing
+        Dim myNewAttachments As Outlook.Attachments = Nothing
+        Dim myOther As Outlook.MailItem = Nothing
+        Dim x As Short
+        Dim strFileName As String
+
+        Try
+            myInspectors = OutlookApp.Inspectors
+            x = myInspectors.Count
+            If x = 0 Then
+                MsgBox("Display the MailItem that has the Attachments on it," & vbNewLine & _
+                        "then click on this button from the new E-mail.", vbInformation, strTitle)
+                Return
+            End If
+            myInsp = OutlookApp.ActiveInspector
+            obj = myInsp.CurrentItem
+            Marshal.ReleaseComObject(myInsp)
+            If TypeOf obj Is Outlook.MailItem Then
+                myNew = obj
+                If myNew.Sent Then
+                    MsgBox("This item has already been sent." & vbNewLine & vbNewLine & _
+                           "Display the new E-mail and try again when it has the focus.", vbExclamation, strTitle)
+                    Return
+                End If
+            Else
+                MsgBox("This only works if the active item is the new MailItem you want to add the attachments to.", vbExclamation, strTitle)
+                Return
+            End If
+            myNewAttachments = myNew.Attachments
+
+            ' step through the other open items, looking for MailItems with Attachments
+            Dim y As Short, intAdded As Short
+            For y = x To 1 Step -1
+                myInsp = myInspectors(y)
+                obj = myInsp.CurrentItem
+                If TypeOf obj Is Outlook.MailItem Then
+                    myOther = obj
+                    ' only get attachments from items that have already been sent -- including the new email will be excluded
+                    If myOther.Sent Then
+                        Dim z As Short
+                        myAttachments = myOther.Attachments
+                        z = myAttachments.Count
+                        If z > 0 Then
+                            ' after this question is asked the event fires that releases the COM object -- so the rest won't work
+                            'RetVal = MsgBox("Copy the Attachments from the MailItem" & vbNewLine & _
+                            '                "'" & myOther.Subject & "'?", vbQuestion + vbYesNoCancel, strTitle)
+                            'If RetVal = vbCancel Then Return
+                            'If RetVal = vbYes Then
+                            z = 0
+                            Dim i As Short
+                            For i = 1 To myAttachments.Count
+                                myAttach = myAttachments(i)
+                                strFileName = "C:\tmp\" & myAttach.FileName
+                                myAttach.SaveAsFile(strFileName)
+                                myNewAttachments.Add(strFileName)
+                                My.Computer.FileSystem.DeleteFile(strFileName)
+                                z = z + 1
+                                intAdded = intAdded + 1
+                                Marshal.ReleaseComObject(myAttach)
+                            Next ' myAttach
+                            ' End If
+                        End If
+                        Marshal.ReleaseComObject(myAttachments)
+                    End If
+                    Marshal.ReleaseComObject(myOther)
+                End If
+                Marshal.ReleaseComObject(obj)
+                Marshal.ReleaseComObject(myInsp)
+            Next
+            Marshal.ReleaseComObject(myNewAttachments)
+            If intAdded > 0 Then
+                MsgBox(IIf(intAdded = 1, "One attachment was", intAdded & " attachments were") & " added to your new item.", vbInformation, strTitle)
+            Else
+                MsgBox("No other MailItems with Attachments were found.", vbExclamation, strTitle)
+            End If
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, strTitle)
+        Finally
+            If myOther IsNot Nothing Then Marshal.ReleaseComObject(myOther) : myOther = Nothing
+            If myNewAttachments IsNot Nothing Then Marshal.ReleaseComObject(myNewAttachments) : myNewAttachments = Nothing
+            If myNew IsNot Nothing Then Marshal.ReleaseComObject(myNew) : myNew = Nothing
+            If obj IsNot Nothing Then Marshal.ReleaseComObject(obj) : obj = Nothing
+            If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
+            If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
+        End Try
+    End Sub
+
+    Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
+        MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
+               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
+               "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
+               "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
+               "This version dated 2015-Nov-20 12:50.", vbInformation, "About this Add-in")
+    End Sub
+
+    Public Function OpenItemFromID(strID As String) As Boolean
+        Const strTitle As String = "OpenItemFromID()"
+        If strPublicStoreID Is Nothing Then
+            Debug.Print("strPublicStoreID Is Nothing")
+            Stop
+            MsgBox("Please call Gordon about this message:" & vbNewLine & vbNewLine & "strPublicStoreID Is Nothing", vbInformation, strTitle)
+            Return False
+        End If
+        Dim olNameSpace As Outlook.NameSpace = Nothing
+        Dim item As Object = Nothing
+        Try
+            olNameSpace = OutlookApp.Session
+            item = olNameSpace.GetItemFromID(strID, strPublicStoreID)
+            item.Display()
+            Return True
+        Catch
+            MsgBox("The item was not found in the information store.", vbOKOnly + vbExclamation, strTitle)
+            Return False
+        Finally
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
+        End Try
+    End Function
+
 End Class
 
