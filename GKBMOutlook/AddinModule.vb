@@ -74,33 +74,10 @@ Public Class AddinModule
                 Dim item As Object = selection.Item(1)
                 If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
-                Marshal.ReleaseComObject(item) : item = Nothing
+                ' Marshal.ReleaseComObject(item) : item = Nothing
                 Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
             End If
         End If
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles AdxOutlookAppEvents1.ExplorerActivate
-        Dim myExplorer As Outlook.Explorer = Nothing
-        Dim sel As Outlook.Selection = Nothing
-        Dim item As Object = Nothing
-        Try
-            myExplorer = TryCast(explorer, Outlook.Explorer)
-            If myExplorer Is Nothing Then Return
-            sel = TryCast(myExplorer.Selection, Outlook.Selection)
-            If sel Is Nothing Then Return
-            If sel.Count = 1 Then
-                item = sel.Item(1)
-                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
-                itemEvents.ConnectTo(item, True)
-                Marshal.ReleaseComObject(item)
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
-            End If
-        Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
-            ' don't release myExplorer
-        End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
@@ -111,40 +88,77 @@ Public Class AddinModule
             item = myInsp.CurrentItem
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             itemEvents.ConnectTo(item, True)
-            Marshal.ReleaseComObject(item)
+            ' Marshal.ReleaseComObject(item)
             Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
-        Catch
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
         Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             ' don't release myInsp
         End Try
     End Sub
 
-    Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-        Dim myExplorer As Outlook.Explorer = Nothing
+    Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles _
+        AdxOutlookAppEvents1.ExplorerActivate, _
+        AdxOutlookAppEvents1.ExplorerSelectionChange
+
+        Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        If myExplorer Is Nothing Then Return
         Dim sel As Outlook.Selection = Nothing
         Dim item As Object = Nothing
         Try
-            myExplorer = CType(explorer, Outlook.Explorer)
-            If myExplorer Is Nothing Then Return
-            Try
-                sel = myExplorer.Selection
-            Catch ex As Exception
-            End Try
-            If sel Is Nothing Then Return
+            sel = myExplorer.Selection
+        Catch
+        End Try
+        If sel Is Nothing Then Return
+        Try
             If sel.Count = 1 Then
                 item = sel.Item(1)
                 If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
-                Marshal.ReleaseComObject(item)
-                Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange fired")
+                'Marshal.ReleaseComObject(item)
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
             End If
+        Catch ex As Exception
+            MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
         Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            'If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
             ' don't release myExplorer
         End Try
     End Sub
+
+    'Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
+    '    Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+    '    If myExplorer Is Nothing Then Return
+    '    Dim sel As Outlook.Selection = Nothing
+    '    Dim item As Object = Nothing
+    '    Try
+    '        sel = myExplorer.Selection
+    '    Catch
+    '    End Try
+    '    If sel Is Nothing Then Return
+    '    Try
+    '        If sel.Count = 1 Then
+    '            item = sel.Item(1)
+    '            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+    '            itemEvents.ConnectTo(item, True)
+    '            Marshal.ReleaseComObject(item)
+    '            Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange fired")
+    '        End If
+    '    Catch ex As Exception
+    '        MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerSelectionChange")
+    '    Finally
+    '        If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+    '        If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
+    '        ' don't release myExplorer
+    '    End Try
+    '    Try
+    '        AdxOutlookAppEvents1_ExplorerActivate(sender, explorer)
+    '    Catch ex As Exception
+    '        MsgBox(ex.Message, vbExclamation, "calling AdxOutlookAppEvents1_ExplorerActivate(sender, explorer)")
+    '    End Try
+    'End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
         'delete any leftover notes from InstantFile attachments
