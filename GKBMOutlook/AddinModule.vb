@@ -161,22 +161,18 @@ Public Class AddinModule
     'End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
-        'delete any leftover notes from InstantFile attachments
-        'myNotes = OutlookApp.GetNamespace("MAPI").GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes).Items
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolder As Outlook.Folder = Nothing
         Dim myNotes As Outlook.Items = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Dim myFolders As Outlook.Folders = Nothing
-        Dim myPublicFolder As Outlook.MAPIFolder = Nothing
         Dim myExplorer As Outlook.Explorer = Nothing
-
-        Dim x As Short
 
         Try
             mySession = OutlookApp.GetNamespace("MAPI")
             myFolder = mySession.GetDefaultFolder(Outlook.OlDefaultFolders.olFolderNotes)
             myNotes = myFolder.Items
+            Dim x As Short
             For x = myNotes.Count To 1 Step -1
                 myNote = myNotes(x)
                 If Left(myNote.Body, 18) = strIFmatNo Or _
@@ -198,7 +194,7 @@ Public Class AddinModule
                     "and see if you get a 'Connected' message." & vbNewLine & _
                     "If so, you've solved the problem.)", vbExclamation, "Working Offline")
             Else
-                ' 11/11/2015 didn't finish doing this -- do it later 
+                ' 11/11/2015 didn't finish doing this -- don't think it's needed anymore
                 ' For Each olFolder In OutlookApp.Session.Folders
                 'Dim intNote As Integer
                 'Dim myFolders As Outlook.Folders = mySession.Folders
@@ -231,39 +227,21 @@ Public Class AddinModule
 
                 'SetNewCallTracking:
                 myFolders = mySession.Folders
-                ' Dim olNS As Outlook.NameSpace, objFolder As Outlook.MAPIFolder, objItem As Outlook.TaskItem
-                ' For Each myPublicFolder In OutlookApp.Session.Folders
                 For x = 1 To myFolders.Count
-                    myPublicFolder = myFolders(x)
-                    If Left(myPublicFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
-                        strPublicStoreID = myPublicFolder.StoreID
-                        ' For Each olFolder In myPublicFolder.Folders
-                        ' 11/11/2015 skipped this, also
-                        'Dim y As Int16, myF As Outlook.Folders
-                        'myF = myPublicFolder.Folders
-                        'For y = 1 To myF.Count
-                        '    myFolder = myF(y)
-                        '    If myFolder.Name = strAllPublicFolders Then
-                        '        ' For Each myNewCallTracking In olFolder.Folders
-                        '        Dim n As Int16, myPF As Outlook.Folders
-                        '        For n = 1 To myPF.Count
-                        '            myPF = myFolder(n)
-                        '            If myPF.Name = "New Call Tracking" Then 
+                    myFolder = myFolders(x)
+                    If Left(myFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
+                        strPublicStoreID = myFolder.StoreID
+                        Marshal.ReleaseComObject(myFolder)
                         GoTo HaveNewCallTracking
-                        '        Next
-                        '    End If
-                        'Next
                     End If
-                    Marshal.ReleaseComObject(myPublicFolder)
+                    Marshal.ReleaseComObject(myFolder)
                 Next
-                MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & "Try to get Outlook working Online if possible.", vbExclamation, "New Call Tracking Not Available")
+                Marshal.ReleaseComObject(myFolders)
+                MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & _
+                       "Try to get Outlook working Online if possible.", vbExclamation, "Connect to Public Folders")
             End If
 
 HaveNewCallTracking:
-            ' olNS = OutlookApp.GetNamespace("MAPI")
-            ' Debug.Print "ExchangeConnectionMode = " & olNS.ExchangeConnectionMode
-            ' Dim intExchangeConnectionMode As Integer = olNS.ExchangeConnectionMode
-            ' OutlookApp.ActiveExplorer.WindowState = Outlook.OlWindowState.olMaximized
             myExplorer = OutlookApp.ActiveExplorer
             myExplorer.WindowState = Outlook.OlWindowState.olMaximized
 
@@ -290,12 +268,11 @@ HaveNewCallTracking:
         Finally
             If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
-            If myPublicFolder IsNot Nothing Then Marshal.ReleaseComObject(myPublicFolder) : myPublicFolder = Nothing
+            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myNotes IsNot Nothing Then Marshal.ReleaseComObject(myNotes) : myNotes = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
-            ' Debug.Print("mySession was not released from Startup")
         End Try
     End Sub
 
