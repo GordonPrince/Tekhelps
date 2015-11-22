@@ -236,9 +236,9 @@ Public Class OutlookItemEventsClass1
         Debug.Print("Entered ProcessBeforeAttachmentRead")
         If InterceptNote(attachment) Then
             e.Cancel = True
-            Debug.Print("ProcessBeforeAttachmentRead: e.Cancel = True")
+            Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
         Else
-            Debug.Print("ProcessBeforeAttachmentRead: e.Cancel = False")
+            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
         End If
     End Sub
 

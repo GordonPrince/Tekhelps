@@ -857,105 +857,92 @@ HavePublic:
     End Sub
 
     Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
-        ' look for Note attachments with the right Display property 
-        ' read the EntryID from the Note & open the item using the EntryID
         Const strTitle As String = "Open Item from Attached Note"
         Dim myInsp As Outlook.Inspector = Nothing
-        Dim myInspectors As Outlook.Inspectors = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
-        Dim myTask As Outlook.TaskItem = Nothing
-        Dim myAppt As Outlook.AppointmentItem = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
-        Dim myNote As Outlook.NoteItem = Nothing
         Dim item As Object = Nothing
-        Dim strOriginalType As String
-        Dim datAppt As Date
 
         Try
             myInsp = OutlookApp.ActiveInspector
-            If TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                myTask = myInsp.CurrentItem
-                strOriginalType = TypeName(myTask)
-                myAttachments = myTask.Attachments
-            ElseIf TypeOf myInsp.CurrentItem Is Outlook.AppointmentItem Then
-                myAppt = myInsp.CurrentItem
-                strOriginalType = TypeName(myAppt)
-                datAppt = myAppt.Start
-                myAttachments = myAppt.Attachments
-            Else
-                MsgBox("This only works if a NewCall Tracking or Appointment item is displayed.", vbExclamation, strTitle)
-                Return
-            End If
-            Marshal.ReleaseComObject(myInsp)
+            item = myInsp.CurrentItem
+            myAttachments = item.attachments
             If myAttachments.Count = 0 Then
                 MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
                 Return
             End If
 
-            Dim x As Short
-            For x = 1 To myAttachments.Count
-                myAttach = myAttachments(x)
-                With myAttach
-                    If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
-                        Dim strFileName As String = "C:\tmp\" & .FileName
-                        .SaveAsFile(strFileName)
-                        myNote = OutlookApp.CreateItemFromTemplate(strFileName)
-                        myNote.Display()
-                        Marshal.ReleaseComObject(myNote)
-                        ' For Each myInsp In OutlookApp.Inspectors
-                        ' stepping through these backward worked, the For Each loop didn't
-                        Dim y As Int16
-                        myInspectors = OutlookApp.Inspectors
-                        For y = myInspectors.Count To 1 Step -1
-                            myInsp = myInspectors(y)
-                            ' don't close emails and other types of items -- only Appointments and Tasks and Notes
-                            item = myInsp.CurrentItem
-                            If TypeOf item Is Outlook.NoteItem Then
-                                Try
-                                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                                Catch
-                                    myInsp.WindowState = Outlook.OlWindowState.olMinimized
-                                End Try
-                            ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
-                                If TypeName(item) = strOriginalType Then
-                                    myInsp.Close(Outlook.OlInspectorClose.olSave)
-                                    '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
-                                    'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-                                    '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-                                    '    Const strField As String = "ApptDateTime"
-                                    '    Try
-                                    '        If myTask.UserProperties(strField).Value = datAppt Then
-                                    '        Else
-                                    '            myTask.UserProperties(strField).Value = datAppt
-                                    '            myTask.Save()
-                                    '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
-                                    '        End If
-                                    '    Catch ex As Exception
-                                    '    End Try
-                                End If
-                            End If
-                            Marshal.ReleaseComObject(item)
-                            Marshal.ReleaseComObject(myInsp)
-                        Next
-                        Marshal.ReleaseComObject(myInspectors)
-                        Return
-                    End If
-                End With
-                Marshal.ReleaseComObject(myAttach)
-            Next
+            myAttach = myAttachments(1)
             Marshal.ReleaseComObject(myAttachments)
-            MsgBox("Nothing was opened.", vbInformation, strTitle)
+            If InterceptNote(myAttach) Then
+                If TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
+                    Marshal.ReleaseComObject(item)
+                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+                    Marshal.ReleaseComObject(myInsp)
+                End If
+            End If
+            Return
+
+            'Dim x As Short
+            'For x = 1 To myAttachments.Count
+            '    myAttach = myAttachments(x)
+            '    With myAttach
+            '        If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
+            '            Dim strFileName As String = "C:\tmp\" & .FileName
+            '            .SaveAsFile(strFileName)
+            '            myNote = OutlookApp.CreateItemFromTemplate(strFileName)
+            '            myNote.Display()
+            '            Marshal.ReleaseComObject(myNote)
+            '            ' For Each myInsp In OutlookApp.Inspectors
+            '            ' stepping through these backward worked, the For Each loop didn't
+            '            Dim y As Int16
+            '            myInspectors = OutlookApp.Inspectors
+            '            For y = myInspectors.Count To 1 Step -1
+            '                myInsp = myInspectors(y)
+            '                ' don't close emails and other types of items -- only Appointments and Tasks and Notes
+            '                item = myInsp.CurrentItem
+            '                If TypeOf item Is Outlook.NoteItem Then
+            '                    Try
+            '                        myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+            '                    Catch
+            '                        myInsp.WindowState = Outlook.OlWindowState.olMinimized
+            '                    End Try
+            '                ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
+            '                    If TypeName(item) = strOriginalType Then
+            '                        myInsp.Close(Outlook.OlInspectorClose.olSave)
+            '                        '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
+            '                        'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
+            '                        '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
+            '                        '    Const strField As String = "ApptDateTime"
+            '                        '    Try
+            '                        '        If myTask.UserProperties(strField).Value = datAppt Then
+            '                        '        Else
+            '                        '            myTask.UserProperties(strField).Value = datAppt
+            '                        '            myTask.Save()
+            '                        '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
+            '                        '        End If
+            '                        '    Catch ex As Exception
+            '                        '    End Try
+            '                    End If
+            '                End If
+            '                Marshal.ReleaseComObject(item)
+            '                Marshal.ReleaseComObject(myInsp)
+            '            Next
+            '            Marshal.ReleaseComObject(myInspectors)
+            '            Return
+            '        End If
+            '    End With
+            '    Marshal.ReleaseComObject(myAttach)
+            'Next
+            'Marshal.ReleaseComObject(myAttachments)
+            'MsgBox("Nothing was opened.", vbInformation, strTitle)
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
             If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
-            If myAppt IsNot Nothing Then Marshal.ReleaseComObject(myAppt) : myAppt = Nothing
-            If myTask IsNot Nothing Then Marshal.ReleaseComObject(myTask) : myTask = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
-            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
         End Try
     End Sub
 
