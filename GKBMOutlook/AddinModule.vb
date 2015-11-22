@@ -169,6 +169,8 @@ Public Class AddinModule
         Dim myNote As Outlook.NoteItem = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myExplorer As Outlook.Explorer = Nothing
+        Dim myItems As Outlook.Items = Nothing
+        Dim myItem As Object = Nothing
 
         Try
             mySession = OutlookApp.GetNamespace("MAPI")
@@ -265,10 +267,50 @@ HavePublicFolders:
             '            End If
             '        End If
 
-            ' 11/22/2015 read any items so they will disappear from InstantFile's Inbox
+            ' 11/22/2015 read any items so TaskRequest related emails will disappear from InstantFile's Inbox
+            myFolders = mySession.Folders
+            For x = 1 To myFolders.Count
+                myFolder = myFolders(x)
+                ' Debug.Print(myFolder.Name)
+                If myFolder.Name = strInstantFile Then
+                    Marshal.ReleaseComObject(myFolders)
+                    myFolders = myFolder.Folders
+                    Marshal.ReleaseComObject(myFolder)
+                    Dim y As Short
+                    For y = 1 To myFolders.Count
+                        myFolder = myFolders(y)
+                        If myFolder.Name = "Inbox" Then
+                            myItems = myFolder.Items
+                            Dim z As Short
+                            For z = 1 To myItems.Count
+                                myItem = myItems(z)
+                                ' Debug.Print("typename(myItem) = " & TypeName(myItem))
+                                If TypeOf myItem Is Outlook.TaskRequestAcceptItem Or _
+                                    TypeOf myItem Is Outlook.TaskRequestDeclineItem Or _
+                                    TypeOf myItem Is Outlook.TaskRequestUpdateItem Then
+                                    ' myTaskRequest = myItem
+                                    myItem.Display()
+                                    myItem.Close(Outlook.OlInspectorClose.olDiscard)
+                                    ' Marshal.ReleaseComObject(myTaskRequest)
+                                End If
+                                Marshal.ReleaseComObject(myItem)
+                            Next
+                            Marshal.ReleaseComObject(myItems)
+                            GoTo FinishedInstantFileTaskRequests
+                        End If
+                        Marshal.ReleaseComObject(myFolder)
+                    Next
+                    Marshal.ReleaseComObject(myFolders)
+                End If
+                Marshal.ReleaseComObject(myFolder)
+            Next
+            Marshal.ReleaseComObject(myFolders)
+FinishedInstantFileTaskRequests:
 
         Catch ex As Exception
         Finally
+            If myItem IsNot Nothing Then Marshal.ReleaseComObject(myItem) : myItem = Nothing
+            If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
             If myFolders IsNot Nothing Then Marshal.ReleaseComObject(myFolders) : myFolders = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
@@ -1087,7 +1129,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-21 14:05.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-22  8:40.", vbInformation, "About this Add-in")
     End Sub
 
 End Class
