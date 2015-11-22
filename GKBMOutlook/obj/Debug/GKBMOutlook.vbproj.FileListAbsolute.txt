@@ -8,3 +8,5 @@ C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\obj\Debug\GKBM
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\obj\Debug\GKBMOutlook.vbproj.GenerateResource.Cache
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\obj\Debug\GKBMOutlook.dll
 C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\obj\Debug\GKBMOutlook.pdb
+C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\obj\Debug\GKBMOutlook.vbprojResolveAssemblyReference.cache
+C:\Users\Gordon\Source\Repos\GKBM\Outlook\GKBMOutlook\GKBMOutlook\bin\Debug\GKBMOutlook.tlb

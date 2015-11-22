@@ -91,7 +91,7 @@ Public Class AddinModule
             ' Marshal.ReleaseComObject(item)
             Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
         Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
+            ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
         Finally
             ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             ' don't release myInsp
@@ -120,7 +120,7 @@ Public Class AddinModule
                 Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
             End If
         Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
+            ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
         Finally
             'If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
@@ -892,7 +892,7 @@ HavePublic:
                 Return
             End If
 
-            Dim x As Int16
+            Dim x As Short
             For x = 1 To myAttachments.Count
                 myAttach = myAttachments(x)
                 With myAttach
@@ -1180,14 +1180,6 @@ HavePublic:
         End Try
     End Sub
 
-    Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
-        MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
-               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
-               "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
-               "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-21 12:45.", vbInformation, "About this Add-in")
-    End Sub
-
     Public Function OpenItemFromID(strID As String) As Boolean
         Const strTitle As String = "OpenItemFromID()"
         If strPublicStoreID Is Nothing Then
@@ -1211,6 +1203,14 @@ HavePublic:
             If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
         End Try
     End Function
+
+    Private Sub AboutButton_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles AdxRibbonButton4.OnClick
+        MsgBox("Microsoft Outlook Add-in for" & vbNewLine & _
+               "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
+               "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
+               "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
+               "This version dated 2015-Nov-21 14:05.", vbInformation, "About this Add-in")
+    End Sub
 
 End Class
 
