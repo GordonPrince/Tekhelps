@@ -876,66 +876,10 @@ HavePublic:
             Marshal.ReleaseComObject(myAttachments)
             If InterceptNote(myAttach) Then
                 If TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
-                    Marshal.ReleaseComObject(item)
                     myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-                    Marshal.ReleaseComObject(myInsp)
                 End If
             End If
             Return
-
-            'Dim x As Short
-            'For x = 1 To myAttachments.Count
-            '    myAttach = myAttachments(x)
-            '    With myAttach
-            '        If .FileName = strNewCallAppointmentTag & ".msg" Or .FileName = strNewCallTrackingTag & ".msg" Then
-            '            Dim strFileName As String = "C:\tmp\" & .FileName
-            '            .SaveAsFile(strFileName)
-            '            myNote = OutlookApp.CreateItemFromTemplate(strFileName)
-            '            myNote.Display()
-            '            Marshal.ReleaseComObject(myNote)
-            '            ' For Each myInsp In OutlookApp.Inspectors
-            '            ' stepping through these backward worked, the For Each loop didn't
-            '            Dim y As Int16
-            '            myInspectors = OutlookApp.Inspectors
-            '            For y = myInspectors.Count To 1 Step -1
-            '                myInsp = myInspectors(y)
-            '                ' don't close emails and other types of items -- only Appointments and Tasks and Notes
-            '                item = myInsp.CurrentItem
-            '                If TypeOf item Is Outlook.NoteItem Then
-            '                    Try
-            '                        myInsp.Close(Outlook.OlInspectorClose.olDiscard)
-            '                    Catch
-            '                        myInsp.WindowState = Outlook.OlWindowState.olMinimized
-            '                    End Try
-            '                ElseIf TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
-            '                    If TypeName(item) = strOriginalType Then
-            '                        myInsp.Close(Outlook.OlInspectorClose.olSave)
-            '                        '11/10/2015 this seems to do that same thing with the prompt in the form's VBScript
-            '                        'ElseIf TypeOf myInsp.CurrentItem Is Outlook.TaskItem Then
-            '                        '    Dim myTask As Outlook.TaskItem = myInsp.CurrentItem
-            '                        '    Const strField As String = "ApptDateTime"
-            '                        '    Try
-            '                        '        If myTask.UserProperties(strField).Value = datAppt Then
-            '                        '        Else
-            '                        '            myTask.UserProperties(strField).Value = datAppt
-            '                        '            myTask.Save()
-            '                        '            ' MsgBox("The Appointment date/time was changed to " & datAppt & vbNewLine &  "on the NewCallTracking item.", vbOKOnly + vbInformation, "Updated Appointment Information")
-            '                        '        End If
-            '                        '    Catch ex As Exception
-            '                        '    End Try
-            '                    End If
-            '                End If
-            '                Marshal.ReleaseComObject(item)
-            '                Marshal.ReleaseComObject(myInsp)
-            '            Next
-            '            Marshal.ReleaseComObject(myInspectors)
-            '            Return
-            '        End If
-            '    End With
-            '    Marshal.ReleaseComObject(myAttach)
-            'Next
-            'Marshal.ReleaseComObject(myAttachments)
-            'MsgBox("Nothing was opened.", vbInformation, strTitle)
         Catch ex As Exception
             MsgBox(ex.Message, vbExclamation, strTitle)
         Finally
