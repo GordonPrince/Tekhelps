@@ -234,16 +234,15 @@ Public Class AddinModule
                     If Left(myFolder.Name, Len(strPublicFolders)) = strPublicFolders Then
                         strPublicStoreID = myFolder.StoreID
                         Marshal.ReleaseComObject(myFolder)
-                        GoTo HaveNewCallTracking
+                        GoTo HavePublicFolders
                     End If
                     Marshal.ReleaseComObject(myFolder)
                 Next
                 Marshal.ReleaseComObject(myFolders)
-                MsgBox("You may not be able to able to view New Call Tracking items." & vbNewLine & vbNewLine & _
-                       "Try to get Outlook working Online if possible.", vbExclamation, "Connect to Public Folders")
+                MsgBox("Could not connect to Public Folders.", vbExclamation)
             End If
 
-HaveNewCallTracking:
+HavePublicFolders:
             myExplorer = OutlookApp.ActiveExplorer
             myExplorer.WindowState = Outlook.OlWindowState.olMaximized
 
@@ -265,6 +264,8 @@ HaveNewCallTracking:
             '                objFD.PublishForm(Outlook.OlFormRegistry.olFolderRegistry, objFolder)
             '            End If
             '        End If
+
+            ' 11/22/2015 read any items so they will disappear from InstantFile's Inbox
 
         Catch ex As Exception
         Finally

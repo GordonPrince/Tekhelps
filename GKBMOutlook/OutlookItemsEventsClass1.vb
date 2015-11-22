@@ -58,10 +58,12 @@ Public Class OutlookItemsEventsClass1
             Return
         End Try
 
+        'Dim obj As Object = SourceFolder
+        'Debug.Print(TypeName(obj))
+
         If Left(myMailItem.Subject, 13) = "Task Request:" _
         Or Left(myMailItem.Subject, 14) = "Task Accepted:" _
         Or Left(myMailItem.Subject, 14) = "Task Declined:" Then
-            ' it was created by InstantFile, therefore it's already been stored in InstantFile
             Return
         End If
 

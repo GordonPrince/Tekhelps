@@ -233,12 +233,12 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        Debug.Print("Entered ProcessBeforeAttachmentRead")
+        'Debug.Print("Entered ProcessBeforeAttachmentRead")
         If InterceptNote(attachment) Then
             e.Cancel = True
-            Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
+            'Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
         Else
-            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
+            'Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
         End If
     End Sub
 
@@ -265,12 +265,12 @@ Public Class OutlookItemEventsClass1
     Private Function EmailMatNo(ByRef myAttach As Outlook.Attachment, ByVal strSubject As String) As Double
         ' updated this 11/16/2015
         Dim strDisplayName As String
-        Dim intX As Integer
+        Dim x As Integer
         Try
             If Left(myAttach.DisplayName, 18) = strIFmatNo Then
                 strDisplayName = Mid(myAttach.DisplayName, 19)
-                intX = InStr(1, strDisplayName, Space(1))
-                If intX > 0 Then strDisplayName = Left(strDisplayName, intX - 1)
+                x = InStr(1, strDisplayName, Space(1))
+                If x > 0 Then strDisplayName = Left(strDisplayName, x - 1)
                 Return CDbl(strDisplayName)
             ElseIf Left(myAttach.DisplayName, 18) = strIFdocNo Then
                 Return CDbl(MatNoFromSubject(strSubject))
@@ -285,30 +285,29 @@ Public Class OutlookItemEventsClass1
 
     Private Function MatNoFromSubject(ByVal strSubject) As Double
         ' try to parse the MatterNo from the Subject line, not the attachment
-        Dim intA As Integer, intB As Integer
+        Dim a As Short
         Dim strSearchFor As String = Nothing
 
-        ' check for either string in the Subject. Use whichever one is found (changed 3/20/2006)
-        intA = InStr(1, strSubject, strDocScanned)
-        If intA > 0 Then
-            strSearchFor = strDocScanned
-        Else
-            intA = InStr(1, strSubject, strLastScanned)
-            If intA > 0 Then strSearchFor = strLastScanned
-        End If
-        If intA > 0 Then
-            strSubject = Trim(Mid(strSubject, intA + Len(strSearchFor) + 1))
-            intB = InStr(1, strSubject, Space(1))
-            If intB > 0 Then
-                On Error Resume Next
-                MatNoFromSubject = Left(strSubject, intB)
-                If Err.Number <> 0 Then
-                    Err.Clear()
-                    MatNoFromSubject = 0
-                    On Error GoTo 0
+        ' check for either string in the Subject. Use whichever one is found.
+        Try
+            a = InStr(1, strSubject, strDocScanned)
+            If a > 0 Then
+                strSearchFor = strDocScanned
+            Else
+                a = InStr(1, strSubject, strLastScanned)
+                If a > 0 Then strSearchFor = strLastScanned
+            End If
+            If a > 0 Then
+                strSubject = Trim(Mid(strSubject, a + Len(strSearchFor) + 1))
+                Dim b As Short
+                b = InStr(1, strSubject, Space(1))
+                If b > 0 Then
+                    Return CDbl(Left(strSubject, b))
                 End If
             End If
-        End If
+        Catch ex As Exception
+        End Try
+        Return 0
     End Function
 End Class
 
