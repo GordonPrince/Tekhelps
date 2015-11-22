@@ -156,13 +156,14 @@ Module Globals
 
     Function InterceptNote(attachment) As Boolean
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
-                         "Open InstantFile, then try this again."
+                                 "Open InstantFile, then try this again."
         Const strTitle As String = "InterceptNote() for "
         Dim myAttachment As Outlook.Attachment = Nothing
         Dim appAccess As Access.Application = Nothing
         Dim myNote As Outlook.NoteItem = Nothing
         Dim olNameSpace As Outlook.NameSpace = Nothing
         Dim olItem As Object = Nothing
+        Debug.Print("InterceptNote fired")
         Try
             myAttachment = attachment
             If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then

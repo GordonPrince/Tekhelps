@@ -80,7 +80,42 @@ Public Class AddinModule
     '    End If
     'End Sub
 
+    'Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
+    '    '11/22/2015 commented this whole procedure out -- everything handled by InspectorActivate
+    '    Debug.Print("AdxOutlookAppEvents1_NewInspector fired")
+    '    Dim myInsp As Outlook.Inspector = inspector
+    '    Dim item As Object = Nothing
+    '    Dim myNote As Outlook.NoteItem = Nothing
+    '    Try
+    '        item = myInsp.CurrentItem
+    '        If TypeOf item Is Outlook.NoteItem Then
+    '            myNote = item
+    '            Dim strID As String = Nothing
+    '            If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
+    '                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
+    '            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
+    '                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
+    '            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
+    '                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
+    '            End If
+    '            If Len(strID) > 0 Then
+    '                If OpenItemFromID(strID) Then
+    '                Else
+    '                    MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
+    '                End If
+    '            End If
+    '            Marshal.ReleaseComObject(myNote)
+    '        End If
+    '        Marshal.ReleaseComObject(item)
+    '    Catch ex As Exception
+    '    Finally
+    '        If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
+    '        If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+    '    End Try
+    'End Sub
+
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
         Try
@@ -89,7 +124,7 @@ Public Class AddinModule
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             itemEvents.ConnectTo(item, True)
             ' Marshal.ReleaseComObject(item)
-            Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
+            ' Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
         Catch ex As Exception
             ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
         Finally
@@ -99,9 +134,8 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles _
-        AdxOutlookAppEvents1.ExplorerActivate, _
-        AdxOutlookAppEvents1.ExplorerSelectionChange
-
+                AdxOutlookAppEvents1.ExplorerActivate, _
+                AdxOutlookAppEvents1.ExplorerSelectionChange
         Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If myExplorer Is Nothing Then Return
         Dim sel As Outlook.Selection = Nothing
@@ -117,7 +151,7 @@ Public Class AddinModule
                 If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
                 'Marshal.ReleaseComObject(item)
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
+                ' Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
             End If
         Catch ex As Exception
             ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
@@ -127,38 +161,6 @@ Public Class AddinModule
             ' don't release myExplorer
         End Try
     End Sub
-
-    'Private Sub AdxOutlookAppEvents1_ExplorerSelectionChange(sender As System.Object, explorer As System.Object) Handles AdxOutlookAppEvents1.ExplorerSelectionChange
-    '    Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-    '    If myExplorer Is Nothing Then Return
-    '    Dim sel As Outlook.Selection = Nothing
-    '    Dim item As Object = Nothing
-    '    Try
-    '        sel = myExplorer.Selection
-    '    Catch
-    '    End Try
-    '    If sel Is Nothing Then Return
-    '    Try
-    '        If sel.Count = 1 Then
-    '            item = sel.Item(1)
-    '            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
-    '            itemEvents.ConnectTo(item, True)
-    '            Marshal.ReleaseComObject(item)
-    '            Debug.Print("AdxOutlookAppEvents1_ExplorerSelectionChange fired")
-    '        End If
-    '    Catch ex As Exception
-    '        MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerSelectionChange")
-    '    Finally
-    '        If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-    '        If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
-    '        ' don't release myExplorer
-    '    End Try
-    '    Try
-    '        AdxOutlookAppEvents1_ExplorerActivate(sender, explorer)
-    '    Catch ex As Exception
-    '        MsgBox(ex.Message, vbExclamation, "calling AdxOutlookAppEvents1_ExplorerActivate(sender, explorer)")
-    '    End Try
-    'End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
         Dim mySession As Outlook.NameSpace = Nothing
@@ -291,39 +293,6 @@ HaveNewCallTracking:
         Finally
             If myProject IsNot Nothing Then Marshal.ReleaseComObject(myProject) : myProject = Nothing
             If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
-        End Try
-    End Sub
-
-    Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-        '11/21/2015
-        Dim myInsp As Outlook.Inspector = inspector
-        Dim item As Object = Nothing
-        Dim myNote As Outlook.NoteItem = Nothing
-        Try
-            item = myInsp.CurrentItem
-            If TypeOf item Is Outlook.NoteItem Then
-                myNote = item
-                Dim strID As String = Nothing
-                If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-                    strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-                ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-                    strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-                ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-                    strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-                End If
-                If Len(strID) > 0 Then
-                    If OpenItemFromID(strID) Then
-                    Else
-                        MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
-                    End If
-                End If
-                Marshal.ReleaseComObject(myNote)
-            End If
-            Marshal.ReleaseComObject(item)
-        Catch ex As Exception
-        Finally
-            If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
         End Try
     End Sub
 

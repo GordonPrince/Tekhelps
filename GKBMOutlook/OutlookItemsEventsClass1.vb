@@ -9,9 +9,6 @@ Imports System.Data
 'Add-in Express Outlook Items Events Class
 Public Class OutlookItemsEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemsEvents
- 
-    ' Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
-    ' Dim OutlookApp As Outlook.Application = Nothing
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
@@ -43,9 +40,6 @@ Public Class OutlookItemsEventsClass1
 
         Static strLastID As String
 
-        'Dim myFolder As Outlook.Folder = SourceFolder
-        'Debug.Print("ItemAdd() myFolder.FolderPath = " & myFolder.FolderPath)
-
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
             'Debug.Print("myMailItem.Subject = " & myMailItem.Subject)
@@ -71,6 +65,7 @@ Public Class OutlookItemsEventsClass1
             Return
         End If
 
+        Dim x As Short
         Try
             ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
             If Len(myMailItem.BillingInformation) > 0 Then
@@ -88,7 +83,6 @@ Public Class OutlookItemsEventsClass1
                 ' if this is an InstantFile related E-mail then add it to InstantFile (unless it originated in InstantFile)
                 'For Each myAttach In myMailItem.Attachments
 TryFromAttachments:
-                Dim x As Short
                 myAttachments = myMailItem.Attachments
                 For x = 1 To myAttachments.Count
                     myAttach = myAttachments(x)
@@ -179,20 +173,10 @@ InstantFileEmail:
             End If
 
             myCopy = myMailItem.Copy
-            ' myMove = myCopy.Move(myFolder)  ' the myMove object has the new EntryID
             myMove = myCopy.Move(myPublicFolder)
             Marshal.ReleaseComObject(myPublicFolder)
 
-            ' 11/16/2015 this is a band-aid and needs a better fix
-            ' 11/17/2015 changed Constructor
-            ' If OutlookApp IsNot Nothing Then
             mySession = OutlookApp.Session
-            'ElseIf myMailItem IsNot Nothing Then
-            '    myApplication = myMailItem.Application
-            '    mySession = myApplication.Session
-            '    ' Marshal.ReleaseComObject(myApplication)
-            'End If
-
             myUser = mySession.CurrentUser
             Dim strCmd As String
             strCmd = "select staff_id from staff where staff_name = '" & Replace(myUser.Name, "'", "''") & "'"
@@ -220,11 +204,10 @@ InstantFileEmail:
                 Else
                     MsgBox("No initials were entered. No comment about this E-mail could be created.", vbExclamation, strTitle)
                     con.Close()
-                    Exit Sub
+                    Return
                 End If
             End If
 
-            Dim lngX As Int16
             With myMove
                 ' This updates the database with the EntryID of the mail item, which can only be done after it was sent
                 ' InstantFile puts the Comment or Email.DocNo in the BillingInformation field when it creates the email
@@ -232,11 +215,11 @@ InstantFileEmail:
                 ' Debug.Print("ItemAdd() myMove.BillingInformation = " & .BillingInformation)
                 If InStr(1, .BillingInformation, strCommentID) Or InStr(1, .BillingInformation, strDocNo) Then
                     ' update the Comment with the EntryID
-                    lngX = InStr(1, .BillingInformation, strCommentID)
-                    If lngX > 0 Then
+                    x = InStr(1, .BillingInformation, strCommentID)
+                    If x > 0 Then
                         strSQL = Mid(.BillingInformation, Len(strCommentID))
-                        lngX = InStr(1, strSQL, ",")
-                        If lngX > 0 Then strSQL = Left(strSQL, lngX - 1)
+                        x = InStr(1, strSQL, ",")
+                        If x > 0 Then strSQL = Left(strSQL, x - 1)
                         strSQL = Trim(strSQL)
                         strScratch = "UPDATE COMMENT SET EntryID = '" & .EntryID & "' WHERE CommentID = " & CLng(strSQL)
                         If Not RunSQLcommand(strScratch) Then
@@ -244,9 +227,9 @@ InstantFileEmail:
                         End If
                     End If
                     ' update the Email row with the EntryID
-                    lngX = InStr(1, .BillingInformation, strDocNo)
-                    If lngX > 0 Then
-                        strSQL = Mid(.BillingInformation, lngX + 1)
+                    x = InStr(1, .BillingInformation, strDocNo)
+                    If x > 0 Then
+                        strSQL = Mid(.BillingInformation, x + 1)
                         strSQL = Trim(Mid(strSQL, Len(strDocNo)))
                         strScratch = "UPDATE Email SET EntryID = '" & .EntryID & "' WHERE DocNo = " & CLng(strSQL)
                         If Not RunSQLcommand(strScratch) Then
@@ -310,12 +293,10 @@ AddRecipientsAndBody:
                 MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
                        "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
             End If
-
         Catch ex As Exception
             MsgBox(Err.Description, vbExclamation, strTitle)
         Finally
             If myUser IsNot Nothing Then Marshal.ReleaseComObject(myUser) : myUser = Nothing
-            'If myApplication IsNot Nothing Then Marshal.ReleaseComObject(myApplication) : myApplication = Nothing
             If mySession IsNot Nothing Then Marshal.ReleaseComObject(mySession) : mySession = Nothing
             If myRecipient IsNot Nothing Then Marshal.ReleaseComObject(myRecipient) : myRecipient = Nothing
             If myRecipients IsNot Nothing Then Marshal.ReleaseComObject(myRecipients) : myRecipients = Nothing
