@@ -115,7 +115,7 @@ Public Class AddinModule
     'End Sub
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
+        Debug.Print("AdxOutlookAppEvents1_InspectorActivate started")
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
         Try
@@ -124,7 +124,7 @@ Public Class AddinModule
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             itemEvents.ConnectTo(item, True)
             ' Marshal.ReleaseComObject(item)
-            ' Debug.Print("AdxOutlookAppEvents1_InspectorActivate fired")
+            Debug.Print("AdxOutlookAppEvents1_InspectorActivate finished")
         Catch ex As Exception
             ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
         Finally
@@ -136,6 +136,7 @@ Public Class AddinModule
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles _
                 AdxOutlookAppEvents1.ExplorerActivate, _
                 AdxOutlookAppEvents1.ExplorerSelectionChange
+        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate started")
         Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         If myExplorer Is Nothing Then Return
         Dim sel As Outlook.Selection = Nothing
@@ -146,12 +147,12 @@ Public Class AddinModule
         End Try
         If sel Is Nothing Then Return
         Try
+            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             If sel.Count = 1 Then
                 item = sel.Item(1)
-                If itemEvents.IsConnected Then itemEvents.RemoveConnection()
                 itemEvents.ConnectTo(item, True)
                 'Marshal.ReleaseComObject(item)
-                ' Debug.Print("AdxOutlookAppEvents1_ExplorerActivate fired")
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate finished")
             End If
         Catch ex As Exception
             ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
@@ -1129,7 +1130,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-22  8:55.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-24  17:45.", vbInformation, "About this Add-in")
     End Sub
 
 End Class

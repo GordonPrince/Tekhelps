@@ -163,7 +163,7 @@ Module Globals
         Dim myNote As Outlook.NoteItem = Nothing
         Dim olNameSpace As Outlook.NameSpace = Nothing
         Dim olItem As Object = Nothing
-        Debug.Print("InterceptNote fired")
+        'Debug.Print("InterceptNote fired")
         Try
             myAttachment = attachment
             If Left(myAttachment.DisplayName, Len(strIFdocNo)) = strIFdocNo Then
@@ -177,7 +177,7 @@ Module Globals
                         appAccess = CType(Marshal.GetActiveObject("Access.Application"), Access.Application)
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayDocument", lngDocNo)
-                        Debug.Print("InterceptNote: DisplayDocument")
+                        'Debug.Print("InterceptNote: DisplayDocument")
                         Marshal.ReleaseComObject(appAccess)
                         Return True
                     Catch
@@ -201,7 +201,7 @@ Module Globals
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strMat)
                     End Try
-                    Debug.Print("InterceptNote: DisplayMatter")
+                    'Debug.Print("InterceptNote: DisplayMatter")
                     Return False
                 End If
             ElseIf Left(myAttachment.DisplayName, Len(strIFtaskTag)) = strIFtaskTag Then  ' added 11/16/2015, updated 11/17/2015
