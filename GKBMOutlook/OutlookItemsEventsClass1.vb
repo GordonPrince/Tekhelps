@@ -94,7 +94,7 @@ TryFromAttachments:
                         ' myProp = myMailItem.UserProperties.Find("CameFromOutlook")
                         myProp = myProperties.Find("CameFromOutlook")
                         If myProp Is Nothing Then Return
-                        If MsgBox("Save the E-mail you sent as an InstantFile Comment in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
+                        If MsgBox("Save the E-mail you sent as an InstantFile Comment in matter " & dblMatNo & "?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = MsgBoxResult.Yes Then
                             bScanned = False
                             If dblMatNo > 0 Then
                                 GoTo InstantFileEmail
@@ -293,7 +293,7 @@ AddRecipientsAndBody:
                     " VALUES (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
             If RunSQLcommand(strSQL) Then
                 MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
-                       "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
+                       "and a copy of the E-mail was saved with the Comment.", , strTitle)
             End If
         Catch ex As Exception
             MsgBox(Err.Description, vbExclamation, strTitle)
@@ -308,7 +308,7 @@ AddRecipientsAndBody:
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myMove IsNot Nothing Then Marshal.ReleaseComObject(myMove) : myMove = Nothing
             If myCopy IsNot Nothing Then Marshal.ReleaseComObject(myCopy) : myCopy = Nothing
-            If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
+            '11/25/2015 commented this out If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
             If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
         End Try
 

@@ -67,99 +67,49 @@ Public Class AddinModule
 
 #End Region
 
-    'Private Sub ConnectToSelectedItem(ByVal selection As Outlook.Selection)
-    '    ' 11/20/2015
-    '    If selection IsNot Nothing Then
-    '        If selection.Count = 1 Then
-    '            Dim item As Object = selection.Item(1)
-    '            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
-    '            itemEvents.ConnectTo(item, True)
-    '            ' Marshal.ReleaseComObject(item) : item = Nothing
-    '            Debug.Print("ConnectToSelectedItem() itemEvents.ConnectTo(item, True) fired")
-    '        End If
-    '    End If
-    'End Sub
-
-    'Private Sub AdxOutlookAppEvents1_NewInspector(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.NewInspector
-    '    '11/22/2015 commented this whole procedure out -- everything handled by InspectorActivate
-    '    Debug.Print("AdxOutlookAppEvents1_NewInspector fired")
-    '    Dim myInsp As Outlook.Inspector = inspector
-    '    Dim item As Object = Nothing
-    '    Dim myNote As Outlook.NoteItem = Nothing
-    '    Try
-    '        item = myInsp.CurrentItem
-    '        If TypeOf item Is Outlook.NoteItem Then
-    '            myNote = item
-    '            Dim strID As String = Nothing
-    '            If Left(myNote.Body, Len(strNewCallTrackingTag)) = strNewCallTrackingTag Then
-    '                strID = Mid(myNote.Body, Len(strNewCallTrackingTag) + 3)
-    '            ElseIf Left(myNote.Body, Len(strNewCallAppointmentTag)) = strNewCallAppointmentTag Then
-    '                strID = Mid(myNote.Body, Len(strNewCallAppointmentTag) + 3)
-    '            ElseIf Left(myNote.Body, Len(strIFtaskTag)) = strIFtaskTag Then
-    '                strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
-    '            End If
-    '            If Len(strID) > 0 Then
-    '                If OpenItemFromID(strID) Then
-    '                Else
-    '                    MsgBox("Could not open Item from ID", vbExclamation + vbOKCancel, "OpenItemFromID")
-    '                End If
-    '            End If
-    '            Marshal.ReleaseComObject(myNote)
-    '        End If
-    '        Marshal.ReleaseComObject(item)
-    '    Catch ex As Exception
-    '    Finally
-    '        If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
-    '        If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-    '    End Try
-    'End Sub
-
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
-        Debug.Print("AdxOutlookAppEvents1_InspectorActivate started")
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
         Try
             myInsp = inspector
+            If myInsp Is Nothing Then Return '11/25/2015 added this line
             item = myInsp.CurrentItem
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             itemEvents.ConnectTo(item, True)
-            ' Marshal.ReleaseComObject(item)
-            Debug.Print("AdxOutlookAppEvents1_InspectorActivate finished")
         Catch ex As Exception
-            ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_InspectorActivate")
-        Finally
-            ' If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
-            ' don't release myInsp
         End Try
     End Sub
 
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles _
                 AdxOutlookAppEvents1.ExplorerActivate, _
                 AdxOutlookAppEvents1.ExplorerSelectionChange
-        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate started")
-        Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        '11/25/2015 changed this to see if would prevent throwing the error that Kailey reported to me
+        'Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate entered")
+        Dim myExplorer As Outlook.Explorer = Nothing
+        Try
+            myExplorer = explorer
+        Catch ex As Exception
+        End Try
         If myExplorer Is Nothing Then Return
+
         Dim sel As Outlook.Selection = Nothing
-        Dim item As Object = Nothing
         Try
             sel = myExplorer.Selection
-        Catch
+        Catch ex As Exception
         End Try
         If sel Is Nothing Then Return
+
+        Dim item As Object = Nothing
         Try
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             If sel.Count = 1 Then
                 item = sel.Item(1)
                 itemEvents.ConnectTo(item, True)
-                'Marshal.ReleaseComObject(item)
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate finished")
             End If
         Catch ex As Exception
-            ' MsgBox(ex.Message, vbExclamation, "AdxOutlookAppEvents1_ExplorerActivate")
         Finally
-            'If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
-            ' don't release myExplorer
         End Try
     End Sub
 
@@ -172,6 +122,7 @@ Public Class AddinModule
         Dim myExplorer As Outlook.Explorer = Nothing
         Dim myItems As Outlook.Items = Nothing
         Dim myItem As Object = Nothing
+        Dim myUser As Outlook.Recipient = Nothing
 
         Try
             mySession = OutlookApp.GetNamespace("MAPI")
@@ -268,6 +219,13 @@ HavePublicFolders:
             '            End If
             '        End If
 
+            myUser = mySession.CurrentUser
+            If myUser.Name = "Gordon Prince" Or myUser.Name = "Michael F. Montesi" Then
+                Marshal.ReleaseComObject(myUser) : myUser = Nothing
+                GoTo FinishedInstantFileTaskRequests
+            End If
+            Marshal.ReleaseComObject(myUser) : myUser = Nothing
+
             ' 11/22/2015 read any items so TaskRequest related emails will disappear from InstantFile's Inbox
             myFolders = mySession.Folders
             For x = 1 To myFolders.Count
@@ -310,6 +268,7 @@ FinishedInstantFileTaskRequests:
 
         Catch ex As Exception
         Finally
+            If myUser IsNot Nothing Then Marshal.ReleaseComObject(myUser) : myUser = Nothing
             If myItem IsNot Nothing Then Marshal.ReleaseComObject(myItem) : myItem = Nothing
             If myItems IsNot Nothing Then Marshal.ReleaseComObject(myItems) : myItems = Nothing
             If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
@@ -1130,7 +1089,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-24  17:45.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-25 13:30.", vbInformation, "About this Add-in")
     End Sub
 
 End Class

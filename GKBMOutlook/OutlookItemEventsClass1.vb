@@ -9,9 +9,6 @@ Imports Microsoft.Office.Interop
 Public Class OutlookItemEventsClass1
     Inherits AddinExpress.MSO.ADXOutlookItemEvents
 
-    ' Dim OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
-    ' Dim OutlookApp As Outlook.Application = Nothing
-
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
         ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
@@ -23,7 +20,7 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessAttachmentRead(ByVal Attachment As Object)
-        'Debug.Print("ProcessAttachmentRead fired")
+        ' Debug.Print("ProcessAttachmentRead fired")
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentSave(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
@@ -84,7 +81,6 @@ Public Class OutlookItemEventsClass1
             If myProps IsNot Nothing Then Marshal.ReleaseComObject(myProps) : myProps = Nothing
             If myAttachment IsNot Nothing Then Marshal.ReleaseComObject(myAttachment) : myAttachment = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
-            ' Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
         End Try
     End Sub
 
@@ -197,7 +193,8 @@ Public Class OutlookItemEventsClass1
             If myExpl IsNot Nothing Then Marshal.ReleaseComObject(myExpl) : myExpl = Nothing
             If myInsps IsNot Nothing Then Marshal.ReleaseComObject(myInsps) : myInsps = Nothing
             If myOriginal IsNot Nothing Then Marshal.ReleaseComObject(myOriginal) : myOriginal = Nothing
-            If myResponse IsNot Nothing Then Marshal.ReleaseComObject(myResponse) : myResponse = Nothing
+            '11/25/2015 commented this out -- don't release the object passed into the procedure
+            ' If myResponse IsNot Nothing Then Marshal.ReleaseComObject(myResponse) : myResponse = Nothing
         End Try
     End Sub
 
@@ -238,7 +235,7 @@ Public Class OutlookItemEventsClass1
             e.Cancel = True
             'Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
         Else
-            'Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
+            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
         End If
     End Sub
 
@@ -278,7 +275,7 @@ Public Class OutlookItemEventsClass1
                 Return False
             End If
         Catch ex As Exception
-            MsgBox(Err.Description, vbExclamation, "Parse MatterNo from Attachment")
+            MsgBox(ex.Message, vbExclamation, "Parse MatterNo from Attachment")
             Return False
         End Try
     End Function
