@@ -807,35 +807,65 @@ HavePublic:
 
     Private Sub OpenItemFromNote_OnClick(sender As Object, control As IRibbonControl, pressed As Boolean) Handles OpenItemFromNote.OnClick
         Const strTitle As String = "Open Item from Attached Note"
+        Dim myInspectors As Outlook.Inspectors = Nothing
         Dim myInsp As Outlook.Inspector = Nothing
+        Dim myExplorer As Outlook.Explorer = Nothing
+        Dim mySel As Outlook.Selection = Nothing
+        Dim item As Object = Nothing
         Dim myAttachments As Outlook.Attachments = Nothing
         Dim myAttach As Outlook.Attachment = Nothing
-        Dim item As Object = Nothing
 
         Try
-            myInsp = OutlookApp.ActiveInspector
-            item = myInsp.CurrentItem
-            myAttachments = item.attachments
-            If myAttachments.Count = 0 Then
-                MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
-                Return
-            End If
-
-            myAttach = myAttachments(1)
-            Marshal.ReleaseComObject(myAttachments)
-            If InterceptNote(myAttach) Then
-                If TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
-                    myInsp.Close(Outlook.OlInspectorClose.olDiscard)
+            myInspectors = OutlookApp.Inspectors
+            If myInspectors.Count > 0 Then
+                myInsp = OutlookApp.ActiveInspector
+                item = myInsp.CurrentItem
+            Else
+                myExplorer = OutlookApp.ActiveExplorer
+                mySel = myExplorer.Selection
+                If mySel.Count = 1 Then
+                    item = mySel.Item(1)
+                ElseIf mySel.Count = 0 Then
+                    MsgBox("Please select an item before trying to open its attached Note.", vbExclamation, strTitle)
+                Else
+                    MsgBox("Please select only one item before trying to open its attached Note.", vbExclamation, strTitle)
+                    Return
                 End If
             End If
-            Return
+
+            myAttachments = item.attachments
+            Dim x As Short
+            For x = 1 To myAttachments.Count
+                myAttach = myAttachments(x)
+                If Right(myAttach.FileName, 4) = ".msg" Then
+                    If InterceptNote(myAttach) Then
+                        If myInsp IsNot Nothing Then  ' could have been triggered by an Explorer selection
+                            If TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
+                                myInsp.Close(Outlook.OlInspectorClose.olSave)
+                            End If
+                        End If
+                        Return
+                    End If
+                End If
+                Marshal.ReleaseComObject(myAttach)
+            Next
+            MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
+            
         Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, strTitle)
+            If InStr(ex.Message, "The Explorer has been closed") Then
+                MsgBox("This will not work from Outlook Today." & vbNewLine & vbNewLine & _
+                       "There is no item selected.", vbExclamation, strTitle)
+            Else
+                MsgBox(ex.Message, vbExclamation, strTitle)
+            End If
         Finally
-            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+            If mySel IsNot Nothing Then Marshal.ReleaseComObject(mySel) : mySel = Nothing
+            If myExplorer IsNot Nothing Then Marshal.ReleaseComObject(myExplorer) : myExplorer = Nothing
             If myInsp IsNot Nothing Then Marshal.ReleaseComObject(myInsp) : myInsp = Nothing
+            If myInspectors IsNot Nothing Then Marshal.ReleaseComObject(myInspectors) : myInspectors = Nothing
         End Try
     End Sub
 
@@ -1089,7 +1119,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-25 13:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-26  7:50.", vbInformation, "About this Add-in")
     End Sub
 
 End Class

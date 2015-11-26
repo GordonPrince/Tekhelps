@@ -215,10 +215,6 @@ Module Globals
                 strID = Mid(myNote.Body, Len(strIFtaskTag) + 3)
                 x = InStr(1, strID, vbNewLine)
                 strID = Left(strID, x - 1)
-                'strID = Mid(myNote.Body, Len(strIFtaskTag) + 1) ' strip out the tag
-                'x = InStr(1, strID, vbNewLine)
-                'If x > 0 Then strID = Mid(strID, x + 2) ' strip out the leading vbNewLine, which should leave only the EntryID
-
                 myNote.Close(Outlook.OlInspectorClose.olDiscard)
                 Marshal.ReleaseComObject(myNote)
                 Try
