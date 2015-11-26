@@ -94,7 +94,8 @@ TryFromAttachments:
                         ' myProp = myMailItem.UserProperties.Find("CameFromOutlook")
                         myProp = myProperties.Find("CameFromOutlook")
                         If myProp Is Nothing Then Return
-                        If MsgBox("Save the E-mail you sent as an InstantFile Comment in matter " & dblMatNo & "?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = MsgBoxResult.Yes Then
+                        If MsgBox("Save the E-mail you sent as an InstantFile Comment" & vbNewLine & _
+                                  "in matter " & dblMatNo & "?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = MsgBoxResult.Yes Then
                             bScanned = False
                             If dblMatNo > 0 Then
                                 GoTo InstantFileEmail
@@ -293,7 +294,9 @@ AddRecipientsAndBody:
                     " VALUES (" & dblMatNo & ",'" & strInitials & "','" & Left(Replace(strBody, "'", "''"), 2000) & "','" & myMove.EntryID & "')"
             If RunSQLcommand(strSQL) Then
                 MsgBox("An InstantFile Comment was created from your E-mail" & vbNewLine & _
-                       "and a copy of the E-mail was saved with the Comment.", , strTitle)
+                       "and a copy of the E-mail was saved with the Comment.", vbInformation, strTitle)
+            Else
+                MsgBox("There was a problem creating the InstantFile Comment" & vbNewLine & "from your E-mail.", vbExclamation, strTitle)
             End If
         Catch ex As Exception
             MsgBox(Err.Description, vbExclamation, strTitle)

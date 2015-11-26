@@ -98,23 +98,19 @@ Partial Public Class AddinModule
         Me.SaveClose.Id = "adxRibbonButton_3d19a766ad2c4d30be39ba838a25052e"
         Me.SaveClose.IdMso = "SaveAndClose"
         Me.SaveClose.ImageTransparentColor = System.Drawing.Color.Transparent
-        Me.SaveClose.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+        Me.SaveClose.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookAppointment Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
         Me.SaveClose.Size = AddinExpress.MSO.ADXRibbonXControlSize.Large
         '
         'AdxRibbonSeparator6
         '
         Me.AdxRibbonSeparator6.Id = "adxRibbonSeparator_b6799511e297445ba5bac1a95c3d48bd"
-        Me.AdxRibbonSeparator6.Ribbons = CType(((((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookMeetingRequestRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookAppointment) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
+        Me.AdxRibbonSeparator6.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookAppointment Or AddinExpress.MSO.ADXRibbons.msrOutlookContact) _
             Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
-            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
         '
         'AppointmentCalendar
         '
@@ -246,7 +242,9 @@ Partial Public Class AddinModule
         'AdxRibbonSeparator4
         '
         Me.AdxRibbonSeparator4.Id = "adxRibbonSeparator_81545993843d4e66aa25cab258f35721"
-        Me.AdxRibbonSeparator4.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
+        Me.AdxRibbonSeparator4.Ribbons = CType((((AddinExpress.MSO.ADXRibbons.msrOutlookMailRead Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostRead) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSRead), AddinExpress.MSO.ADXRibbons)
         '
         'OpenItemFromNote
         '
@@ -273,7 +271,10 @@ Partial Public Class AddinModule
         'AdxRibbonSeparator1
         '
         Me.AdxRibbonSeparator1.Id = "adxRibbonSeparator_ab15ec8bc2634c16b73d15434c77cde1"
-        Me.AdxRibbonSeparator1.Ribbons = AddinExpress.MSO.ADXRibbons.msrOutlookTask
+        Me.AdxRibbonSeparator1.Ribbons = CType(((((AddinExpress.MSO.ADXRibbons.msrOutlookMailCompose Or AddinExpress.MSO.ADXRibbons.msrOutlookTask) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookResend) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookPostCompose) _
+            Or AddinExpress.MSO.ADXRibbons.msrOutlookMMSCompose), AddinExpress.MSO.ADXRibbons)
         '
         'AdxRibbonButton1
         '

@@ -31,16 +31,19 @@ Module Globals
         Dim strConnectionString As String = SQLConnectionString()
         Dim con As New SqlClient.SqlConnection(strConnectionString)
         Dim cmd As New SqlClient.SqlCommand(queryString, con)
-        ' Using con As New SqlClient.SqlConnection(strConnectionString)
+        Dim rows As Long
         Try
             cmd.Connection.Open()
-            cmd.ExecuteNonQuery()
+            rows = cmd.ExecuteNonQuery()
             con.Close()
-            Return True
+            If rows = 1 Then
+                Return True
+            Else
+                Return False
+            End If
         Catch ex As Exception
             Return False
         End Try
-        ' End Using
     End Function
 
     Public Function SQLConnectionString() As String
