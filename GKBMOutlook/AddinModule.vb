@@ -820,11 +820,13 @@ HavePublic:
             If myInspectors.Count > 0 Then
                 myInsp = OutlookApp.ActiveInspector
                 item = myInsp.CurrentItem
+                Debug.WriteLine("OpenItemFromNote_OnClick item = myInsp.CurrentItem")
             Else
                 myExplorer = OutlookApp.ActiveExplorer
                 mySel = myExplorer.Selection
                 If mySel.Count = 1 Then
                     item = mySel.Item(1)
+                    Debug.WriteLine("OpenItemFromNote_OnClick item = mySel.Item(1)")
                 ElseIf mySel.Count = 0 Then
                     MsgBox("Please select an item before trying to open its attached Note.", vbExclamation, strTitle)
                 Else
@@ -838,7 +840,9 @@ HavePublic:
             For x = 1 To myAttachments.Count
                 myAttach = myAttachments(x)
                 If Right(myAttach.FileName, 4) = ".msg" Then
+                    Debug.WriteLine("OpenItemFromNote_OnClick Right(myAttach.FileName, 4) = .msg")
                     If InterceptNote(myAttach) Then
+                        Debug.WriteLine("OpenItemFromNote_OnClick InterceptNote(myAttach) returned true")
                         If myInsp IsNot Nothing Then  ' could have been triggered by an Explorer selection
                             If TypeOf item Is Outlook.AppointmentItem Or TypeOf item Is Outlook.TaskItem Then
                                 myInsp.Close(Outlook.OlInspectorClose.olSave)
@@ -1119,7 +1123,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-26  7:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Nov-27  5:45.", vbInformation, "About this Add-in")
     End Sub
 
 End Class
