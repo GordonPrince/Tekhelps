@@ -181,7 +181,7 @@ Module Globals
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayDocument", lngDocNo)
                         Marshal.ReleaseComObject(appAccess)
-                        Debug.Print("InterceptNote() DisplayDocument")
+                        Debug.Print("InterceptNote() DisplayDocument " & lngDocNo)
                         Return True
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strDoc)
@@ -200,7 +200,7 @@ Module Globals
                         If Not appAccess.Visible Then appAccess.Visible = True
                         appAccess.Run("DisplayMatter", dblMatNo)
                         Marshal.ReleaseComObject(appAccess)
-                        Debug.Print("InterceptNote() DisplayMatter")
+                        Debug.Print("InterceptNote() DisplayMatter " & dblMatNo)
                         Return True
                     Catch
                         MsgBox(strMsg, vbExclamation + vbOKOnly, strTitle & strMat)

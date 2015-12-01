@@ -105,7 +105,13 @@ Public Class AddinModule
             If itemEvents.IsConnected Then itemEvents.RemoveConnection()
             If sel.Count = 1 Then
                 item = sel.Item(1)
-                itemEvents.ConnectTo(item, True)
+                If TypeOf item Is Outlook.NoteItem Then
+                    Debug.WriteLine("Did not connect to Note item")
+                    If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+                Else
+                    itemEvents.ConnectTo(item, True)
+                    Debug.WriteLine("Connected to item of type " & TypeName(item))
+                End If
             End If
         Catch ex As Exception
         Finally
@@ -829,13 +835,24 @@ HavePublic:
                     Debug.WriteLine("OpenItemFromNote_OnClick item = mySel.Item(1)")
                 ElseIf mySel.Count = 0 Then
                     MsgBox("Please select an item before trying to open its attached Note.", vbExclamation, strTitle)
+                    Return
                 Else
                     MsgBox("Please select only one item before trying to open its attached Note.", vbExclamation, strTitle)
                     Return
                 End If
             End If
 
+            If item Is Nothing Then
+                Debug.WriteLine("item Is Nothing")
+                Return
+            End If
+
             myAttachments = item.attachments
+            If myAttachments Is Nothing Then
+                Debug.WriteLine("myAttachments Is Nothing")
+                Return
+            End If
+            Debug.WriteLine("myAttachments.Count = " & myAttachments.Count)
             Dim x As Short
             For x = 1 To myAttachments.Count
                 myAttach = myAttachments(x)
@@ -854,12 +871,13 @@ HavePublic:
                 Marshal.ReleaseComObject(myAttach)
             Next
             MsgBox("There are no Notes attached to this item.", vbInformation, strTitle)
-            
+
         Catch ex As Exception
             If InStr(ex.Message, "The Explorer has been closed") Then
                 MsgBox("This will not work from Outlook Today." & vbNewLine & vbNewLine & _
                        "There is no item selected.", vbExclamation, strTitle)
             Else
+                Debug.WriteLine(ex.Message)
                 MsgBox(ex.Message, vbExclamation, strTitle)
             End If
         Finally
@@ -1123,7 +1141,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Nov-27  5:45.", vbInformation, "About this Add-in")
+               "This version dated 2015-Dec-1  6:40.", vbInformation, "About this Add-in")
     End Sub
 
 End Class
