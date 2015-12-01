@@ -84,13 +84,13 @@ Public Class AddinModule
                 AdxOutlookAppEvents1.ExplorerActivate, _
                 AdxOutlookAppEvents1.ExplorerSelectionChange
         '11/25/2015 changed this to see if would prevent throwing the error that Kailey reported to me
-        'Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-        'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate entered")
-        Dim myExplorer As Outlook.Explorer = Nothing
-        Try
-            myExplorer = explorer
-        Catch ex As Exception
-        End Try
+        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate entered")
+        Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
+        'Dim myExplorer As Outlook.Explorer = Nothing
+        'Try
+        '    myExplorer = explorer
+        'Catch ex As Exception
+        'End Try
         If myExplorer Is Nothing Then Return
 
         Dim sel As Outlook.Selection = Nothing
@@ -120,6 +120,7 @@ Public Class AddinModule
     End Sub
 
     Private Sub AdxOutlookAppEvents1_Startup(sender As Object, e As EventArgs) Handles AdxOutlookAppEvents1.Startup
+        Const strTitle As String = "AdxOutlookAppEvents1_Startup"
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolder As Outlook.Folder = Nothing
         Dim myNotes As Outlook.Items = Nothing
@@ -199,7 +200,7 @@ Public Class AddinModule
                     Marshal.ReleaseComObject(myFolder)
                 Next
                 Marshal.ReleaseComObject(myFolders)
-                MsgBox("Could not connect to Public Folders.", vbExclamation)
+                MsgBox("Could not connect to Public Folders.", vbExclamation, strTitle)
             End If
 
 HavePublicFolders:

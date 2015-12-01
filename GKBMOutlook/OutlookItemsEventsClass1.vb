@@ -21,7 +21,7 @@ Public Class OutlookItemsEventsClass1
         Const strCommentID As String = "InstantFile CommentID "
         Const strDocNo As String = "InstantFile DocNo "
 
-        Dim myFolder As Outlook.MAPIFolder = Nothing
+        Dim myFolder As Outlook.Folder = Nothing
         Dim myMailItem As Outlook.MailItem = Nothing
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myUser As Outlook.Recipient = Nothing
@@ -40,9 +40,20 @@ Public Class OutlookItemsEventsClass1
 
         Static strLastID As String
 
+        If TypeOf SourceFolder Is Outlook.Folder Then
+            myFolder = SourceFolder
+            If myFolder.Name = "Sent Items" Then
+            Else
+                Debug.Print("ItemAdd() myFolder.Name = " & myFolder.Name)
+                Return
+            End If
+        Else
+            Return
+        End If
+
+        Debug.Print("ItemAdd() TypeOf Item is " & TypeName(Item))
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
-            'Debug.Print("myMailItem.Subject = " & myMailItem.Subject)
         Else
             Return
         End If
@@ -50,20 +61,20 @@ Public Class OutlookItemsEventsClass1
         ' Outlook seems to process each item twice. The first time works, subsequent times fail
         Try
             If myMailItem.EntryID = strLastID Then
-                Exit Sub
+                Debug.WriteLine("myMailItem.EntryID = strLastID")
+                Return
             Else
                 strLastID = myMailItem.EntryID
             End If
         Catch ex As Exception
+            Debug.WriteLine("Error: '" & ex.Message & "' on If myMailItem.EntryID = strLastID Then")
             Return
         End Try
-
-        'Dim obj As Object = SourceFolder
-        'Debug.Print(TypeName(obj))
 
         If Left(myMailItem.Subject, 13) = "Task Request:" _
         Or Left(myMailItem.Subject, 14) = "Task Accepted:" _
         Or Left(myMailItem.Subject, 14) = "Task Declined:" Then
+            Debug.WriteLine(myMailItem.Subject)
             Return
         End If
 
@@ -91,11 +102,10 @@ TryFromAttachments:
                     dblMatNo = EmailMatNo(myAttach, myMailItem.Subject)
                     If dblMatNo > 0 Then
                         myProperties = myMailItem.UserProperties
-                        ' myProp = myMailItem.UserProperties.Find("CameFromOutlook")
                         myProp = myProperties.Find("CameFromOutlook")
                         If myProp Is Nothing Then Return
                         If MsgBox("Save the E-mail you sent as an InstantFile Comment" & vbNewLine & _
-                                  "in matter " & dblMatNo & "?", MsgBoxStyle.Question + MsgBoxStyle.YesNo, strTitle) = MsgBoxResult.Yes Then
+                                  "in matter " & dblMatNo & "?", vbQuestion + vbYesNo, strTitle) = vbYes Then
                             bScanned = False
                             If dblMatNo > 0 Then
                                 GoTo InstantFileEmail
@@ -112,15 +122,13 @@ TryFromAttachments:
                         Marshal.ReleaseComObject(myProp)
                         Marshal.ReleaseComObject(myProperties)
                     End If
-                    Marshal.ReleaseComObject(myAttach)
+                        Marshal.ReleaseComObject(myAttach)
                 Next
 
-                ' if no Note attachment had the MatterNo on it, try to determine the MatterNo from the DocNo that's attached
-                ' For Each myAttach In myMailItem.Attachments
+                'if no Note attachment had the MatterNo on it, try to determine the MatterNo from the DocNo that's attached
                 For x = 1 To myAttachments.Count
                     myAttach = myAttachments(x)
                     strScratch = myAttach.DisplayName
-                    ' added 10/25/2010
                     If strScratch = strNewCallTrackingTag Then
                     Else
                         intA = InStr(1, strScratch, strIFdocNo)
@@ -262,14 +270,13 @@ Prompt4Matter:
 
 AddRecipientsAndBody:
                 strBody = "email to "
-                ' For Each myRecipient In .Recipients
                 Dim r As Short
                 myRecipients = .Recipients
                 For r = 1 To myRecipients.Count
                     myRecipient = myRecipients(r)
                     strBody = strBody & myRecipient.Name & "; "
                     Marshal.ReleaseComObject(myRecipient)
-                Next ' myRecipient
+                Next
                 Marshal.ReleaseComObject(myRecipients)
                 strBody = Left(strBody, Len(strBody) - 2)
 
@@ -311,8 +318,6 @@ AddRecipientsAndBody:
             If myAttachments IsNot Nothing Then Marshal.ReleaseComObject(myAttachments) : myAttachments = Nothing
             If myMove IsNot Nothing Then Marshal.ReleaseComObject(myMove) : myMove = Nothing
             If myCopy IsNot Nothing Then Marshal.ReleaseComObject(myCopy) : myCopy = Nothing
-            '11/25/2015 commented this out If myMailItem IsNot Nothing Then Marshal.ReleaseComObject(myMailItem) : myMailItem = Nothing
-            If myFolder IsNot Nothing Then Marshal.ReleaseComObject(myFolder) : myFolder = Nothing
         End Try
 
     End Sub
