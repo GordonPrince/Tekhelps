@@ -83,7 +83,7 @@ Public Class AddinModule
     Private Sub AdxOutlookAppEvents1_ExplorerActivate(sender As Object, explorer As Object) Handles _
                 AdxOutlookAppEvents1.ExplorerActivate, _
                 AdxOutlookAppEvents1.ExplorerSelectionChange
-        '11/25/2015 changed this to see if would prevent throwing the error that Kailey reported to me
+        '12/1/2015 changed this to see if would prevent throwing the error that Kailey reported to me
         Debug.Print("AdxOutlookAppEvents1_ExplorerActivate entered")
         Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
         'Dim myExplorer As Outlook.Explorer = Nothing
@@ -1142,7 +1142,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Dec-1  6:40.", vbInformation, "About this Add-in")
+               "This version dated 2015-Dec-2 8:10.", vbInformation, "About this Add-in")
     End Sub
 
 End Class

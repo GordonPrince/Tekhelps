@@ -11,8 +11,6 @@ Public Class OutlookItemEventsClass1
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
-        ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
-        OutlookApp = CType(ADXModule, AddinModule).OutlookApp
     End Sub
 
     Public Overrides Sub ProcessAttachmentAdd(ByVal Attachment As Object)

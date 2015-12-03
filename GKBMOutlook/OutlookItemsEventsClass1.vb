@@ -12,8 +12,6 @@ Public Class OutlookItemsEventsClass1
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
-        ' from https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
-        OutlookApp = CType(ADXModule, AddinModule).OutlookApp
     End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
@@ -44,42 +42,41 @@ Public Class OutlookItemsEventsClass1
             myFolder = SourceFolder
             If myFolder.Name = "Sent Items" Then
             Else
-                Debug.Print("ItemAdd() myFolder.Name = " & myFolder.Name)
                 Return
             End If
         Else
             Return
         End If
 
-        Debug.Print("ItemAdd() TypeOf Item is " & TypeName(Item))
         If TypeOf Item Is Outlook.MailItem Then
             myMailItem = Item
         Else
             Return
         End If
 
-        ' Outlook seems to process each item twice. The first time works, subsequent times fail
+        'the statement myCopy = myMailItem.Copy below creates a new item (before it is moved), 
+        'which explains the second (recursive) call to this procedure.
+        'On that item, just return out of the procedure
         Try
-            If myMailItem.EntryID = strLastID Then
-                Debug.WriteLine("myMailItem.EntryID = strLastID")
+            Try
+                If myMailItem.EntryID = strLastID Then
+                    Return
+                Else
+                    strLastID = myMailItem.EntryID
+                End If
+            Catch ex As Exception
+                Debug.WriteLine("Exception in ItemAdd(): '" & ex.Message & "' on statement 'If myMailItem.EntryID = strLastID'")
                 Return
-            Else
-                strLastID = myMailItem.EntryID
+            End Try
+
+            If Left(myMailItem.Subject, 13) = "Task Request:" _
+            Or Left(myMailItem.Subject, 14) = "Task Accepted:" _
+            Or Left(myMailItem.Subject, 14) = "Task Declined:" Then
+                Return
             End If
-        Catch ex As Exception
-            Debug.WriteLine("Error: '" & ex.Message & "' on If myMailItem.EntryID = strLastID Then")
-            Return
-        End Try
 
-        If Left(myMailItem.Subject, 13) = "Task Request:" _
-        Or Left(myMailItem.Subject, 14) = "Task Accepted:" _
-        Or Left(myMailItem.Subject, 14) = "Task Declined:" Then
-            Debug.WriteLine(myMailItem.Subject)
-            Return
-        End If
+            Dim x As Short
 
-        Dim x As Short
-        Try
             ' save Sent MailItems as comments if they have the attachment that Import2InstantFile creates
             If Len(myMailItem.BillingInformation) > 0 Then
                 If InStr(1, myMailItem.BillingInformation, strCommentID) Or InStr(1, myMailItem.BillingInformation, strDocNo) Then
@@ -122,7 +119,7 @@ TryFromAttachments:
                         Marshal.ReleaseComObject(myProp)
                         Marshal.ReleaseComObject(myProperties)
                     End If
-                        Marshal.ReleaseComObject(myAttach)
+                    Marshal.ReleaseComObject(myAttach)
                 Next
 
                 'if no Note attachment had the MatterNo on it, try to determine the MatterNo from the DocNo that's attached
