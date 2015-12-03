@@ -1,4 +1,5 @@
-﻿Imports System.Data  ' includes SqlClient
+﻿Imports System.Data
+Imports System.Data.SqlClient
 Imports Microsoft.Office.Interop
 Imports System.Runtime.InteropServices
 Imports System.Diagnostics
@@ -28,13 +29,15 @@ Module Globals
 
     Public Function RunSQLcommand(ByVal queryString As String) As Boolean
         Dim strConnectionString As String = SQLConnectionString()
-        Dim con As New SqlClient.SqlConnection(strConnectionString)
-        Dim cmd As New SqlClient.SqlCommand(queryString, con)
+        Dim con As New SqlConnection
+        Dim cmd As New SqlCommand
         Dim rows As Long
         Try
-            cmd.Connection.Open()
+            con.ConnectionString = SQLConnectionString()
+            con.Open()
+            cmd.Connection = con
+            cmd.CommandText = queryString
             rows = cmd.ExecuteNonQuery()
-            con.Close()
             If rows = 1 Then
                 Debug.WriteLine("RunSQLcommand succeeded: " & queryString)
                 Return True
@@ -44,7 +47,11 @@ Module Globals
             End If
         Catch ex As Exception
             Debug.WriteLine("RunSQLcommand failed: " & queryString)
+            Debug.WriteLine(ex.Message)
+            MsgBox(ex.Message, vbExclamation, "RunSQLcommand()")
             Return False
+        Finally
+            con.Close()
         End Try
     End Function
 
