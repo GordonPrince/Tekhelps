@@ -233,7 +233,7 @@ Public Class OutlookItemEventsClass1
             e.Cancel = True
             'Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
         Else
-            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
+            'Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
         End If
     End Sub
 

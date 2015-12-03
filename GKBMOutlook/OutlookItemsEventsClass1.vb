@@ -12,6 +12,8 @@ Public Class OutlookItemsEventsClass1
 
     Public Sub New(ByVal ADXModule As AddinExpress.MSO.ADXAddinModule)
         MyBase.New(ADXModule)
+        ' per https://www.add-in-express.com/forum/read.php?FID=5&TID=13491
+        ' OutlookApp = CType(ADXModule, AddinModule).OutlookApp
     End Sub
 
     Public Overrides Sub ItemAdd(ByVal Item As Object, ByVal SourceFolder As Object)
@@ -65,7 +67,7 @@ Public Class OutlookItemsEventsClass1
                     strLastID = myMailItem.EntryID
                 End If
             Catch ex As Exception
-                Debug.WriteLine("Exception in ItemAdd(): '" & ex.Message & "' on statement 'If myMailItem.EntryID = strLastID'")
+                Debug.WriteLine("Exception in ItemAdd() at statement 'If myMailItem.EntryID = strLastID'")
                 Return
             End Try
 

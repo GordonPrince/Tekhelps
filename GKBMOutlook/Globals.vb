@@ -24,8 +24,7 @@ Module Globals
 
     Public myPublicFolder As Outlook.Folder = Nothing
 
-    ' Private OutlookApp As Outlook.Application = CType(AddinModule.CurrentInstance, AddinModule).OutlookApp
-    Public OutlookApp As Outlook.Application = Nothing
+    Public OutlookApp As Outlook.Application = AddinModule.CurrentInstance.OutlookApp ' 12/3/2015
 
     Public Function RunSQLcommand(ByVal queryString As String) As Boolean
         Dim strConnectionString As String = SQLConnectionString()
@@ -37,11 +36,14 @@ Module Globals
             rows = cmd.ExecuteNonQuery()
             con.Close()
             If rows = 1 Then
+                Debug.WriteLine("RunSQLcommand succeeded: " & queryString)
                 Return True
             Else
+                Debug.WriteLine("RunSQLcommand failed: " & queryString)
                 Return False
             End If
         Catch ex As Exception
+            Debug.WriteLine("RunSQLcommand failed: " & queryString)
             Return False
         End Try
     End Function
@@ -54,7 +56,7 @@ Module Globals
         End If
     End Function
 
-    Public Function GetPublicFolder(ByVal strFolderName As String) As Boolean ' 11/17/2015
+    Public Function GetPublicFolder(strFolderName As String) As Boolean ' 11/17/2015
         Dim mySession As Outlook.NameSpace = Nothing
         Dim myFolders As Outlook.Folders = Nothing
         Dim myFolder As Outlook.Folder = Nothing
@@ -157,7 +159,7 @@ Module Globals
         End If
     End Function
 
-    Function InterceptNote(attachment) As Boolean
+    Function InterceptNote(attachment As Outlook.Attachment) As Boolean
         Const strMsg As String = "This will only work if InstantFile is open." & vbNewLine & vbNewLine & _
                                  "Open InstantFile, then try this again."
         Const strTitle As String = "InterceptNote() for "

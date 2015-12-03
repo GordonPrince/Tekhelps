@@ -1142,7 +1142,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Dec-2 8:10.", vbInformation, "About this Add-in")
+               "This version dated 2015-Dec-3  11:30.", vbInformation, "About this Add-in")
     End Sub
 
 End Class
