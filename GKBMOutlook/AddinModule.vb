@@ -84,26 +84,29 @@ Public Class AddinModule
                 AdxOutlookAppEvents1.ExplorerActivate, _
                 AdxOutlookAppEvents1.ExplorerSelectionChange
         '12/1/2015 changed this to see if would prevent throwing the error that Kailey reported to me
-        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate entered")
+        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() entered")
         Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-        'Dim myExplorer As Outlook.Explorer = Nothing
-        'Try
-        '    myExplorer = explorer
-        'Catch ex As Exception
-        'End Try
         If myExplorer Is Nothing Then Return
-
+        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() myExplorer Is Nothing = false")
         Dim sel As Outlook.Selection = Nothing
         Try
             sel = myExplorer.Selection
         Catch ex As Exception
         End Try
         If sel Is Nothing Then Return
+        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel Is Nothing = false")
 
         Dim item As Object = Nothing
         Try
-            If itemEvents.IsConnected Then itemEvents.RemoveConnection()
+            If itemEvents.IsConnected Then
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = true")
+                itemEvents.RemoveConnection()
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.RemoveConnection()")
+            Else
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = false")
+            End If
             If sel.Count = 1 Then
+                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel.Count = 1")
                 item = sel.Item(1)
                 If TypeOf item Is Outlook.NoteItem Then
                     Debug.WriteLine("Did not connect to Note item")
@@ -844,7 +847,10 @@ HavePublic:
             End If
 
             If item Is Nothing Then
-                Debug.WriteLine("item Is Nothing")
+                Debug.WriteLine("item Is Nothing -- exiting")
+                Return
+            ElseIf TypeOf item Is Outlook.NoteItem Then
+                Debug.WriteLine("OpenItemFromNote_OnClick() TypeOf item Is Outlook.NoteItem -- exiting")
                 Return
             End If
 
@@ -879,7 +885,6 @@ HavePublic:
                        "There is no item selected.", vbExclamation, strTitle)
             Else
                 Debug.WriteLine(ex.Message)
-                MsgBox(ex.Message, vbExclamation, strTitle)
             End If
         Finally
             If myAttach IsNot Nothing Then Marshal.ReleaseComObject(myAttach) : myAttach = Nothing
@@ -1142,7 +1147,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Dec-3  11:30.", vbInformation, "About this Add-in")
+               "This version dated 2015-Dec-8  11:50.", vbInformation, "About this Add-in")
     End Sub
 
 End Class
