@@ -110,6 +110,7 @@ Public Class OutlookItemEventsClass1
         End If
 
         Dim myResponse As Outlook.MailItem = Nothing
+        Dim item As Object = Nothing
         Dim myOriginal As Outlook.MailItem = Nothing
         Dim myInsps As Outlook.Inspectors = Nothing
         Dim myExpl As Outlook.Explorer = Nothing
@@ -124,18 +125,27 @@ Public Class OutlookItemEventsClass1
         Dim str1 As String
         Dim str2 As String
         Try
-            myResponse = Response
+            If TypeOf Response Is Outlook.MailItem Then
+                myResponse = Response
+            Else
+                Return
+            End If
+            If myResponse Is Nothing Then Return
+
             myInsps = OutlookApp.Inspectors
             If myInsps.Count = 0 Then
                 ' the user hit Reply from the Explorer window -- there's not an item open in an Inspector window
                 ' 11/11/2015 changed myOriginal = OutlookApp.ActiveExplorer.Selection.Item(1)
                 myExpl = OutlookApp.ActiveExplorer
                 mySel = myExpl.Selection
-                myOriginal = mySel.Item(1)
-                Marshal.ReleaseComObject(mySel)
-                Marshal.ReleaseComObject(myExpl)
+                item = mySel.Item(1)
+                If TypeOf item Is Outlook.MailItem Then
+                    myOriginal = item
+                Else
+                    Debug.Print("ReplyOrReplyAll() TypeOf item is " & TypeName(item))
+                    Return
+                End If
             Else
-                ' For Each myInsp In OutlookApp.Inspectors
                 myInsp = myInsps(1)
                 myOriginal = myInsp.CurrentItem
                 If TypeOf myOriginal Is Outlook.MailItem Then
@@ -143,9 +153,7 @@ Public Class OutlookItemEventsClass1
                     MsgBox("The item in the first Outlook Inspector window is not a MailItem.", vbOKOnly + vbExclamation, "ReplyOrReplyAll()")
                     Return
                 End If
-                Marshal.ReleaseComObject(myInsp)
             End If
-            Marshal.ReleaseComObject(myInsps)
 
             ' 11/4/2015 Replying to an email that was Forwarded to you won't work without this
             str1 = RemoveREFW(myOriginal.Subject)
@@ -179,7 +187,7 @@ Public Class OutlookItemEventsClass1
                 Marshal.ReleaseComObject(myProperties)
             End If
         Catch ex As Exception
-            MsgBox(ex.Message, vbExclamation, "ReplyOrReplyAll()")
+            Debug.Print("ReplyOrReplyAll() Exception: " & ex.Message)
         Finally
             If myProp IsNot Nothing Then Marshal.ReleaseComObject(myProp) : myProp = Nothing
             If myProperties IsNot Nothing Then Marshal.ReleaseComObject(myProperties) : myProperties = Nothing
@@ -191,8 +199,7 @@ Public Class OutlookItemEventsClass1
             If myExpl IsNot Nothing Then Marshal.ReleaseComObject(myExpl) : myExpl = Nothing
             If myInsps IsNot Nothing Then Marshal.ReleaseComObject(myInsps) : myInsps = Nothing
             If myOriginal IsNot Nothing Then Marshal.ReleaseComObject(myOriginal) : myOriginal = Nothing
-            '11/25/2015 commented this out -- don't release the object passed into the procedure
-            ' If myResponse IsNot Nothing Then Marshal.ReleaseComObject(myResponse) : myResponse = Nothing
+            If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
         End Try
     End Sub
 
@@ -224,16 +231,22 @@ Public Class OutlookItemEventsClass1
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentPreview(ByVal Attachment As Object, ByVal E As AddinExpress.MSO.ADXCancelEventArgs)
-        ' Debug.Print("ProcessBeforeAttachmentPreview fired")
+        Debug.Print("ProcessBeforeAttachmentPreview() fired")
+        If InterceptNote(Attachment) Then
+            E.Cancel = True
+            Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentPreview()")
+        Else
+            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentPreview()")
+        End If
     End Sub
 
     Public Overrides Sub ProcessBeforeAttachmentRead(ByVal attachment As Object, ByVal e As AddinExpress.MSO.ADXCancelEventArgs)
-        'Debug.Print("Entered ProcessBeforeAttachmentRead")
+        Debug.Print("ProcessBeforeAttachmentRead() fired")
         If InterceptNote(attachment) Then
             e.Cancel = True
-            'Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
+            Debug.Print("InterceptNote returned True to ProcessBeforeAttachmentRead()")
         Else
-            'Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
+            Debug.Print("InterceptNote returned False to ProcessBeforeAttachmentRead()")
         End If
     End Sub
 

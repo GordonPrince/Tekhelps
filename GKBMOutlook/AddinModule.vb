@@ -68,6 +68,7 @@ Public Class AddinModule
 #End Region
 
     Private Sub AdxOutlookAppEvents1_InspectorActivate(sender As Object, inspector As Object, folderName As String) Handles AdxOutlookAppEvents1.InspectorActivate
+        Debug.Print("AdxOutlookAppEvents1_InspectorActivate() entered")
         Dim myInsp As Outlook.Inspector = Nothing
         Dim item As Object = Nothing
         Try
@@ -85,38 +86,43 @@ Public Class AddinModule
                 AdxOutlookAppEvents1.ExplorerSelectionChange
         '12/1/2015 changed this to see if would prevent throwing the error that Kailey reported to me
         Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() entered")
-        Dim myExplorer As Outlook.Explorer = TryCast(explorer, Outlook.Explorer)
-        If myExplorer Is Nothing Then Return
-        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() myExplorer Is Nothing = false")
+        Dim myExplorer As Outlook.Explorer = Nothing
         Dim sel As Outlook.Selection = Nothing
-        Try
-            sel = myExplorer.Selection
-        Catch ex As Exception
-        End Try
-        If sel Is Nothing Then Return
-        Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel Is Nothing = false")
-
         Dim item As Object = Nothing
         Try
-            If itemEvents.IsConnected Then
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = true")
-                itemEvents.RemoveConnection()
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.RemoveConnection()")
+            myExplorer = TryCast(explorer, Outlook.Explorer)
+            If myExplorer Is Nothing Then
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() myExplorer Is Nothing")
+                Return
             Else
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = false")
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() myExplorer Is Nothing = false")
+            End If
+
+            sel = myExplorer.Selection
+            If sel Is Nothing Then Return
+            'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel Is Nothing = false")
+
+            If itemEvents.IsConnected Then
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = true")
+                itemEvents.RemoveConnection()
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.RemoveConnection()")
+            Else
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() itemEvents.IsConnected = false")
             End If
             If sel.Count = 1 Then
-                Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel.Count = 1")
+                'Debug.Print("AdxOutlookAppEvents1_ExplorerActivate() sel.Count = 1")
                 item = sel.Item(1)
                 If TypeOf item Is Outlook.NoteItem Then
-                    Debug.WriteLine("Did not connect to Note item")
-                    If item IsNot Nothing Then Marshal.ReleaseComObject(item) : item = Nothing
+                    'Debug.WriteLine("Did not connect to Note item")
+                    'only release item if it's the Note -- not if it's a MailItem. Releasing the item means it doesn't respond to events
+                    Marshal.ReleaseComObject(item) : item = Nothing
                 Else
                     itemEvents.ConnectTo(item, True)
-                    Debug.WriteLine("Connected to item of type " & TypeName(item))
+                    'Debug.WriteLine("Connected to item of type " & TypeName(item))
                 End If
             End If
         Catch ex As Exception
+            Debug.WriteLine("AdxOutlookAppEvents1_ExplorerActivate() Exception: " & ex.Message)
         Finally
             If sel IsNot Nothing Then Marshal.ReleaseComObject(sel) : sel = Nothing
         End Try
@@ -1147,7 +1153,7 @@ HavePublic:
                "Gatti, Keltner, Bienvenu & Montesi, PLC." & vbNewLine & vbNewLine & _
                "Copyright (c) 1997-2015 by Tekhelps, Inc." & vbNewLine & _
                "For further information contact Gordon Prince (901) 761-3393." & vbNewLine & vbNewLine & _
-               "This version dated 2015-Dec-8  11:50.", vbInformation, "About this Add-in")
+               "This version dated 2015-Dec-8  18:35.", vbInformation, "About this Add-in")
     End Sub
 
 End Class

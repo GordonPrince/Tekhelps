@@ -285,12 +285,14 @@ Module Globals
             Else
                 Return False
             End If
+        Catch ex As Exception
+            Debug.Print("InterceptNote() Exception: " & ex.Message)
+            Return False
         Finally
             If olItem IsNot Nothing Then Marshal.ReleaseComObject(olItem) : olItem = Nothing
             If olNameSpace IsNot Nothing Then Marshal.ReleaseComObject(olNameSpace) : olNameSpace = Nothing
             If myNote IsNot Nothing Then Marshal.ReleaseComObject(myNote) : myNote = Nothing
             If appAccess IsNot Nothing Then Marshal.ReleaseComObject(appAccess) : appAccess = Nothing
-            ' myAttachment refers to object that was passed into procedure, so don't release it
         End Try
     End Function
 End Module
